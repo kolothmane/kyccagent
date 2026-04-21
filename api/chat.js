@@ -2,7 +2,7 @@
 
 const { getClient } = require("../lib/openai-client");
 
-const MODEL = "gpt-4o-mini";
+const MODEL = "gpt-5.4";
 const MAX_HISTORY = 20; // keep last 20 turns to stay within token budget
 
 const IDENTITY_DOCUMENTS = "passport, national ID card, or driving licence";
@@ -72,6 +72,21 @@ function isFrenchMessage(message) {
     "releve",
     "avis d impot",
     "courrier officiel",
+  ]);
+}
+
+function wantsGreeting(message) {
+  const normalized = normaliseText(message);
+  return includesAny(normalized, [
+    "hello",
+    "hi",
+    "hey",
+    "good morning",
+    "good afternoon",
+    "good evening",
+    "bonjour",
+    "salut",
+    "coucou",
   ]);
 }
 
@@ -221,6 +236,17 @@ function buildNextStepHint(context, french) {
   return "Both document types have already been received.";
 }
 
+function buildGreetingReply(message, context) {
+  const french = isFrenchMessage(message);
+  const nextStepHint = buildNextStepHint(context, french);
+
+  if (french) {
+    return `Bonjour, je suis la pour vous aider avec la verification KYC. ${nextStepHint}`;
+  }
+
+  return `Hello, I can help you with the KYC verification. ${nextStepHint}`;
+}
+
 function buildAcceptedDocumentsReply(message, context) {
   const french = isFrenchMessage(message);
   const wantsIdentity = wantsIdentityDocumentDetails(message);
@@ -278,7 +304,22 @@ function buildWrongTypeReply(message, context) {
   return `Understood. The system tries to auto-detect the document type from the image content. Please re-upload the document for the missing category. ${nextStepHint}`;
 }
 
-function buildDirectReply(message, context) {
+function buildGeneralFallbackReply(message, context) {
+  const french = isFrenchMessage(message);
+  const nextStepHint = buildNextStepHint(context, french);
+
+  if (french) {
+    return `Je peux vous aider pour les documents KYC, les formats acceptes et les raisons de rejet. ${nextStepHint}`;
+  }
+
+  return `I can help with KYC documents, accepted formats, and rejection reasons. ${nextStepHint}`;
+}
+
+function buildFallbackReply(message, context) {
+  if (wantsGreeting(message)) {
+    return buildGreetingReply(message, context);
+  }
+
   if (wantsAcceptedDocuments(message)) {
     return buildAcceptedDocumentsReply(message, context);
   }
@@ -291,7 +332,7 @@ function buildDirectReply(message, context) {
     return buildWrongTypeReply(message, context);
   }
 
-  return null;
+  return buildGeneralFallbackReply(message, context);
 }
 
 module.exports = async (req, res) => {
@@ -308,7 +349,6 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: "message is required" });
   }
 
-  // --- Build context injection ------------------------------------------------
   const ctx = context || {};
   const uploaded = ctx.uploadedDocuments || [];
   const stillNeeded = ["identity", "address"].filter((d) => !uploaded.includes(d));
@@ -324,17 +364,13 @@ module.exports = async (req, res) => {
     ctxLines.push(`Validation warnings on last upload: ${ctx.validationWarnings.join("; ")}`);
   }
 
-  const directReply = buildDirectReply(message, ctx);
-  if (directReply) {
-    return res.status(200).json({ reply: directReply });
-  }
+  const deterministicReply = buildFallbackReply(message, ctx);
 
   const contextMessage = {
     role: "system",
     content: `[Onboarding context]\n${ctxLines.join("\n")}`,
   };
 
-  // --- Assemble message thread -----------------------------------------------
   const safeHistory = Array.isArray(history) ? history.slice(-MAX_HISTORY) : [];
   const cleanHistory = safeHistory
     .filter(
@@ -352,22 +388,19 @@ module.exports = async (req, res) => {
     { role: "user", content: message.trim() },
   ];
 
-  // --- Call OpenAI ------------------------------------------------------------
   try {
     const client = getClient();
     const response = await client.chat.completions.create({
       model: MODEL,
       max_tokens: 300,
-      temperature: 0.5,
+      temperature: 0.4,
       messages,
     });
 
     const reply = response.choices[0]?.message?.content?.trim() || "";
-    return res.status(200).json({ reply });
+    return res.status(200).json({ reply: reply || deterministicReply });
   } catch (err) {
     console.error("[chat] OpenAI error:", err.message);
-    return res.status(500).json({
-      error: "Chat service is temporarily unavailable. Please try again.",
-    });
+    return res.status(200).json({ reply: deterministicReply });
   }
 };
