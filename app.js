@@ -24,6 +24,7 @@ const chatLauncher = document.getElementById("chatLauncher");
 const chatUnread = document.getElementById("chatUnread");
 const chatShell = document.getElementById("chatShell");
 const chatStatus = document.getElementById("chatStatus");
+const chatUploadBtn = document.getElementById("chatUpload");
 const chatMinimizeBtn = document.getElementById("chatMinimize");
 const chatCloseBtn = document.getElementById("chatClose");
 const openChatButtons = document.querySelectorAll("[data-open-chat]");
@@ -249,7 +250,7 @@ function ensureChatWelcome() {
   if (messages && messages.querySelector(".msg")) return;
 
   const welcome =
-    "Welcome to BayBridge Assistant. I can guide you through identity verification, accepted documents and application status questions.";
+    "Welcome to BayBridge Assistant. I can guide you through identity verification, accepted documents, application status questions and document uploads from the chat.";
 
   say(welcome, "agent", { mirrorActivity: false, tone: "info" });
   chatHistory.push({ role: "assistant", content: welcome });
@@ -826,6 +827,13 @@ openChatButtons.forEach(function(button) {
   button.addEventListener("click", openChat);
 });
 
+if (chatUploadBtn && fileInput) {
+  chatUploadBtn.addEventListener("click", function() {
+    openChat();
+    fileInput.click();
+  });
+}
+
 if (chatMinimizeBtn) {
   chatMinimizeBtn.addEventListener("click", toggleChatMinimize);
 }
@@ -1022,7 +1030,7 @@ if (fileInput) {
 
       if (validation.passed) {
         say(
-          "Details extracted successfully. Review the pre-filled details and submit when ready.",
+          "Details extracted successfully. The applicant form has been filled automatically. Review the pre-filled details and submit when ready.",
           "agent",
           { mirrorActivity: true, tone: "success" },
         );
