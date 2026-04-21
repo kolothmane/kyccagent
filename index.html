@@ -3,40 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DEMO — Onboarding</title>
-
-  <!-- Type + styles -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>BayBridge | Identity Verification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
   <link rel="stylesheet" href="styles.css" />
-
-  <!-- No client-side OCR needed — extraction runs server-side via OpenAI -->
 </head>
 <body>
-  <!-- Ambient gradient background -->
-  <div class="scene" aria-hidden="true">
-    <div class="orb orb-a"></div>
-    <div class="orb orb-b"></div>
-  </div>
-
-  <!-- Header -->
-  <header class="header">
+  <header class="site-header">
     <div class="container header-inner">
-      <div class="brand">
-        <img class="logo" alt="" src="" />
-        <!-- JS will inject a gradient badge -->
-        <div class="brand-captions">
-          <div class="brand-title">DEMO</div>
-          <div class="brand-sub">Trusted • Regulated • Global</div>
-        </div>
-      </div>
-      <div class="badges">
-        <span class="chip soft">KYC secure</span>
-        <span class="chip soft">24/7 chat</span>
+      <a href="#" class="brand" aria-label="BayBridge home">
+        <span class="brand-mark">B</span>
+        <span class="brand-copy">
+          <span class="brand-name">BayBridge</span>
+          <span class="brand-subtitle">Identity Verification Service</span>
+        </span>
+      </a>
+
+      <div class="header-actions">
+        <a class="ghost-link" href="#manual-kyc">Manual verification</a>
+        <button class="btn btn-primary" type="button" data-open-chat>
+          Open assistant
+        </button>
       </div>
 
-      <!-- Hidden SLA timer required by app.js (kept offscreen but present) -->
       <div class="sr-only">
         <span id="elapsed">00:00</span>
         <div id="bar"></div>
@@ -44,165 +37,404 @@
     </div>
   </header>
 
-  <!-- Main -->
-  <main class="container grid">
-    <!-- Left: steps + uploader -->
-    <aside class="card steps">
-      <div class="card-head">
-        <div class="card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 3H5a2 2 0 0 0-2 2v14l4-3h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2"/></svg>
-          Onboarding
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">BayBridge KYC</span>
+          <h1>Verify your identity your way.</h1>
+          <p class="hero-text">
+            Complete the KYC flow manually on the page, or open the assistant to
+            automate the process step by step. Both paths use the same secure
+            verification backend.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#manual-kyc">
+              Start manual verification
+            </a>
+            <button class="btn btn-secondary" type="button" data-open-chat>
+              Automate with the assistant
+            </button>
+          </div>
+
+          <ul class="hero-points">
+            <li>Upload identity and address documents one by one</li>
+            <li>Review extracted applicant details before submission</li>
+            <li>Open the assistant at any time for guided help</li>
+          </ul>
         </div>
-      </div>
 
-      <ol class="steps-list">
-        <li class="active"><span>1</span> Welcome</li>
-        <li><span>2</span> Upload ID &amp; Address</li>
-        <li><span>3</span> Review &amp; Confirm</li>
-        <li><span>4</span> Finish</li>
-      </ol>
+        <div class="hero-preview card">
+          <div class="preview-head">
+            <span class="preview-kicker">Verification overview</span>
+            <h2>Secure, fast and optional to automate</h2>
+          </div>
 
-      <div class="uploader">
-        <input id="file" type="file" accept="application/pdf,image/*"/>
-        <label for="file" class="btn block">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3v12m0-12l-4 4m4-4l4 4M4 15v4h16v-4"/></svg>
-          Browse files
-        </label>
-        <p class="hint">PDF, JPG, PNG • up to ~10MB</p>
-        <!-- chips will be inserted here by JS -->
-      </div>
+          <div class="preview-stack">
+            <article class="preview-item">
+              <span class="preview-step">01</span>
+              <div>
+                <h3>Upload an identity document</h3>
+                <p>Passport, national ID card or driving licence.</p>
+              </div>
+            </article>
 
-      <div class="checklist" aria-live="polite"></div>
-    </aside>
+            <article class="preview-item">
+              <span class="preview-step">02</span>
+              <div>
+                <h3>Add a proof of address</h3>
+                <p>Utility bill, bank statement, tax letter or insurance letter.</p>
+              </div>
+            </article>
 
-    <!-- Center: chat -->
-    <section class="card chat" aria-live="polite">
-      <div class="card-head">
-        <div class="card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 5h16v9H7l-3 3z"/></svg>
-          Verify your identity
+            <article class="preview-item">
+              <span class="preview-step">03</span>
+              <div>
+                <h3>Review the extracted details</h3>
+                <p>Confirm the profile and submit it for verification.</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="preview-footer">
+            <button class="btn btn-secondary btn-block" type="button" data-open-chat>
+              Open BayBridge Assistant
+            </button>
+          </div>
         </div>
-        <div class="chip glow">Fast approval</div>
-      </div>
-
-      <p class="lead">A few quick steps to keep your account safe. You can chat with us anytime.</p>
-
-      <div id="messages" class="messages">
-        <div class="empty" id="emptyState">
-          <div class="empty-badge"></div>
-          <div class="empty-sub">Ask anything or upload your documents to get started.</div>
-        </div>
-      </div>
-
-      <div class="composer">
-        <input id="input" placeholder="Type a message…" autocomplete="off" />
-        <button id="send" class="btn primary" type="button">Send</button>
       </div>
     </section>
 
-    <!-- Right: details form -->
-    <aside class="card details">
-      <div class="card-head">
-        <div class="card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 12a5 5 0 1 0 0-10a5 5 0 0 0 0 10M3 21a9 9 0 1 1 18 0z"/></svg>
-          Your details
+    <section class="features">
+      <div class="container">
+        <div class="section-heading">
+          <span class="section-kicker">Why this flow works</span>
+          <h2>One interface for manual and assisted KYC</h2>
+          <p>
+            The page stays fully functional on its own, while the assistant can
+            be opened from anywhere to answer questions and guide the user.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3v18M3 12h18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+            </div>
+            <h3>Manual first</h3>
+            <p>
+              Users can upload their documents, review extracted fields and submit
+              the application without ever opening the chatbot.
+            </p>
+          </article>
+
+          <article class="feature-card card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 6h16v9H8l-4 4V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <h3>Assistant on demand</h3>
+            <p>
+              A floating widget opens the assistant when guidance is needed for
+              accepted documents, status questions or step-by-step support.
+            </p>
+          </article>
+
+          <article class="feature-card card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 4l7 3v5c0 4.4-2.9 8.3-7 9-4.1-.7-7-4.6-7-9V7l7-3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <h3>Single verification engine</h3>
+            <p>
+              Whether the user follows the page or the assistant, the same upload,
+              extraction and submission pipeline remains in control.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="manual-kyc" id="manual-kyc">
+      <div class="container verification-grid">
+        <div class="manual-column">
+          <section class="card flow-card">
+            <div class="section-kicker">Manual flow</div>
+            <h2>Complete KYC without the chatbot</h2>
+            <p class="section-copy">
+              Upload one document at a time. Extracted fields will populate the
+              applicant form on the right.
+            </p>
+
+            <ol class="steps-list">
+              <li class="active">
+                <span>1</span>
+                <div>
+                  <strong>Welcome</strong>
+                  <p>Start by uploading your identity document.</p>
+                </div>
+              </li>
+              <li>
+                <span>2</span>
+                <div>
+                  <strong>Upload identity and address documents</strong>
+                  <p>Submit each file separately for validation.</p>
+                </div>
+              </li>
+              <li>
+                <span>3</span>
+                <div>
+                  <strong>Review extracted details</strong>
+                  <p>Confirm or correct the information before submission.</p>
+                </div>
+              </li>
+              <li>
+                <span>4</span>
+                <div>
+                  <strong>Finish verification</strong>
+                  <p>Submit the completed application for review.</p>
+                </div>
+              </li>
+            </ol>
+          </section>
+
+          <section class="card upload-card">
+            <div class="card-heading">
+              <div>
+                <h3>Upload documents</h3>
+                <p>Accepted formats: PDF, JPG, PNG, WebP or GIF.</p>
+              </div>
+            </div>
+
+            <input
+              id="file"
+              type="file"
+              accept="application/pdf,image/*"
+            />
+            <label for="file" class="btn btn-primary btn-block">
+              Upload a document
+            </label>
+
+            <p class="hint">
+              Upload one file at a time. Both identity documents and proof-of-address
+              documents are supported.
+            </p>
+
+            <div id="fileChips" class="chips"></div>
+            <div id="pageStatus" class="page-status" hidden></div>
+            <div class="checklist" aria-live="polite"></div>
+          </section>
+
+          <section class="card activity-card">
+            <div class="card-heading">
+              <div>
+                <h3>Updates</h3>
+                <p>Live status messages from the verification flow.</p>
+              </div>
+            </div>
+
+            <div id="activityFeed" class="activity-feed">
+              <div id="activityEmpty" class="activity-empty">
+                Status updates will appear here as documents are reviewed and the
+                application progresses.
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <section class="card details-card">
+          <div class="card-heading details-heading">
+            <div>
+              <span class="section-kicker">Applicant form</span>
+              <h2>Review and submit the profile</h2>
+              <p>
+                Complete any missing fields and submit the application for identity
+                verification.
+              </p>
+            </div>
+            <button class="btn btn-secondary" type="button" data-open-chat>
+              Need guided help?
+            </button>
+          </div>
+
+          <form id="profile" class="form" novalidate>
+            <label>
+              First name
+              <input name="firstName" id="firstName" />
+            </label>
+
+            <label>
+              Last name
+              <input name="lastName" id="lastName" />
+            </label>
+
+            <label>
+              Email
+              <input type="email" name="email" id="email" />
+            </label>
+
+            <label>
+              Mobile
+              <input name="phone" id="phone" placeholder="+441234567890" />
+            </label>
+
+            <label>
+              Country of residence
+              <input name="country" id="country" placeholder="e.g. GB" />
+            </label>
+
+            <label>
+              Date of birth (YYYY-MM-DD)
+              <input name="dob" id="dob" placeholder="1992-02-10" />
+            </label>
+
+            <label>
+              Street
+              <input name="street" id="street" />
+            </label>
+
+            <label>
+              City
+              <input name="city" id="city" />
+            </label>
+
+            <label>
+              State / Province
+              <input name="state" id="state" />
+            </label>
+
+            <label>
+              Postal code
+              <input name="postal" id="postal" />
+            </label>
+
+            <div class="divider"></div>
+
+            <div class="subhead">Document information</div>
+            <div class="docgrid">
+              <div>
+                <strong>ID / passport number</strong>
+                <div id="docNumber" class="muted">Not available</div>
+              </div>
+              <div>
+                <strong>Document expiry</strong>
+                <div id="docExpiry" class="muted">Not available</div>
+              </div>
+              <div>
+                <strong>Nationality</strong>
+                <div id="nationality" class="muted">Not available</div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button id="submit" class="btn btn-primary" type="button">
+                Submit for verification
+              </button>
+            </div>
+            <p id="result" class="result"></p>
+          </form>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="brand-mark small">B</span>
+        <span>BayBridge</span>
+      </div>
+      <p>
+        BayBridge Identity Verification keeps the manual flow available while the
+        assistant remains optional.
+      </p>
+    </div>
+  </footer>
+
+  <button
+    id="chatLauncher"
+    class="chat-launcher"
+    type="button"
+    aria-label="Open BayBridge Assistant"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M4 6h16v9H8l-4 4V6z"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.9"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+    <span id="chatUnread" class="chat-unread" hidden></span>
+  </button>
+
+  <div id="chatShell" class="chat-shell" hidden>
+    <aside class="chat-widget" aria-live="polite">
+      <div class="chat-widget-header">
+        <div class="chat-widget-brand">
+          <span class="brand-mark small">B</span>
+          <div>
+            <p>BayBridge Assistant</p>
+            <span id="chatStatus" class="chat-status">Online</span>
+          </div>
+        </div>
+
+        <div class="chat-widget-actions">
+          <button id="chatMinimize" type="button" aria-label="Minimize chat">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M6 12h12"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.9"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+          <button id="chatClose" type="button" aria-label="Close chat">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M6 6l12 12M18 6L6 18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.9"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
         </div>
       </div>
 
-      <!-- IDs are optional for your fill(); names are required and kept the same -->
-      <form id="profile" class="form" novalidate>
-        <label>First name <input name="firstName" id="firstName"/></label>
-        <label>Last name <input name="lastName" id="lastName"/></label>
-
-        <label>Email <input type="email" name="email" id="email"/></label>
-        <label>Mobile (+E.164) <input name="phone" id="phone" placeholder="+441234567890"/></label>
-
-        <label>Country of residence <input name="country" id="country" placeholder="e.g., GB"/></label>
-        <label>Date of birth (YYYY-MM-DD) <input name="dob" id="dob" placeholder="1992-02-10"/></label>
-
-        <label>Street <input name="street" id="street"/></label>
-        <label>City <input name="city" id="city"/></label>
-
-        <label>State/Province <input name="state" id="state"/></label>
-        <label>Postal code <input name="postal" id="postal"/></label>
-
-        <div class="divider"></div>
-
-        <div class="subhead">Document info</div>
-        <div class="docgrid">
-          <div><strong>ID / Passport number</strong><div id="docNumber" class="muted">—</div></div>
-          <div><strong>Document expiry</strong><div id="docExpiry" class="muted">—</div></div>
-          <div><strong>Nationality</strong><div id="nationality" class="muted">—</div></div>
+      <div id="chatWidgetBody" class="chat-widget-body">
+        <div id="messages" class="messages">
+          <div class="empty" id="emptyState">
+            <div class="empty-title">Assistant ready when you need it</div>
+            <div class="empty-sub">
+              Open a conversation to automate the verification flow, ask document
+              questions or get guidance while completing KYC.
+            </div>
+          </div>
         </div>
 
-        <div class="actions">
-          <button id="submit" class="btn cta" type="button">Continue</button>
+        <div class="composer">
+          <input
+            id="input"
+            placeholder="Ask BayBridge Assistant..."
+            autocomplete="off"
+          />
+          <button id="send" class="btn btn-primary" type="button">Send</button>
         </div>
-        <p id="result" class="result"></p>
-      </form>
+      </div>
     </aside>
-  </main>
+  </div>
 
-  <footer class="container footer">
-    <p class="muted">For your protection, never share passwords, PINs or recovery codes in chat. Use only the official DEMO portal for deposits.</p>
-  </footer>
-
-  <!-- Visual-only helpers; non-mutating chips to avoid breaking OCR -->
-  <script>
-  (function(){
-    const $ = (s, r=document)=>r.querySelector(s);
-
-    // Gradient brand badge
-    (function brand(){
-      const host = $('.brand'); if (!host || $('.mark')) return;
-      const el = document.createElement('div'); el.className='mark';
-      const seed = Date.now()%100000; const rnd = i => (Math.sin(seed+i)*10000)%1;
-      const h1 = Math.floor(rnd(1)*360), h2 = (h1+50)%360;
-      el.innerHTML = `
-        <svg viewBox="0 0 72 72" width="36" height="36" aria-hidden="true">
-          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="hsl(${h1} 90% 62%)"/><stop offset="100%" stop-color="hsl(${h2} 90% 58%)"/>
-          </linearGradient></defs>
-          <rect x="6" y="6" width="60" height="60" rx="18" fill="url(#g)"/>
-        </svg>`;
-      const logo = host.querySelector('.logo'); if (logo) logo.style.display='none';
-      host.insertBefore(el, host.firstChild);
-    })();
-
-    // Non-mutating chips (DO NOT touch input.files)
-    (function chips(){
-      const input = $('#file'); if (!input) return;
-      const wrap = document.createElement('div'); wrap.className='chips'; input.after(wrap);
-      input.addEventListener('change', ()=>{
-        wrap.innerHTML = '';
-        Array.from(input.files||[]).forEach(f=>{
-          const c = document.createElement('div');
-          c.className='chip pill';
-          c.innerHTML = `<span class="ico">📄</span><span class="name">${f.name}</span>`;
-          wrap.appendChild(c);
-        });
-      });
-    })();
-
-    // Simple send UX (doesn't interfere with your logic)
-    (function sendUX(){
-      const send = $('#send'), input = $('#input'), msgs = $('#messages');
-      if (!send || !input || !msgs) return;
-      send.addEventListener('click', ()=>{
-        const t=(input.value||'').trim(); if(!t) return;
-        const b=document.createElement('div'); b.className='msg user'; b.textContent=t;
-        msgs.appendChild(b);
-        const es=$('#emptyState'); if(es) es.remove();
-        input.value='';
-      });
-      input.addEventListener('keydown', e=>{
-        if((e.key==='Enter'||e.keyCode===13)&&!e.shiftKey){ e.preventDefault(); send.click(); }
-      });
-    })();
-  })();
-  </script>
-
-  <!-- IMPORTANT: classic script so your app.js executes in all setups -->
   <script src="app.js"></script>
 </body>
 </html>
