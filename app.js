@@ -20,6 +20,7 @@ const checklist = document.querySelector(".checklist");
 const activityFeed = document.getElementById("activityFeed");
 const activityEmpty = document.getElementById("activityEmpty");
 const pageStatus = document.getElementById("pageStatus");
+const uploadButton = document.querySelector('label[for="file"]');
 const stepItems = document.querySelectorAll(".steps-list li");
 const chatLauncher = document.getElementById("chatLauncher");
 const chatUnread = document.getElementById("chatUnread");
@@ -67,6 +68,44 @@ if (elapsedEl && barEl) {
 
 function scrollMessages() {
   if (messages) messages.scrollTop = messages.scrollHeight;
+}
+
+function ensureUploadFeedback() {
+  let feedback = document.getElementById("uploadFeedback");
+  if (feedback || !uploadButton) return feedback;
+
+  feedback = document.createElement("div");
+  feedback.id = "uploadFeedback";
+  feedback.className = "upload-feedback";
+  feedback.hidden = true;
+  uploadButton.insertAdjacentElement("afterend", feedback);
+  return feedback;
+}
+
+function setUploadFeedback(message, tone = "error") {
+  const feedback = ensureUploadFeedback();
+  if (!feedback) return;
+
+  if (!message) {
+    feedback.hidden = true;
+    feedback.textContent = "";
+    feedback.className = "upload-feedback";
+    return;
+  }
+
+  feedback.hidden = false;
+  feedback.textContent = message;
+  feedback.className =
+    "upload-feedback " +
+    (tone === "success"
+      ? "upload-feedback-success"
+      : tone === "warning"
+        ? "upload-feedback-warning"
+        : "upload-feedback-error");
+}
+
+function clearUploadFeedback() {
+  setUploadFeedback("");
 }
 
 function normaliseText(value) {
@@ -917,6 +956,7 @@ if (fileInput) {
     const f = e.target.files && e.target.files[0];
     if (!f) return;
 
+    clearUploadFeedback();
     await initSession();
     setStep("upload");
     updateFileChips(f.name);
@@ -930,11 +970,13 @@ if (fileInput) {
     ];
 
     if (!allowed.includes(f.type)) {
-      say(
-        "Format non pris en charge. Merci d'envoyer un document JPEG, PNG, WebP ou PDF.",
-        "agent",
-        { mirrorActivity: true, tone: "error" },
-      );
+      const formatMessage =
+        "Format non pris en charge. Merci d'envoyer un document JPEG, PNG, WebP ou PDF.";
+      setUploadFeedback(formatMessage, "error");
+      say(formatMessage, "agent", {
+        mirrorActivity: true,
+        tone: "error",
+      });
       return;
     }
 
@@ -949,11 +991,13 @@ if (fileInput) {
       const approxBytes = Math.ceil((base64.length * 3) / 4);
       if (approxBytes > 4 * 1024 * 1024) {
         removeProcessing();
-        say(
-          "Le document est trop volumineux. Merci d'utiliser un fichier plus leger ou une image moins lourde.",
-          "agent",
-          { mirrorActivity: true, tone: "error" },
-        );
+        const tooLargeMessage =
+          "Le document est trop volumineux. Merci d'utiliser un fichier plus leger ou une image moins lourde.";
+        setUploadFeedback(tooLargeMessage, "error");
+        say(tooLargeMessage, "agent", {
+          mirrorActivity: true,
+          tone: "error",
+        });
         return;
       }
 
@@ -974,11 +1018,13 @@ if (fileInput) {
         const err = await checkResp.json().catch(function() {
           return {};
         });
-        say(
-          err.error || "La verification du document a echoue. Merci de reessayer.",
-          "agent",
-          { mirrorActivity: true, tone: "error" },
-        );
+        const checkErrorMessage =
+          err.error || "La verification du document a echoue. Merci de reessayer.";
+        setUploadFeedback(checkErrorMessage, "error");
+        say(checkErrorMessage, "agent", {
+          mirrorActivity: true,
+          tone: "error",
+        });
         return;
       }
 
@@ -987,9 +1033,15 @@ if (fileInput) {
       if (!checkResult.valid) {
         const issueList =
           checkResult.issues && checkResult.issues.length
-            ? checkResult.issues.join("\n")
+            ? checkResult.issues.join(" ")
             : "The document could not be accepted.";
 
+        const rejectionMessage =
+          "Document refuse : " +
+          issueList +
+          " Merci d'envoyer un document clair et conforme.";
+
+        setUploadFeedback(rejectionMessage, "error");
         say(
           "Document refuse :\n" +
             issueList +
@@ -1004,6 +1056,12 @@ if (fileInput) {
       const categoryLabel = getCategoryLabel(detectedCategory);
 
       if (checkResult.warnings && checkResult.warnings.length) {
+        setUploadFeedback(
+          "Document accepte comme " +
+            categoryLabel +
+            ". Verification terminee avec remarques.",
+          "warning",
+        );
         say(
           "Document accepte comme " +
             categoryLabel +
@@ -1014,6 +1072,10 @@ if (fileInput) {
           { mirrorActivity: true, tone: "warning" },
         );
       } else {
+        setUploadFeedback(
+          "Document accepte comme " + categoryLabel + ".",
+          "success",
+        );
         say(
           "Document accepte comme " +
             categoryLabel +
@@ -1044,7 +1106,10 @@ if (fileInput) {
         const err = await resp.json().catch(function() {
           return {};
         });
-        say(err.error || "Le televersement a echoue. Merci de reessayer.", "agent", {
+        const uploadErrorMessage =
+          err.error || "Le televersement a echoue. Merci de reessayer.";
+        setUploadFeedback(uploadErrorMessage, "error");
+        say(uploadErrorMessage, "agent", {
           mirrorActivity: true,
           tone: "error",
         });
@@ -1077,12 +1142,21 @@ if (fileInput) {
       }
 
       if (validation.passed) {
+        setUploadFeedback(
+          "Informations extraites avec succes. Le formulaire a ete rempli automatiquement.",
+          "success",
+        );
         say(
           "Informations extraites avec succes. Le formulaire a ete rempli automatiquement. Verifiez les champs puis soumettez le dossier quand vous etes pret.",
           "agent",
           { mirrorActivity: true, tone: "success" },
         );
       } else {
+        const validationMessage =
+          "Le document a ete traite avec des points de vigilance : " +
+          validationErrors.join(" ") +
+          " Merci de renvoyer un document valide ou de corriger manuellement les informations.";
+        setUploadFeedback(validationMessage, "warning");
         say(
           "Le document a ete traite avec des points de vigilance :\n" +
             validationErrors.join("\n") +
@@ -1094,11 +1168,13 @@ if (fileInput) {
     } catch (err) {
       removeProcessing();
       console.error("Upload error:", err);
-      say(
-        "Une erreur est survenue pendant le traitement du document. Merci de reessayer.",
-        "agent",
-        { mirrorActivity: true, tone: "error" },
-      );
+      const genericErrorMessage =
+        "Une erreur est survenue pendant le traitement du document. Merci de reessayer.";
+      setUploadFeedback(genericErrorMessage, "error");
+      say(genericErrorMessage, "agent", {
+        mirrorActivity: true,
+        tone: "error",
+      });
     }
   });
 }
@@ -1197,6 +1273,7 @@ if (submitBtn) {
   updateChecklist();
   setStep("welcome");
   updateChatShell();
+  ensureUploadFeedback();
   await initSession();
 })();
 
