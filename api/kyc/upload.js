@@ -18,7 +18,6 @@ const {
   extractIdentityDocument,
   extractAddressDocument,
   extractSelfieDocument,
-  detectDocumentCategory,
 } = require("../../lib/extraction");
 const {
   validateIdentityDocument,
@@ -33,7 +32,7 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { sessionId, documentCategory, fileName, mimeType, data } = req.body || {};
+  const { sessionId, documentCategory, detectedCategory: clientDetectedCategory, fileName, mimeType, data } = req.body || {};
 
   // ─── Input validation ──────────────────────────────────────────────────────
   if (!sessionId || typeof sessionId !== "string") {
@@ -53,17 +52,13 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: fileCheck.error });
   }
 
-  // ─── AI document-category detection (overrides filename hint) ─────────────
-  let detectedCategory;
-  try {
-    detectedCategory = await detectDocumentCategory(data, mimeType);
-  } catch (err) {
-    console.error("[upload] Category detection error:", err.message);
-    detectedCategory = "unknown";
-  }
-  // Use the AI-detected category when confident; fall back to the client hint
-  const effectiveCategory =
-    detectedCategory !== "unknown" ? detectedCategory : documentCategory;
+  // ─── Resolve effective category ────────────────────────────────────────────
+  // Prefer the AI-detected category supplied by /api/kyc/check (call 1).
+  // Fall back to the client-side filename hint if not provided.
+  const VALID_CATEGORIES = new Set(["identity", "address", "selfie"]);
+  const effectiveCategory = VALID_CATEGORIES.has(clientDetectedCategory)
+    ? clientDetectedCategory
+    : documentCategory;
 
   // ─── Extraction ────────────────────────────────────────────────────────────
   let extraction;
@@ -98,7 +93,6 @@ module.exports = async (req, res) => {
     success: true,
     sessionId,
     documentCategory: effectiveCategory,
-    detectedCategory,
     fileName: fileName || "document",
     extraction,
     validation,

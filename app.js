@@ -259,7 +259,7 @@ function guessCategory(fileName) {
   return "identity";
 }
 
-// ─── File upload → backend extraction ────────────────────────────────────────
+// ─── File upload → backend check then extraction ──────────────────────────────
 fileInput.addEventListener("change", async function(e) {
   const f = e.target.files && e.target.files[0];
   if (!f) return;
@@ -274,7 +274,7 @@ fileInput.addEventListener("change", async function(e) {
   }
 
   const documentCategory = guessCategory(f.name);
-  showProcessing("Processing " + f.name + "…");
+  showProcessing("Checking " + f.name + "…");
 
   try {
     const prepared = await prepareImageForUpload(f);
@@ -288,12 +288,58 @@ fileInput.addEventListener("change", async function(e) {
       return;
     }
 
+    // ── Call 1: quick validity check ────────────────────────────────────────
+    const checkResp = await fetch("/api/kyc/check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId: sessionId,
+        fileName: f.name,
+        mimeType: mimeType,
+        data: base64,
+      }),
+    });
+
+    removeProcessing();
+
+    if (!checkResp.ok) {
+      const err = await checkResp.json().catch(function() { return {}; });
+      say("⚠️ " + (err.error || "Document check failed. Please try again."));
+      return;
+    }
+
+    const checkResult = await checkResp.json();
+
+    if (!checkResult.valid) {
+      const issueList = checkResult.issues && checkResult.issues.length
+        ? checkResult.issues.join("\n• ")
+        : "The document could not be accepted.";
+      say("❌ " + f.name + " was rejected:\n• " + issueList + "\nPlease upload a valid, clear document and try again.");
+      return;
+    }
+
+    // Document passed the validity check — proceed to extraction
+    const detectedCategory = checkResult.detectedCategory || documentCategory;
+    const categoryLabel = detectedCategory === "identity" ? "identity document"
+                        : detectedCategory === "address"  ? "proof of address"
+                        : "document";
+
+    if (checkResult.warnings && checkResult.warnings.length) {
+      say("✅ " + f.name + " looks valid (" + categoryLabel + "). Note: " + checkResult.warnings.join("; ") + ". Extracting details…");
+    } else {
+      say("✅ " + f.name + " looks valid (" + categoryLabel + "). Extracting your details…");
+    }
+
+    showProcessing("Extracting details from " + f.name + "…");
+
+    // ── Call 2: full extraction ──────────────────────────────────────────────
     const resp = await fetch("/api/kyc/upload", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         sessionId: sessionId,
         documentCategory: documentCategory,
+        detectedCategory: detectedCategory,
         fileName: f.name,
         mimeType: mimeType,
         data: base64,
@@ -311,8 +357,7 @@ fileInput.addEventListener("change", async function(e) {
     const uploadResult = await resp.json();
     const extraction = uploadResult.extraction;
     const validation = uploadResult.validation;
-    // Use the server-side AI-detected category (overrides filename guess)
-    const effectiveCategory = uploadResult.documentCategory || documentCategory;
+    const effectiveCategory = uploadResult.documentCategory || detectedCategory;
 
     if (!uploadedDocuments.includes(effectiveCategory)) uploadedDocuments.push(effectiveCategory);
     if (effectiveCategory === "identity") identityExtraction = extraction;
@@ -329,12 +374,8 @@ fileInput.addEventListener("change", async function(e) {
       setStep("review");
     }
 
-    const categoryLabel = effectiveCategory === "identity" ? "identity document"
-                        : effectiveCategory === "address"  ? "proof of address"
-                        : "document";
-
     if (validation.passed) {
-      say("✅ " + f.name + " processed successfully as a " + categoryLabel + ". Please review and confirm the pre-filled details on the right.");
+      say("✅ Details extracted successfully. Please review and confirm the pre-filled details on the right.");
     } else {
       say("⚠️ Document processed with issues:\n" + validationErrors.join("\n") + "\nPlease re-upload a valid document or correct the details manually.");
     }
