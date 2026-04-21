@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { sessionId, documentCategory, fileName, mimeType, data } = req.body || {};
+  const { sessionId, documentCategory, detectedCategory: clientDetectedCategory, fileName, mimeType, data } = req.body || {};
 
   // ─── Input validation ──────────────────────────────────────────────────────
   if (!sessionId || typeof sessionId !== "string") {
@@ -52,12 +52,20 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: fileCheck.error });
   }
 
+  // ─── Resolve effective category ────────────────────────────────────────────
+  // Prefer the AI-detected category supplied by /api/kyc/check (call 1).
+  // Fall back to the client-side filename hint if not provided.
+  const VALID_CATEGORIES = new Set(["identity", "address", "selfie"]);
+  const effectiveCategory = VALID_CATEGORIES.has(clientDetectedCategory)
+    ? clientDetectedCategory
+    : documentCategory;
+
   // ─── Extraction ────────────────────────────────────────────────────────────
   let extraction;
   try {
-    if (documentCategory === "identity") {
+    if (effectiveCategory === "identity") {
       extraction = await extractIdentityDocument(data, mimeType);
-    } else if (documentCategory === "address") {
+    } else if (effectiveCategory === "address") {
       extraction = await extractAddressDocument(data, mimeType);
     } else {
       extraction = await extractSelfieDocument(data, mimeType);
@@ -72,9 +80,9 @@ module.exports = async (req, res) => {
 
   // ─── Deterministic validation ──────────────────────────────────────────────
   let validation;
-  if (documentCategory === "identity") {
+  if (effectiveCategory === "identity") {
     validation = validateIdentityDocument(extraction);
-  } else if (documentCategory === "address") {
+  } else if (effectiveCategory === "address") {
     validation = validateAddressDocument(extraction);
   } else {
     // Selfie: no strict validation rules — just pass through AI output
@@ -84,7 +92,7 @@ module.exports = async (req, res) => {
   return res.status(200).json({
     success: true,
     sessionId,
-    documentCategory,
+    documentCategory: effectiveCategory,
     fileName: fileName || "document",
     extraction,
     validation,

@@ -31,6 +31,7 @@ Your role:
 - If data was extracted, you can summarise it back to the user for confirmation — but do not display raw JSON.
 - Answer questions about the KYC process, document requirements, and privacy.
 - Be concise, friendly, and reassuring.
+- When a user says a document was uploaded as the wrong type (e.g. "that was my proof of address, not my ID"), acknowledge the mistake, explain that the system auto-detects document types from the image content, and ask them to re-upload the correct document for the missing category.
 
 You have awareness of the user's current onboarding state provided in each message.
 
@@ -57,15 +58,18 @@ module.exports = async (req, res) => {
 
   // ─── Build context injection ───────────────────────────────────────────────
   const ctx = context || {};
+  const uploaded = ctx.uploadedDocuments || [];
+  const stillNeeded = ["identity", "address"].filter((d) => !uploaded.includes(d));
   const ctxLines = [
     `Current step: ${ctx.step || "welcome"}`,
-    `Documents uploaded: ${(ctx.uploadedDocuments || []).join(", ") || "none"}`,
+    `Documents uploaded: ${uploaded.join(", ") || "none"}`,
+    `Documents still required: ${stillNeeded.join(", ") || "none — all collected"}`,
   ];
   if (ctx.validationErrors?.length) {
-    ctxLines.push(`Validation errors: ${ctx.validationErrors.join("; ")}`);
+    ctxLines.push(`Validation errors on last upload: ${ctx.validationErrors.join("; ")}`);
   }
   if (ctx.validationWarnings?.length) {
-    ctxLines.push(`Validation warnings: ${ctx.validationWarnings.join("; ")}`);
+    ctxLines.push(`Validation warnings on last upload: ${ctx.validationWarnings.join("; ")}`);
   }
 
   const contextMessage = {
