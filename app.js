@@ -311,10 +311,12 @@ fileInput.addEventListener("change", async function(e) {
     const uploadResult = await resp.json();
     const extraction = uploadResult.extraction;
     const validation = uploadResult.validation;
+    // Use the server-side AI-detected category (overrides filename guess)
+    const effectiveCategory = uploadResult.documentCategory || documentCategory;
 
-    if (!uploadedDocuments.includes(documentCategory)) uploadedDocuments.push(documentCategory);
-    if (documentCategory === "identity") identityExtraction = extraction;
-    if (documentCategory === "address")  addressExtraction  = extraction;
+    if (!uploadedDocuments.includes(effectiveCategory)) uploadedDocuments.push(effectiveCategory);
+    if (effectiveCategory === "identity") identityExtraction = extraction;
+    if (effectiveCategory === "address")  addressExtraction  = extraction;
 
     validationErrors   = validation.errors   || [];
     validationWarnings = validation.warnings || [];
@@ -322,13 +324,17 @@ fileInput.addEventListener("change", async function(e) {
     updateChecklist();
     showValidationBanner(validationErrors, validationWarnings);
 
-    if (documentCategory === "identity" || documentCategory === "address") {
+    if (effectiveCategory === "identity" || effectiveCategory === "address") {
       fillForm(extraction);
       setStep("review");
     }
 
+    const categoryLabel = effectiveCategory === "identity" ? "identity document"
+                        : effectiveCategory === "address"  ? "proof of address"
+                        : "document";
+
     if (validation.passed) {
-      say("✅ " + f.name + " processed successfully. Please review and confirm the pre-filled details on the right.");
+      say("✅ " + f.name + " processed successfully as a " + categoryLabel + ". Please review and confirm the pre-filled details on the right.");
     } else {
       say("⚠️ Document processed with issues:\n" + validationErrors.join("\n") + "\nPlease re-upload a valid document or correct the details manually.");
     }

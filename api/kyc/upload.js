@@ -18,6 +18,7 @@ const {
   extractIdentityDocument,
   extractAddressDocument,
   extractSelfieDocument,
+  detectDocumentCategory,
 } = require("../../lib/extraction");
 const {
   validateIdentityDocument,
@@ -52,12 +53,24 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: fileCheck.error });
   }
 
+  // ─── AI document-category detection (overrides filename hint) ─────────────
+  let detectedCategory;
+  try {
+    detectedCategory = await detectDocumentCategory(data, mimeType);
+  } catch (err) {
+    console.error("[upload] Category detection error:", err.message);
+    detectedCategory = "unknown";
+  }
+  // Use the AI-detected category when confident; fall back to the client hint
+  const effectiveCategory =
+    detectedCategory !== "unknown" ? detectedCategory : documentCategory;
+
   // ─── Extraction ────────────────────────────────────────────────────────────
   let extraction;
   try {
-    if (documentCategory === "identity") {
+    if (effectiveCategory === "identity") {
       extraction = await extractIdentityDocument(data, mimeType);
-    } else if (documentCategory === "address") {
+    } else if (effectiveCategory === "address") {
       extraction = await extractAddressDocument(data, mimeType);
     } else {
       extraction = await extractSelfieDocument(data, mimeType);
@@ -72,9 +85,9 @@ module.exports = async (req, res) => {
 
   // ─── Deterministic validation ──────────────────────────────────────────────
   let validation;
-  if (documentCategory === "identity") {
+  if (effectiveCategory === "identity") {
     validation = validateIdentityDocument(extraction);
-  } else if (documentCategory === "address") {
+  } else if (effectiveCategory === "address") {
     validation = validateAddressDocument(extraction);
   } else {
     // Selfie: no strict validation rules — just pass through AI output
@@ -84,7 +97,8 @@ module.exports = async (req, res) => {
   return res.status(200).json({
     success: true,
     sessionId,
-    documentCategory,
+    documentCategory: effectiveCategory,
+    detectedCategory,
     fileName: fileName || "document",
     extraction,
     validation,
