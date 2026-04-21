@@ -55,7 +55,11 @@ function showProcessing(label) {
   const d = document.createElement("div");
   d.className = "msg agent processing";
   d.id = "processingMsg";
-  d.innerHTML = '<span class="spinner" aria-hidden="true"></span> ' + label;
+  const spin = document.createElement("span");
+  spin.className = "spinner";
+  spin.setAttribute("aria-hidden", "true");
+  d.appendChild(spin);
+  d.appendChild(document.createTextNode(" " + label));
   messages.appendChild(d);
   messages.scrollTop = messages.scrollHeight;
   const es = document.getElementById("emptyState");
@@ -128,8 +132,16 @@ function showValidationBanner(errors, warnings) {
   const isError = errors.length > 0;
   banner.className = "validation-banner " + (isError ? "banner-error" : "banner-warning");
   const items = isError ? errors : warnings;
-  banner.innerHTML = "<strong>" + (isError ? "⚠ Issues found" : "ℹ Notices") + "</strong><ul>" +
-    items.map(function(m) { return "<li>" + m + "</li>"; }).join("") + "</ul>";
+  const strong = document.createElement("strong");
+  strong.textContent = isError ? "⚠ Issues found" : "ℹ Notices";
+  banner.appendChild(strong);
+  const ul = document.createElement("ul");
+  items.forEach(function(m) {
+    const li = document.createElement("li");
+    li.textContent = m;
+    ul.appendChild(li);
+  });
+  banner.appendChild(ul);
   profileForm.parentElement.insertBefore(banner, profileForm);
 }
 
