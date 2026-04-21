@@ -131,10 +131,6 @@
         <div class="section-heading">
           <span class="section-kicker">Nos services</span>
           <h2>Deux facons de terminer le meme parcours KYC</h2>
-          <p>
-            Le design reprend l'esprit du repo `Bot-Baybridge` avec une page de
-            marque tres lisible et un widget flottant toujours disponible.
-          </p>
         </div>
 
         <div class="service-grid">
@@ -150,8 +146,9 @@
           <article class="service-card">
             <h3>Assistant en surimpression</h3>
             <p>
-              Le widget flottant ouvre une conversation proche du repo cible et
-              permet d'envoyer un document directement depuis le chat.
+              Le widget flottant permet d'envoyer un document directement
+              depuis le chat et d'accompagner l'utilisateur tout au long du
+              parcours.
             </p>
           </article>
 
@@ -170,80 +167,19 @@
       <div class="container manual-grid">
         <aside class="manual-column">
           <section class="panel">
-            <span class="section-kicker">Parcours utilisateur</span>
-            <h2>Completer la verification sans le chat</h2>
-            <p class="panel-copy">
-              Chaque document passe par le meme moteur de validation. Les
-              champs du formulaire sont mis a jour des qu'une extraction reussit.
-            </p>
-
-            <ol class="steps-list">
-              <li class="active">
-                <span>1</span>
-                <div>
-                  <strong>Demarrer le dossier</strong>
-                  <p>Preparer une piece d'identite ou un justificatif de domicile.</p>
-                </div>
-              </li>
-              <li>
-                <span>2</span>
-                <div>
-                  <strong>Envoyer les documents</strong>
-                  <p>Televerser un fichier a la fois pour verification.</p>
-                </div>
-              </li>
-              <li>
-                <span>3</span>
-                <div>
-                  <strong>Verifier les donnees extraites</strong>
-                  <p>Corriger si necessaire avant la soumission finale.</p>
-                </div>
-              </li>
-              <li>
-                <span>4</span>
-                <div>
-                  <strong>Soumettre la verification</strong>
-                  <p>Envoyer le dossier complet pour controle final.</p>
-                </div>
-              </li>
-            </ol>
-          </section>
-
-          <section class="panel">
             <div class="panel-heading">
               <div>
-                <h3>Televerser un document</h3>
-                <p>Formats pris en charge : PDF, JPG, PNG, WebP et GIF.</p>
+                <h3>Fichiers joints</h3>
+                <p>Ajoutez les documents du dossier KYC.</p>
               </div>
             </div>
 
             <input id="file" type="file" accept="application/pdf,image/*" />
-            <label for="file" class="upload-button">Choisir un document</label>
-
-            <p class="support-copy">
-              Le flux manuel reste disponible meme si l'assistant n'est jamais
-              ouvert.
-            </p>
+            <label for="file" class="upload-button">Ajouter un fichier au dossier KYC</label>
 
             <div id="fileChips" class="chips"></div>
             <div id="pageStatus" class="page-status" hidden></div>
             <div class="checklist" aria-live="polite"></div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-heading">
-              <div>
-                <h3>Historique du dossier</h3>
-                <p>Les controles et statuts recents apparaissent ici.</p>
-              </div>
-            </div>
-
-            <div id="activityFeed" class="activity-feed">
-              <div id="activityEmpty" class="activity-empty">
-                Aucun evenement pour le moment. Les mises a jour de
-                verification apparaitront ici au fur et a mesure.
-              </div>
-            </div>
           </section>
         </aside>
 
@@ -346,10 +282,6 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <span class="footer-brand" data-brand>Marque</span>
-      <p>
-        Interface KYC inspiree de Bot-Baybridge avec assistant flottant et
-        parcours manuel conserve.
-      </p>
     </div>
   </footer>
 
