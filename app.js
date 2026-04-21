@@ -52,15 +52,66 @@ function say(text, who = "agent") {
   if (es) es.remove();
 }
 
-function showProcessing(label) {
+function ensureTypingIndicatorStyles() {
+  if (document.getElementById("typingIndicatorStyles")) return;
+
+  const style = document.createElement("style");
+  style.id = "typingIndicatorStyles";
+  style.textContent = `
+    .msg.processing.typing{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      min-width:64px;
+      padding:14px 16px;
+    }
+    .typing-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background: rgba(59, 130, 246, .85);
+      display:inline-block;
+      animation: typingBounce 1.1s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(2){ animation-delay: .16s; }
+    .typing-dot:nth-child(3){ animation-delay: .32s; }
+    @keyframes typingBounce {
+      0%, 80%, 100%{
+        transform: translateY(0);
+        opacity: .35;
+      }
+      40%{
+        transform: translateY(-5px);
+        opacity: 1;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function showProcessing(label, variant = "spinner") {
   const d = document.createElement("div");
   d.className = "msg agent processing";
   d.id = "processingMsg";
-  const spin = document.createElement("span");
-  spin.className = "spinner";
-  spin.setAttribute("aria-hidden", "true");
-  d.appendChild(spin);
-  d.appendChild(document.createTextNode(" " + label));
+
+  if (variant === "typing") {
+    ensureTypingIndicatorStyles();
+    d.classList.add("typing");
+    d.setAttribute("aria-label", label || "Assistant is typing");
+    for (let i = 0; i < 3; i += 1) {
+      const dot = document.createElement("span");
+      dot.className = "typing-dot";
+      dot.setAttribute("aria-hidden", "true");
+      d.appendChild(dot);
+    }
+  } else {
+    const spin = document.createElement("span");
+    spin.className = "spinner";
+    spin.setAttribute("aria-hidden", "true");
+    d.appendChild(spin);
+    d.appendChild(document.createTextNode(" " + label));
+  }
+
   messages.appendChild(d);
   messages.scrollTop = messages.scrollHeight;
   const es = document.getElementById("emptyState");
@@ -456,7 +507,7 @@ async function sendMessage(text) {
   await initSession();
   say(trimmedText, "user");
   chatHistory.push({ role: "user", content: trimmedText });
-  showProcessing("Thinking...");
+  showProcessing("Assistant is typing", "typing");
 
   const fallbackReply = buildLocalChatFallback(trimmedText);
   const controller = new AbortController();
