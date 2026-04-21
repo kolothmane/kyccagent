@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BayBridge | Identity Verification</title>
+  <title>iPharma | Verification d'identite</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -15,20 +15,20 @@
 <body>
   <header class="site-header">
     <div class="container header-inner">
-      <a href="#" class="brand" aria-label="BayBridge home">
-        <span class="brand-mark">B</span>
-        <span class="brand-copy">
-          <span class="brand-name">BayBridge</span>
-          <span class="brand-subtitle">Identity Verification Service</span>
-        </span>
+      <a href="#" class="brand" aria-label="Accueil iPharma">
+        <span class="brand-name">iPharma</span>
       </a>
 
-      <div class="header-actions">
-        <a class="ghost-link" href="#manual-kyc">Manual verification</a>
-        <button class="btn btn-primary" type="button" data-open-chat>
-          Open assistant
-        </button>
-      </div>
+      <nav class="top-nav" aria-label="Navigation principale">
+        <a href="#intro" class="nav-pill">Notre histoire</a>
+        <a href="#manual-kyc" class="nav-pill">Verification</a>
+        <a href="#services" class="nav-pill">Nos services</a>
+        <a href="#manual-kyc" class="nav-pill">Mon dossier</a>
+      </nav>
+
+      <button class="header-chat-cta" type="button" data-open-chat>
+        Ouvrir l'assistant
+      </button>
 
       <div class="sr-only">
         <span id="elapsed">00:00</span>
@@ -38,191 +38,126 @@
   </header>
 
   <main>
-    <section class="hero">
-      <div class="container hero-grid">
-        <div class="hero-copy">
-          <span class="eyebrow">BayBridge KYC</span>
-          <h1>Verify your identity your way.</h1>
-          <p class="hero-text">
-            Complete the KYC flow manually on the page, or open the assistant to
-            automate the process step by step. Both paths use the same secure
-            verification backend.
+    <section class="hero-shell" id="intro">
+      <div class="hero-banner">
+        <div class="container hero-inner">
+          <span class="hero-kicker">iPharma</span>
+          <h1>Une verification d'identite simple, guidee et securisee.</h1>
+          <p class="hero-copy">
+            L'utilisateur peut completer seul son parcours KYC sur la page, ou
+            ouvrir l'assistant pour automatiser l'envoi des documents et le
+            remplissage du dossier.
           </p>
 
           <div class="hero-actions">
-            <a class="btn btn-primary" href="#manual-kyc">
-              Start manual verification
+            <a class="hero-primary" href="#manual-kyc">
+              Commencer la verification
             </a>
-            <button class="btn btn-secondary" type="button" data-open-chat>
-              Automate with the assistant
-            </button>
-          </div>
-
-          <ul class="hero-points">
-            <li>Upload identity and address documents one by one</li>
-            <li>Review extracted applicant details before submission</li>
-            <li>Open the assistant at any time for guided help</li>
-          </ul>
-        </div>
-
-        <div class="hero-preview card">
-          <div class="preview-head">
-            <span class="preview-kicker">Verification overview</span>
-            <h2>Secure, fast and optional to automate</h2>
-          </div>
-
-          <div class="preview-stack">
-            <article class="preview-item">
-              <span class="preview-step">01</span>
-              <div>
-                <h3>Upload an identity document</h3>
-                <p>Passport, national ID card or driving licence.</p>
-              </div>
-            </article>
-
-            <article class="preview-item">
-              <span class="preview-step">02</span>
-              <div>
-                <h3>Add a proof of address</h3>
-                <p>Utility bill, bank statement, tax letter or insurance letter.</p>
-              </div>
-            </article>
-
-            <article class="preview-item">
-              <span class="preview-step">03</span>
-              <div>
-                <h3>Review the extracted details</h3>
-                <p>Confirm the profile and submit it for verification.</p>
-              </div>
-            </article>
-          </div>
-
-          <div class="preview-footer">
-            <button class="btn btn-secondary btn-block" type="button" data-open-chat>
-              Open BayBridge Assistant
+            <button class="hero-secondary" type="button" data-open-chat>
+              Automatiser avec l'assistant
             </button>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="features">
+    <section class="editorial-section" id="services">
       <div class="container">
         <div class="section-heading">
-          <span class="section-kicker">Why this flow works</span>
-          <h2>One interface for manual and assisted KYC</h2>
+          <span class="section-kicker">Nos services</span>
+          <h2>Deux facons de terminer le meme parcours KYC</h2>
           <p>
-            The page stays fully functional on its own, while the assistant can
-            be opened from anywhere to answer questions and guide the user.
+            Le design reprend l'esprit du repo `Bot-Baybridge` avec une page de
+            marque tres lisible et un widget flottant toujours disponible.
           </p>
         </div>
 
-        <div class="feature-grid">
-          <article class="feature-card card">
-            <div class="feature-icon">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 3v18M3 12h18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-              </svg>
-            </div>
-            <h3>Manual first</h3>
+        <div class="service-grid">
+          <article class="service-card">
+            <h3>Parcours manuel</h3>
             <p>
-              Users can upload their documents, review extracted fields and submit
-              the application without ever opening the chatbot.
+              L'utilisateur envoie ses documents, suit les controles, verifie
+              les champs extraits puis soumet son dossier sans passer par le
+              chatbot.
             </p>
           </article>
 
-          <article class="feature-card card">
-            <div class="feature-icon">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 6h16v9H8l-4 4V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </div>
-            <h3>Assistant on demand</h3>
+          <article class="service-card">
+            <h3>Assistant en surimpression</h3>
             <p>
-              A floating widget opens the assistant when guidance is needed for
-              accepted documents, status questions or step-by-step support.
+              Le widget flottant ouvre une conversation proche du repo cible et
+              permet d'envoyer un document directement depuis le chat.
             </p>
           </article>
 
-          <article class="feature-card card">
-            <div class="feature-icon">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 4l7 3v5c0 4.4-2.9 8.3-7 9-4.1-.7-7-4.6-7-9V7l7-3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </div>
-            <h3>Single verification engine</h3>
+          <article class="service-card">
+            <h3>Remplissage automatique</h3>
             <p>
-              Whether the user follows the page or the assistant, the same upload,
-              extraction and submission pipeline remains in control.
+              Quand un document est accepte, les informations extraites
+              alimentent automatiquement le formulaire KYC a droite.
             </p>
           </article>
         </div>
       </div>
     </section>
 
-    <section class="manual-kyc" id="manual-kyc">
-      <div class="container verification-grid">
-        <div class="manual-column">
-          <section class="card flow-card">
-            <div class="section-kicker">Manual flow</div>
-            <h2>Complete KYC without the chatbot</h2>
-            <p class="section-copy">
-              Upload one document at a time. Extracted fields will populate the
-              applicant form on the right.
+    <section class="manual-section" id="manual-kyc">
+      <div class="container manual-grid">
+        <aside class="manual-column">
+          <section class="panel">
+            <span class="section-kicker">Parcours utilisateur</span>
+            <h2>Completer la verification sans le chat</h2>
+            <p class="panel-copy">
+              Chaque document passe par le meme moteur de validation. Les
+              champs du formulaire sont mis a jour des qu'une extraction reussit.
             </p>
 
             <ol class="steps-list">
               <li class="active">
                 <span>1</span>
                 <div>
-                  <strong>Welcome</strong>
-                  <p>Start by uploading your identity document.</p>
+                  <strong>Demarrer le dossier</strong>
+                  <p>Preparer une piece d'identite ou un justificatif de domicile.</p>
                 </div>
               </li>
               <li>
                 <span>2</span>
                 <div>
-                  <strong>Upload identity and address documents</strong>
-                  <p>Submit each file separately for validation.</p>
+                  <strong>Envoyer les documents</strong>
+                  <p>Televerser un fichier a la fois pour verification.</p>
                 </div>
               </li>
               <li>
                 <span>3</span>
                 <div>
-                  <strong>Review extracted details</strong>
-                  <p>Confirm or correct the information before submission.</p>
+                  <strong>Verifier les donnees extraites</strong>
+                  <p>Corriger si necessaire avant la soumission finale.</p>
                 </div>
               </li>
               <li>
                 <span>4</span>
                 <div>
-                  <strong>Finish verification</strong>
-                  <p>Submit the completed application for review.</p>
+                  <strong>Soumettre la verification</strong>
+                  <p>Envoyer le dossier complet pour controle final.</p>
                 </div>
               </li>
             </ol>
           </section>
 
-          <section class="card upload-card">
-            <div class="card-heading">
+          <section class="panel">
+            <div class="panel-heading">
               <div>
-                <h3>Upload documents</h3>
-                <p>Accepted formats: PDF, JPG, PNG, WebP or GIF.</p>
+                <h3>Televerser un document</h3>
+                <p>Formats pris en charge : PDF, JPG, PNG, WebP et GIF.</p>
               </div>
             </div>
 
-            <input
-              id="file"
-              type="file"
-              accept="application/pdf,image/*"
-            />
-            <label for="file" class="btn btn-primary btn-block">
-              Upload a document
-            </label>
+            <input id="file" type="file" accept="application/pdf,image/*" />
+            <label for="file" class="upload-button">Choisir un document</label>
 
-            <p class="hint">
-              Upload one file at a time. Both identity documents and proof-of-address
-              documents are supported.
+            <p class="support-copy">
+              Le flux manuel reste disponible meme si l'assistant n'est jamais
+              ouvert.
             </p>
 
             <div id="fileChips" class="chips"></div>
@@ -230,46 +165,46 @@
             <div class="checklist" aria-live="polite"></div>
           </section>
 
-          <section class="card activity-card">
-            <div class="card-heading">
+          <section class="panel">
+            <div class="panel-heading">
               <div>
-                <h3>Updates</h3>
-                <p>Live status messages from the verification flow.</p>
+                <h3>Historique du dossier</h3>
+                <p>Les controles et statuts recents apparaissent ici.</p>
               </div>
             </div>
 
             <div id="activityFeed" class="activity-feed">
               <div id="activityEmpty" class="activity-empty">
-                Status updates will appear here as documents are reviewed and the
-                application progresses.
+                Aucun evenement pour le moment. Les mises a jour de
+                verification apparaitront ici au fur et a mesure.
               </div>
             </div>
           </section>
-        </div>
+        </aside>
 
-        <section class="card details-card">
-          <div class="card-heading details-heading">
+        <section class="details-panel">
+          <div class="details-header">
             <div>
-              <span class="section-kicker">Applicant form</span>
-              <h2>Review and submit the profile</h2>
+              <span class="section-kicker">Dossier KYC</span>
+              <h2>Verifier puis soumettre le profil</h2>
               <p>
-                Complete any missing fields and submit the application for identity
-                verification.
+                Le formulaire ci-dessous est rempli automatiquement quand une
+                extraction est acceptee.
               </p>
             </div>
-            <button class="btn btn-secondary" type="button" data-open-chat>
-              Need guided help?
+            <button class="secondary-chat-button" type="button" data-open-chat>
+              Besoin d'aide
             </button>
           </div>
 
           <form id="profile" class="form" novalidate>
             <label>
-              First name
+              Prenom
               <input name="firstName" id="firstName" />
             </label>
 
             <label>
-              Last name
+              Nom
               <input name="lastName" id="lastName" />
             </label>
 
@@ -279,61 +214,61 @@
             </label>
 
             <label>
-              Mobile
-              <input name="phone" id="phone" placeholder="+441234567890" />
+              Telephone
+              <input name="phone" id="phone" placeholder="+33123456789" />
             </label>
 
             <label>
-              Country of residence
-              <input name="country" id="country" placeholder="e.g. GB" />
+              Pays de residence
+              <input name="country" id="country" placeholder="FR" />
             </label>
 
             <label>
-              Date of birth (YYYY-MM-DD)
+              Date de naissance (YYYY-MM-DD)
               <input name="dob" id="dob" placeholder="1992-02-10" />
             </label>
 
             <label>
-              Street
+              Adresse
               <input name="street" id="street" />
             </label>
 
             <label>
-              City
+              Ville
               <input name="city" id="city" />
             </label>
 
             <label>
-              State / Province
+              Region / Province
               <input name="state" id="state" />
             </label>
 
             <label>
-              Postal code
+              Code postal
               <input name="postal" id="postal" />
             </label>
 
             <div class="divider"></div>
 
-            <div class="subhead">Document information</div>
+            <div class="subhead">Informations documentaires</div>
             <div class="docgrid">
               <div>
-                <strong>ID / passport number</strong>
-                <div id="docNumber" class="muted">Not available</div>
+                <strong>Numero du document</strong>
+                <div id="docNumber" class="muted">Non disponible</div>
               </div>
               <div>
-                <strong>Document expiry</strong>
-                <div id="docExpiry" class="muted">Not available</div>
+                <strong>Date d'expiration</strong>
+                <div id="docExpiry" class="muted">Non disponible</div>
               </div>
               <div>
-                <strong>Nationality</strong>
-                <div id="nationality" class="muted">Not available</div>
+                <strong>Nationalite</strong>
+                <div id="nationality" class="muted">Non disponible</div>
               </div>
             </div>
 
             <div class="actions">
-              <button id="submit" class="btn btn-primary" type="button">
-                Submit for verification
+              <button id="submit" class="submit-button" type="button">
+                Soumettre la verification
               </button>
             </div>
             <p id="result" class="result"></p>
@@ -345,13 +280,10 @@
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <div class="footer-brand">
-        <span class="brand-mark small">B</span>
-        <span>BayBridge</span>
-      </div>
+      <span class="footer-brand">iPharma</span>
       <p>
-        BayBridge Identity Verification keeps the manual flow available while the
-        assistant remains optional.
+        Interface KYC inspiree de Bot-Baybridge avec assistant flottant et
+        parcours manuel conserve.
       </p>
     </div>
   </footer>
@@ -360,11 +292,11 @@
     id="chatLauncher"
     class="chat-launcher"
     type="button"
-    aria-label="Open BayBridge Assistant"
+    aria-label="Ouvrir l'assistant"
   >
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path
-        d="M4 6h16v9H8l-4 4V6z"
+        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
         fill="none"
         stroke="currentColor"
         stroke-width="1.9"
@@ -378,28 +310,33 @@
   <div id="chatShell" class="chat-shell" hidden>
     <aside class="chat-widget" aria-live="polite">
       <div class="chat-widget-header">
-        <div class="chat-widget-brand">
-          <span class="brand-mark small">B</span>
-          <div>
-            <p>BayBridge Assistant</p>
-            <span id="chatStatus" class="chat-status">Online</span>
+        <div class="chat-widget-left">
+          <div class="chat-menu-wrap">
+            <button id="chatMenuBtn" type="button" class="chat-icon-button" aria-label="Menu">
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path
+                  d="M10 4.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 7a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 7a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+            <div id="chatMenu" class="chat-menu" hidden>
+              <button id="chatOpenManual" type="button">Ouvrir le formulaire</button>
+              <button id="chatCloseAction" type="button">Fermer l'assistant</button>
+            </div>
+          </div>
+
+          <div class="chat-service-meta">
+            <div class="chat-avatar">IV</div>
+            <div>
+              <p>Identity Verification Service</p>
+              <span id="chatStatus" class="chat-status">En ligne</span>
+            </div>
           </div>
         </div>
 
         <div class="chat-widget-actions">
-          <button id="chatUpload" type="button" aria-label="Upload document">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M12 16V6m0 0l-4 4m4-4l4 4M5 18h14"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.9"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </button>
-          <button id="chatMinimize" type="button" aria-label="Minimize chat">
+          <button id="chatMinimize" type="button" class="chat-icon-button" aria-label="Reduire">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path
                 d="M6 12h12"
@@ -410,7 +347,7 @@
               />
             </svg>
           </button>
-          <button id="chatClose" type="button" aria-label="Close chat">
+          <button id="chatClose" type="button" class="chat-icon-button" aria-label="Fermer">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path
                 d="M6 6l12 12M18 6L6 18"
@@ -426,23 +363,51 @@
 
       <div id="chatWidgetBody" class="chat-widget-body">
         <div id="messages" class="messages">
+          <div class="session-separator">
+            <span>Aujourd'hui</span>
+          </div>
           <div class="empty" id="emptyState">
-            <div class="empty-title">Assistant ready when you need it</div>
+            <div class="empty-title">Assistant pret a vous aider</div>
             <div class="empty-sub">
-              Open a conversation to automate the verification flow, upload a
-              document from the chat header, ask document questions or get
-              guidance while completing KYC.
+              Posez une question, envoyez un document depuis le trombone ou
+              laissez l'assistant vous guider dans le parcours KYC.
             </div>
           </div>
         </div>
 
-        <div class="composer">
-          <input
-            id="input"
-            placeholder="Ask BayBridge Assistant..."
-            autocomplete="off"
-          />
-          <button id="send" class="btn btn-primary" type="button">Send</button>
+        <div class="composer-wrap">
+          <div class="composer">
+            <button id="chatAttachBtn" type="button" class="chat-attach-button" aria-label="Joindre un document">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+            <input
+              id="input"
+              placeholder="Tapez votre message..."
+              autocomplete="off"
+            />
+            <button id="send" class="chat-send-button" type="button" aria-label="Envoyer">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+          <p class="composer-note">Propulse par iPharma Identity Verification</p>
         </div>
       </div>
     </aside>
