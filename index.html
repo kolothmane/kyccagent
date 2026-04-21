@@ -3,32 +3,42 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Verification d'identite</title>
+  <title>Northstar | Ouverture de compte & KYC</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
     rel="stylesheet"
   />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="page-aura page-aura-left" aria-hidden="true"></div>
+  <div class="page-aura page-aura-right" aria-hidden="true"></div>
+
   <header class="site-header">
     <div class="container header-inner">
-      <a href="#" class="brand" aria-label="Accueil">
-        <span class="brand-name" data-brand>Marque</span>
+      <a href="#intro" class="brand" aria-label="Accueil">
+        <span class="brand-mark">N</span>
+        <span class="brand-copy">
+          <strong data-brand>Northstar</strong>
+          <span data-service>Treasury OS</span>
+        </span>
       </a>
 
       <nav class="top-nav" aria-label="Navigation principale">
-        <a href="#kyc-process" class="nav-pill">Processus KYC</a>
-        <a href="#manual-kyc" class="nav-pill">Verification</a>
-        <a href="#services" class="nav-pill">Nos services</a>
-        <a href="#manual-kyc" class="nav-pill">Mon dossier</a>
+        <a href="#account">Compte</a>
+        <a href="#manual-kyc">KYC</a>
+        <a href="#crm-panel">CRM</a>
+        <a href="#manual-kyc">Activation</a>
       </nav>
 
-      <button class="header-chat-cta" type="button" data-open-chat>
-        Ouvrir l'assistant
-      </button>
+      <div class="header-actions">
+        <a href="#account" class="ghost-link">Creer un compte</a>
+        <button class="header-primary" type="button" data-open-chat>
+          Parler a l'assistant
+        </button>
+      </div>
 
       <div class="sr-only">
         <span id="elapsed">00:00</span>
@@ -38,250 +48,352 @@
   </header>
 
   <main>
-    <section class="hero-shell" id="intro">
-      <div class="hero-banner">
-        <div class="container hero-inner">
-          <span class="hero-kicker" data-brand>Marque</span>
-          <h1>Une verification d'identite simple, guidee et securisee.</h1>
-          <p class="hero-copy">
-            L'utilisateur peut completer seul son parcours KYC sur la page, ou
-            ouvrir l'assistant pour automatiser l'envoi des documents et le
-            remplissage du dossier.
+    <section class="hero" id="intro">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Ouverture de compte business</span>
+          <h1>Creer un compte, passer le KYC et activer l'espace client dans un seul parcours.</h1>
+          <p>
+            Cette demo simule un produit SaaS premium de finance fictif. L'utilisateur cree d'abord
+            son espace, transmet ses justificatifs, verifie les donnees extraites, puis la plateforme
+            genere une synchronisation CRM factice a la fin du dossier.
           </p>
 
           <div class="hero-actions">
-            <a class="hero-primary" href="#manual-kyc">
-              Commencer la verification
-            </a>
-            <button class="hero-secondary" type="button" data-open-chat>
+            <a href="#account" class="primary-button hero-primary">Commencer l'onboarding</a>
+            <button type="button" class="secondary-button hero-secondary" data-open-chat>
               Automatiser avec l'assistant
             </button>
-            <a class="hero-secondary" href="#kyc-process">
-              Voir le processus KYC
-            </a>
           </div>
-        </div>
-      </div>
-    </section>
 
-    <section class="process-section" id="kyc-process">
-      <div class="container">
-        <div class="section-heading">
-          <span class="section-kicker">Vue d'ensemble</span>
-          <h2>Le processus KYC en 5 etapes</h2>
-          <p>Une representation claire du parcours avec les points de controle cles.</p>
-        </div>
-
-        <div class="process-flow" aria-label="Processus KYC visuel">
-          <div class="process-step" data-step="1">
-            <div class="process-icon">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            </div>
-            <div class="process-label">
-              Demarrer le dossier
-              <span>Creation de session et consentement</span>
-            </div>
-          </div>
-          <div class="process-step" data-step="2">
-            <div class="process-icon">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7zm3-4h12v4H6V3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="process-label">
-              Televerser les documents
-              <span>Piece d'identite et justificatif de domicile</span>
-            </div>
-          </div>
-          <div class="process-step" data-step="3">
-            <div class="process-icon">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3H6a2 2 0 00-2 2v14l4-4h7a2 2 0 002-2V5a2 2 0 00-2-2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="process-label">
-              Extraction & controles
-              <span>OCR, validation et verification de qualite</span>
-            </div>
-          </div>
-          <div class="process-step" data-step="4">
-            <div class="process-icon">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v8m-4-4h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            </div>
-            <div class="process-label">
-              Reconciliation
-              <span>Concordance entre documents et profil</span>
-            </div>
-          </div>
-          <div class="process-step" data-step="5">
-            <div class="process-icon">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="process-label">
-              Decision
-              <span>Approbation immediate ou revue manuelle</span>
-            </div>
+          <div class="hero-proof">
+            <article class="proof-card">
+              <strong>08 min</strong>
+              <span>pour ouvrir un dossier et finaliser le KYC</span>
+            </article>
+            <article class="proof-card">
+              <strong>2 documents</strong>
+              <span>piece d'identite et justificatif de domicile</span>
+            </article>
+            <article class="proof-card">
+              <strong>CRM sync</strong>
+              <span>timeline client generee automatiquement a la fin</span>
+            </article>
           </div>
         </div>
 
-        <div class="process-actions">
-          <button id="startDemo" class="hero-secondary" type="button">Lancer la demo</button>
-        </div>
-      </div>
-    </section>
+        <aside class="hero-panel">
+          <div class="panel-glow" aria-hidden="true"></div>
+          <div class="hero-panel-card">
+            <div class="hero-panel-header">
+              <span class="eyebrow subtle">Northstar onboarding</span>
+              <strong>Business Account Activation</strong>
+            </div>
 
-    <section class="editorial-section" id="services">
-      <div class="container">
-        <div class="section-heading">
-          <span class="section-kicker">Nos services</span>
-          <h2>Deux facons de terminer le meme parcours KYC</h2>
-        </div>
-
-        <div class="service-grid">
-          <article class="service-card">
-            <h3>Parcours manuel</h3>
-            <p>
-              L'utilisateur envoie ses documents, suit les controles, verifie
-              les champs extraits puis soumet son dossier sans passer par le
-              chatbot.
-            </p>
-          </article>
-
-          <article class="service-card">
-            <h3>Assistant en surimpression</h3>
-            <p>
-              Le widget flottant permet d'envoyer un document directement
-              depuis le chat et d'accompagner l'utilisateur tout au long du
-              parcours.
-            </p>
-          </article>
-
-          <article class="service-card">
-            <h3>Remplissage automatique</h3>
-            <p>
-              Quand un document est accepte, les informations extraites
-              alimentent automatiquement le formulaire KYC a droite.
-            </p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="manual-section" id="manual-kyc">
-      <div class="container manual-grid">
-        <aside class="manual-column">
-          <section class="panel">
-            <div class="panel-heading">
-              <div>
-                <h3>Fichiers joints</h3>
-                <p>Ajoutez les documents du dossier KYC.</p>
+            <div class="hero-timeline">
+              <div class="timeline-item is-active">
+                <span>01</span>
+                <div>
+                  <strong>Creation du compte</strong>
+                  <p>Workspace, contact principal et acces admin.</p>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <span>02</span>
+                <div>
+                  <strong>Verification KYC</strong>
+                  <p>Collecte documentaire et extraction automatique.</p>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <span>03</span>
+                <div>
+                  <strong>Activation CRM</strong>
+                  <p>Creation factice des logs de relation client.</p>
+                </div>
               </div>
             </div>
 
-            <input id="file" type="file" accept="application/pdf,image/*" />
-            <label for="file" class="upload-button">Ajouter un fichier au dossier KYC</label>
+            <div class="hero-note">
+              Le chatbot flottant peut aider a chaque etape et televerser un document directement dans le dossier.
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
 
-            <div id="fileChips" class="chips"></div>
-            <div id="pageStatus" class="page-status" hidden></div>
+    <section class="workflow">
+      <div class="container workflow-grid">
+        <aside class="workflow-sidebar">
+          <section class="status-card sticky-card">
+            <span class="eyebrow subtle">Activation client</span>
+            <h2>Suivi du dossier</h2>
+
+            <ol class="journey-list">
+              <li data-journey-step="account">
+                <span>01</span>
+                <div>
+                  <strong>Creer le compte</strong>
+                  <p>Initialiser l'espace business et le contact principal.</p>
+                </div>
+              </li>
+              <li data-journey-step="upload">
+                <span>02</span>
+                <div>
+                  <strong>Televerser les documents</strong>
+                  <p>Piece d'identite et justificatif de domicile.</p>
+                </div>
+              </li>
+              <li data-journey-step="review">
+                <span>03</span>
+                <div>
+                  <strong>Verifier les donnees</strong>
+                  <p>Confirmer les champs extraits avant soumission.</p>
+                </div>
+              </li>
+              <li data-journey-step="done">
+                <span>04</span>
+                <div>
+                  <strong>Activer le compte</strong>
+                  <p>Decision KYC et generation des logs CRM.</p>
+                </div>
+              </li>
+            </ol>
+
+            <div id="accountStatus" class="account-status-card">
+              <div class="placeholder-title">Aucun compte cree</div>
+              <p>Le KYC se debloque des que le compte business est initialise.</p>
+            </div>
+          </section>
+
+          <section class="status-card" id="crm-panel">
+            <div class="card-topline">
+              <div>
+                <span class="eyebrow subtle">CRM simule</span>
+                <h3>Journal d'activation</h3>
+              </div>
+              <span id="crmStatus" class="status-badge neutral">En attente</span>
+            </div>
+
+            <div id="crmEmpty" class="empty-panel">
+              Les logs CRM apparaitront apres la soumission finale du KYC.
+            </div>
+            <div id="crmFeed" class="crm-feed" aria-live="polite"></div>
+          </section>
+
+          <section class="status-card">
+            <span class="eyebrow subtle">Conformite</span>
             <div class="checklist" aria-live="polite"></div>
+            <div class="security-note">
+              Formats acceptes : PDF, JPEG, PNG, WebP et GIF. Les justificatifs de domicile doivent
+              generalement dater de moins de 90 jours.
+            </div>
           </section>
         </aside>
 
-        <section class="details-panel">
-          <div class="details-header">
-            <div>
-              <span class="section-kicker">Dossier KYC</span>
-              <h2>Verifier puis soumettre le profil</h2>
-              <p>
-                Le formulaire ci-dessous est rempli automatiquement quand une
-                extraction est acceptee.
-              </p>
-            </div>
-            <button class="secondary-chat-button" type="button" data-open-chat>
-              Besoin d'aide
-            </button>
-          </div>
-
-          <form id="profile" class="form" novalidate>
-            <label>
-              Prenom
-              <input name="firstName" id="firstName" />
-            </label>
-
-            <label>
-              Nom
-              <input name="lastName" id="lastName" />
-            </label>
-
-            <label>
-              Email
-              <input type="email" name="email" id="email" />
-            </label>
-
-            <label>
-              Telephone
-              <input name="phone" id="phone" placeholder="+33123456789" />
-            </label>
-
-            <label>
-              Pays de residence
-              <input name="country" id="country" placeholder="FR" />
-            </label>
-
-            <label>
-              Date de naissance (YYYY-MM-DD)
-              <input name="dob" id="dob" placeholder="1992-02-10" />
-            </label>
-
-            <label>
-              Adresse
-              <input name="street" id="street" />
-            </label>
-
-            <label>
-              Ville
-              <input name="city" id="city" />
-            </label>
-
-            <label>
-              Region / Province
-              <input name="state" id="state" />
-            </label>
-
-            <label>
-              Code postal
-              <input name="postal" id="postal" />
-            </label>
-
-            <div class="divider"></div>
-
-            <div class="subhead">Informations documentaires</div>
-            <div class="docgrid">
+        <div class="workflow-main">
+          <section class="product-card" id="account">
+            <div class="card-header">
               <div>
-                <strong>Numero du document</strong>
-                <div id="docNumber" class="muted">Non disponible</div>
+                <span class="eyebrow subtle">Etape 1</span>
+                <h2>Creer votre espace client</h2>
+                <p>
+                  Ouvrez un compte fictif avant de lancer les controles KYC. Les informations de compte
+                  pre-remplissent ensuite le dossier de verification.
+                </p>
               </div>
-              <div>
-                <strong>Date d'expiration</strong>
-                <div id="docExpiry" class="muted">Non disponible</div>
-              </div>
-              <div>
-                <strong>Nationalite</strong>
-                <div id="nationality" class="muted">Non disponible</div>
-              </div>
+              <span class="card-chip">Business onboarding</span>
             </div>
 
-            <div class="actions">
-              <button id="submit" class="submit-button" type="button">
-                Soumettre la verification
+            <form id="accountForm" class="account-form" novalidate>
+              <label>
+                Nom de l'espace
+                <input id="workspaceName" name="workspaceName" placeholder="Northstar Paris Ops" />
+              </label>
+
+              <label>
+                Email professionnel
+                <input id="accountEmail" name="accountEmail" type="email" placeholder="team@northstar.example" />
+              </label>
+
+              <label>
+                Telephone professionnel
+                <input id="accountPhone" name="accountPhone" placeholder="+33123456789" />
+              </label>
+
+              <label>
+                Pays de residence
+                <input id="accountCountry" name="accountCountry" placeholder="France" />
+              </label>
+
+              <label>
+                Prenom administrateur
+                <input id="accountFirstName" name="accountFirstName" placeholder="Kenza" />
+              </label>
+
+              <label>
+                Nom administrateur
+                <input id="accountLastName" name="accountLastName" placeholder="Alaoui" />
+              </label>
+
+              <label>
+                Type d'entreprise
+                <input id="companyType" name="companyType" placeholder="SaaS B2B" />
+              </label>
+
+              <label>
+                Mot de passe
+                <input id="accountPassword" name="accountPassword" type="password" placeholder="Minimum 8 caracteres" />
+              </label>
+
+              <div class="account-actions">
+                <button id="createAccountBtn" class="primary-button" type="button">
+                  Creer le compte
+                </button>
+                <p id="accountFormMessage" class="inline-feedback"></p>
+              </div>
+            </form>
+          </section>
+
+          <section class="product-card" id="manual-kyc">
+            <div class="card-header">
+              <div>
+                <span class="eyebrow subtle">Etape 2</span>
+                <h2>Televerser les justificatifs et verifier les donnees</h2>
+                <p>
+                  Le dossier KYC reste fonctionnel sans chatbot. L'assistant est simplement une couche
+                  d'automatisation optionnelle.
+                </p>
+              </div>
+              <button class="secondary-button" type="button" data-open-chat>
+                Automatiser avec l'assistant
               </button>
             </div>
-            <p id="result" class="result"></p>
-          </form>
-        </section>
+
+            <div id="kycGate" class="gate-banner">
+              Creez d'abord votre compte business pour debloquer le dossier KYC.
+            </div>
+
+            <div class="upload-row">
+              <input id="file" type="file" accept="application/pdf,image/*" />
+              <label for="file" class="upload-button">Ajouter un document</label>
+              <div id="pageStatus" class="page-status" hidden></div>
+            </div>
+
+            <div id="fileChips" class="chips"></div>
+
+            <div class="kyc-grid">
+              <div class="info-stack">
+                <section class="mini-card">
+                  <h3>Documents acceptes</h3>
+                  <ul class="requirement-list">
+                    <li>Passeport, carte nationale d'identite ou permis de conduire</li>
+                    <li>Facture, releve bancaire, lettre d'assurance ou courrier officiel</li>
+                    <li>Justificatif de domicile recent avec l'adresse complete</li>
+                  </ul>
+                </section>
+
+                <section class="mini-card">
+                  <h3>Workflow automatique</h3>
+                  <p>
+                    Si un document est accepte, les informations extraites alimentent automatiquement
+                    le formulaire KYC a droite. La soumission finale declenche ensuite la simulation CRM.
+                  </p>
+                </section>
+              </div>
+
+              <div class="review-card">
+                <form id="profile" class="form" novalidate>
+                  <label>
+                    Prenom
+                    <input name="firstName" id="firstName" />
+                  </label>
+
+                  <label>
+                    Nom
+                    <input name="lastName" id="lastName" />
+                  </label>
+
+                  <label>
+                    Email
+                    <input type="email" name="email" id="email" />
+                  </label>
+
+                  <label>
+                    Telephone
+                    <input name="phone" id="phone" placeholder="+33123456789" />
+                  </label>
+
+                  <label>
+                    Pays de residence
+                    <input name="country" id="country" placeholder="France" />
+                  </label>
+
+                  <label>
+                    Date de naissance (YYYY-MM-DD)
+                    <input name="dob" id="dob" placeholder="1992-02-10" />
+                  </label>
+
+                  <label>
+                    Adresse
+                    <input name="street" id="street" />
+                  </label>
+
+                  <label>
+                    Ville
+                    <input name="city" id="city" />
+                  </label>
+
+                  <label>
+                    Region / Province
+                    <input name="state" id="state" />
+                  </label>
+
+                  <label>
+                    Code postal
+                    <input name="postal" id="postal" />
+                  </label>
+
+                  <div class="divider"></div>
+
+                  <div class="subhead">Informations documentaires</div>
+                  <div class="docgrid">
+                    <div>
+                      <strong>Numero du document</strong>
+                      <div id="docNumber" class="muted">Non disponible</div>
+                    </div>
+                    <div>
+                      <strong>Date d'expiration</strong>
+                      <div id="docExpiry" class="muted">Non disponible</div>
+                    </div>
+                    <div>
+                      <strong>Nationalite</strong>
+                      <div id="nationality" class="muted">Non disponible</div>
+                    </div>
+                  </div>
+
+                  <div class="actions">
+                    <button id="submit" class="primary-button submit-button" type="button">
+                      Soumettre le KYC et activer le compte
+                    </button>
+                  </div>
+                  <p id="result" class="result"></p>
+                </form>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <span class="footer-brand" data-brand>Marque</span>
+      <div>
+        <strong data-brand>Northstar</strong>
+        <span class="footer-copy">Produit fictif de demo pour onboarding business et KYC.</span>
+      </div>
+      <span class="footer-copy">Simulation d'activation, verification et CRM</span>
     </div>
   </footer>
 
@@ -318,15 +430,15 @@
               </svg>
             </button>
             <div id="chatMenu" class="chat-menu" hidden>
-              <button id="chatOpenManual" type="button">Ouvrir le formulaire</button>
+              <button id="chatOpenManual" type="button">Ouvrir le dossier</button>
               <button id="chatCloseAction" type="button">Fermer l'assistant</button>
             </div>
           </div>
 
           <div class="chat-service-meta">
-            <div class="chat-avatar">IV</div>
+            <div class="chat-avatar">N</div>
             <div>
-              <p>Identity Verification Service</p>
+              <p data-chat-title>Northstar Onboarding</p>
               <span id="chatStatus" class="chat-status">En ligne</span>
             </div>
           </div>
@@ -364,10 +476,10 @@
             <span>Aujourd'hui</span>
           </div>
           <div class="empty" id="emptyState">
-            <div class="empty-title">Assistant pret a vous aider</div>
+            <div class="empty-title">Assistant d'activation pret</div>
             <div class="empty-sub">
-              Posez une question, envoyez un document depuis le trombone ou
-              laissez l'assistant vous guider dans le parcours KYC.
+              Posez une question sur l'ouverture de compte, les documents acceptes, le KYC
+              ou laissez l'assistant televerser un fichier depuis le chat.
             </div>
           </div>
         </div>
@@ -388,7 +500,7 @@
             </button>
             <input
               id="input"
-              placeholder="Tapez votre message..."
+              placeholder="Posez votre question..."
               autocomplete="off"
             />
             <button id="send" class="chat-send-button" type="button" aria-label="Envoyer">
@@ -404,7 +516,7 @@
               </svg>
             </button>
           </div>
-          <p class="composer-note" data-brand-note>Propulse par Identity Verification</p>
+          <p class="composer-note" data-brand-note>Propulse par Northstar Treasury OS</p>
         </div>
       </div>
     </aside>
@@ -414,14 +526,21 @@
   <script src="app.js"></script>
   <script>
     (function applyBranding() {
-      var b = (window.BRANDING && window.BRANDING.name) || "VeriNova";
-      var s = (window.BRANDING && window.BRANDING.serviceLine) || "Identity Verification";
-      document.title = b + " | Verification d'identite";
-      document.querySelectorAll('[data-brand]').forEach(function(el){ el.textContent = b; });
-      var header = document.querySelector('.brand');
-      if (header) header.setAttribute('aria-label', 'Accueil ' + b);
-      var note = document.querySelector('[data-brand-note]');
-      if (note) note.textContent = 'Propulse par ' + b + ' ' + s;
+      var config = window.BRANDING || {};
+      var brand = config.name || "Northstar";
+      var service = config.serviceLine || "Treasury OS";
+
+      document.title = brand + " | Ouverture de compte & KYC";
+      document.querySelectorAll("[data-brand]").forEach(function(el) {
+        el.textContent = brand;
+      });
+      document.querySelectorAll("[data-service]").forEach(function(el) {
+        el.textContent = service;
+      });
+      var note = document.querySelector("[data-brand-note]");
+      if (note) note.textContent = "Propulse par " + brand + " " + service;
+      var chatTitle = document.querySelector("[data-chat-title]");
+      if (chatTitle) chatTitle.textContent = brand + " Onboarding";
     })();
   </script>
 </body>
