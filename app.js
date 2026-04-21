@@ -1,141 +1,390 @@
-console.log("Build: Pro UI v4");
-const messages = document.getElementById("messages");
-const input = document.getElementById("input");
-const sendBtn = document.getElementById("send");
-const fileInput = document.getElementById("file");
+/**
+ * KYC Onboarding — frontend controller
+ *
+ * Wires the existing three-panel UI to backend API endpoints.
+ * All document intelligence (OCR / extraction) happens server-side via OpenAI.
+ * Client-side: PDF→image rendering (PDF.js), image compression, UI state management.
+ */
+console.log("Build: KYC v2 — backend-powered");
+
+// ─── DOM refs ──────────────────────────────────────────────────────────────────
+const messages    = document.getElementById("messages");
+const input       = document.getElementById("input");
+const sendBtn     = document.getElementById("send");
+const fileInput   = document.getElementById("file");
 const profileForm = document.getElementById("profile");
-const result = document.getElementById("result");
-const elapsedEl = document.getElementById("elapsed");
-const barEl = document.getElementById("bar");
+const result      = document.getElementById("result");
+const elapsedEl   = document.getElementById("elapsed");
+const barEl       = document.getElementById("bar");
+const checklist   = document.querySelector(".checklist");
+const stepItems   = document.querySelectorAll(".steps-list li");
 
-const DATE_RE = /\b(19|20)\d{2}[- /.](0[1-9]|1[0-2])[- /.](0[1-9]|[12]\d|3[01])\b/;
-const UK_POST_RE = /\b([A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2})\b/i;
+// ─── Session state ─────────────────────────────────────────────────────────────
+let sessionId          = sessionStorage.getItem("kycSessionId") || null;
+let chatHistory        = [];
+let identityExtraction = null;
+let addressExtraction  = null;
+let uploadedDocuments  = [];
+let validationErrors   = [];
+let validationWarnings = [];
+let currentStep        = "welcome"; // welcome | upload | review | confirm
 
-
-function stripForbidden(s){
-  if(!s) return "";
-  // remove lines that start with irrelevant labels
-  return s.replace(/^(Nationality|Issue Date|Expiry Date|Authority|Passport|ID Number).*$/gi, "").trim();
-}
-
-const LABELS = [
-  "Type:", "Country Code:", "Passport No:", "Passport Number:", "Surname:", "Given Names:",
-  "Nationality:", "Date of Birth:", "DOB:", "Place of Birth:", "Date of Issue:", "Date of Expiry:", "Expiry Date:",
-  "Authority:", "Residential Address:", "Address:", "Customer Name:", "Service Address:", "ID Number:", "ID No:"
-];
-
-function say(text, who="agent"){ const d=document.createElement("div"); d.className=`msg ${who}`; d.textContent=text; messages.appendChild(d); messages.scrollTop=messages.scrollHeight; }
-
-// SLA timer
+// ─── SLA timer ─────────────────────────────────────────────────────────────────
 const startedAt = Date.now();
-setInterval(()=>{ const diff=Math.floor((Date.now()-startedAt)/1000); const mm=String(Math.floor(diff/60)).padStart(2,"0"); const ss=String(diff%60).padStart(2,"0"); elapsedEl.textContent=`${mm}:${ss}`; barEl.style.width=Math.min(100,(diff/180)*100)+"%"; },500);
+setInterval(() => {
+  const diff = Math.floor((Date.now() - startedAt) / 1000);
+  const mm = String(Math.floor(diff / 60)).padStart(2, "0");
+  const ss = String(diff % 60).padStart(2, "0");
+  elapsedEl.textContent = `${mm}:${ss}`;
+  barEl.style.width = Math.min(100, (diff / 180) * 100) + "%";
+}, 500);
 
-// Welcome
-say("👋 Welcome to XXX! I’ll guide you through opening your account and verifying your identity. Just upload your photo ID and a recent proof of address. I’ll pre‑fill your details for you to confirm. Ready to begin?");
+// ─── Utility: chat message ─────────────────────────────────────────────────────
+function say(text, who = "agent") {
+  const d = document.createElement("div");
+  d.className = `msg ${who}`;
+  d.textContent = text;
+  messages.appendChild(d);
+  messages.scrollTop = messages.scrollHeight;
+  const es = document.getElementById("emptyState");
+  if (es) es.remove();
+}
 
-// Chat send
-sendBtn.addEventListener("click", ()=>{ const t=input.value.trim(); if(!t) return; say(t,"user"); input.value=""; });
+// ─── Utility: processing indicator in chat ────────────────────────────────────
+function showProcessing(label) {
+  const d = document.createElement("div");
+  d.className = "msg agent processing";
+  d.id = "processingMsg";
+  d.innerHTML = '<span class="spinner" aria-hidden="true"></span> ' + label;
+  messages.appendChild(d);
+  messages.scrollTop = messages.scrollHeight;
+  const es = document.getElementById("emptyState");
+  if (es) es.remove();
+  return d;
+}
+function removeProcessing() {
+  const el = document.getElementById("processingMsg");
+  if (el) el.remove();
+}
 
-// Upload
-fileInput.addEventListener("change", async (e)=>{
+// ─── Utility: document checklist ─────────────────────────────────────────────
+function updateChecklist() {
+  if (!checklist) return;
+  const items = [
+    { key: "identity", label: "Photo ID / Passport",  sub: "Passport, national ID or driving licence" },
+    { key: "address",  label: "Proof of address",      sub: "Utility bill, bank statement (< 90 days)" },
+  ];
+  const ul = document.createElement("ul");
+  ul.className = "check-items";
+  items.forEach(function(item) {
+    const done = uploadedDocuments.includes(item.key);
+    const li = document.createElement("li");
+    li.innerHTML = '<div class="cm">' + (done ? "✅" : "⬜") + " " + item.label + '</div><div class="cs">' + item.sub + "</div>";
+    ul.appendChild(li);
+  });
+  checklist.innerHTML = '<div class="check-title">Document checklist</div>';
+  checklist.appendChild(ul);
+}
+
+// ─── Utility: step indicator ──────────────────────────────────────────────────
+const STEPS = ["welcome", "upload", "review", "confirm"];
+function setStep(step) {
+  currentStep = step;
+  const idx = STEPS.indexOf(step);
+  stepItems.forEach(function(li, i) {
+    li.classList.toggle("active", i === idx);
+    li.classList.toggle("done",   i < idx);
+  });
+}
+
+// ─── Utility: fill review form from extraction data ───────────────────────────
+function fillForm(r) {
+  const addr = r.address || "";
+  const addrParts = addr.split(",");
+  const map = {
+    firstName: r.firstName,
+    lastName:  r.lastName,
+    dob:       r.dateOfBirth,
+    street:    r.street || (addrParts[0] || "").trim(),
+    city:      r.city   || (addrParts[1] || "").trim(),
+    state:     r.state  || (addrParts[2] || "").trim(),
+    postal:    r.postal,
+  };
+  Object.keys(map).forEach(function(k) {
+    const v = map[k];
+    if (v && profileForm.elements[k]) profileForm.elements[k].value = v;
+  });
+  if (r.documentNumber) document.getElementById("docNumber").textContent = r.documentNumber;
+  if (r.dateOfExpiry)   document.getElementById("docExpiry").textContent = r.dateOfExpiry;
+  if (r.nationality)    document.getElementById("nationality").textContent = r.nationality;
+}
+
+// ─── Utility: validation banner in details panel ──────────────────────────────
+function showValidationBanner(errors, warnings) {
+  const existing = document.querySelectorAll(".validation-banner");
+  existing.forEach(function(el) { el.remove(); });
+  if (errors.length === 0 && warnings.length === 0) return;
+  const banner = document.createElement("div");
+  const isError = errors.length > 0;
+  banner.className = "validation-banner " + (isError ? "banner-error" : "banner-warning");
+  const items = isError ? errors : warnings;
+  banner.innerHTML = "<strong>" + (isError ? "⚠ Issues found" : "ℹ Notices") + "</strong><ul>" +
+    items.map(function(m) { return "<li>" + m + "</li>"; }).join("") + "</ul>";
+  profileForm.parentElement.insertBefore(banner, profileForm);
+}
+
+// ─── Session init ──────────────────────────────────────────────────────────────
+async function initSession() {
+  if (sessionId) return;
+  try {
+    const resp = await fetch("/api/kyc/session", { method: "POST" });
+    if (!resp.ok) throw new Error("session init failed");
+    const data = await resp.json();
+    sessionId = data.sessionId;
+    sessionStorage.setItem("kycSessionId", sessionId);
+  } catch (e) {
+    sessionId = crypto.randomUUID();
+  }
+}
+
+// ─── Chat send (backend-powered) ──────────────────────────────────────────────
+async function sendMessage(text) {
+  if (!text.trim()) return;
+  say(text, "user");
+  chatHistory.push({ role: "user", content: text });
+  showProcessing("Thinking…");
+  try {
+    const resp = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId: sessionId,
+        message: text,
+        history: chatHistory.slice(-20),
+        context: {
+          step: currentStep,
+          uploadedDocuments: uploadedDocuments,
+          validationErrors: validationErrors,
+          validationWarnings: validationWarnings,
+        },
+      }),
+    });
+    removeProcessing();
+    if (!resp.ok) {
+      say("⚠️ Chat service temporarily unavailable. Please try again.");
+      return;
+    }
+    const data = await resp.json();
+    const reply = data.reply || "I'm sorry, I couldn't generate a response.";
+    say(reply);
+    chatHistory.push({ role: "assistant", content: reply });
+  } catch (e) {
+    removeProcessing();
+    say("⚠️ Network error. Please check your connection and try again.");
+  }
+}
+
+sendBtn.addEventListener("click", function() {
+  const t = input.value.trim();
+  if (!t) return;
+  input.value = "";
+  sendMessage(t);
+});
+input.addEventListener("keydown", function(e) {
+  if ((e.key === "Enter" || e.keyCode === 13) && !e.shiftKey) {
+    e.preventDefault();
+    sendBtn.click();
+  }
+});
+
+// ─── Image preparation: PDF→canvas + compress ─────────────────────────────────
+async function prepareImageForUpload(file) {
+  let bitmap;
+
+  if (file.type === "application/pdf") {
+    const pdfjsLib = await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.min.mjs");
+    if (pdfjsLib && pdfjsLib.GlobalWorkerOptions) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.mjs";
+    }
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    const page = await pdf.getPage(1);
+    const vp = page.getViewport({ scale: 2.0 });
+    const offscreen = document.createElement("canvas");
+    offscreen.width  = vp.width;
+    offscreen.height = vp.height;
+    await page.render({ canvasContext: offscreen.getContext("2d"), viewport: vp }).promise;
+    bitmap = await createImageBitmap(offscreen);
+  } else {
+    bitmap = await createImageBitmap(file);
+  }
+
+  const MAX_DIM = 1600;
+  let w = bitmap.width;
+  let h = bitmap.height;
+  if (w > MAX_DIM || h > MAX_DIM) {
+    const ratio = Math.min(MAX_DIM / w, MAX_DIM / h);
+    w = Math.round(w * ratio);
+    h = Math.round(h * ratio);
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width  = w;
+  canvas.height = h;
+  canvas.getContext("2d").drawImage(bitmap, 0, 0, w, h);
+  if (bitmap.close) bitmap.close();
+
+  const base64 = canvas.toDataURL("image/jpeg", 0.85).split(",")[1];
+  return { base64: base64, mimeType: "image/jpeg" };
+}
+
+// ─── Guess document category from filename ────────────────────────────────────
+function guessCategory(fileName) {
+  const lower = (fileName || "").toLowerCase();
+  if (/selfie|liveness/.test(lower))                            return "selfie";
+  if (/bill|address|utility|council|bank|statement/.test(lower)) return "address";
+  return "identity";
+}
+
+// ─── File upload → backend extraction ────────────────────────────────────────
+fileInput.addEventListener("change", async function(e) {
   const f = e.target.files && e.target.files[0];
-  if(!f) return;
-  say(`Processing ${f.name}…`);
-  try{
-    let text="";
-    if(f.type==="application/pdf") text = await pdfText(f);
-    else text = await ocrImage(f);
-    const rec = extract(text);
-    fill(rec);
-    say("I auto‑filled what I could. Review the right panel and adjust if needed, then press **Continue**.");
-  }catch(err){
-    say("⚠️ Sorry, I couldn't read that file. Try a PDF, JPG or PNG under 10MB.");
-    console.error(err);
+  if (!f) return;
+
+  await initSession();
+  setStep("upload");
+
+  const allowed = ["image/jpeg","image/png","image/webp","image/gif","application/pdf"];
+  if (!allowed.includes(f.type)) {
+    say("⚠️ Unsupported file type. Please upload a JPEG, PNG, WebP, or PDF document.");
+    return;
+  }
+
+  const documentCategory = guessCategory(f.name);
+  showProcessing("Processing " + f.name + "…");
+
+  try {
+    const prepared = await prepareImageForUpload(f);
+    const base64 = prepared.base64;
+    const mimeType = prepared.mimeType;
+
+    const approxBytes = Math.ceil((base64.length * 3) / 4);
+    if (approxBytes > 4 * 1024 * 1024) {
+      removeProcessing();
+      say("⚠️ The document image is too large. Please use a smaller or lower-resolution file.");
+      return;
+    }
+
+    const resp = await fetch("/api/kyc/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId: sessionId,
+        documentCategory: documentCategory,
+        fileName: f.name,
+        mimeType: mimeType,
+        data: base64,
+      }),
+    });
+
+    removeProcessing();
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(function() { return {}; });
+      say("⚠️ " + (err.error || "Upload failed. Please try again."));
+      return;
+    }
+
+    const uploadResult = await resp.json();
+    const extraction = uploadResult.extraction;
+    const validation = uploadResult.validation;
+
+    if (!uploadedDocuments.includes(documentCategory)) uploadedDocuments.push(documentCategory);
+    if (documentCategory === "identity") identityExtraction = extraction;
+    if (documentCategory === "address")  addressExtraction  = extraction;
+
+    validationErrors   = validation.errors   || [];
+    validationWarnings = validation.warnings || [];
+
+    updateChecklist();
+    showValidationBanner(validationErrors, validationWarnings);
+
+    if (documentCategory === "identity" || documentCategory === "address") {
+      fillForm(extraction);
+      setStep("review");
+    }
+
+    if (validation.passed) {
+      say("✅ " + f.name + " processed successfully. Please review and confirm the pre-filled details on the right.");
+    } else {
+      say("⚠️ Document processed with issues:\n" + validationErrors.join("\n") + "\nPlease re-upload a valid document or correct the details manually.");
+    }
+  } catch (err) {
+    removeProcessing();
+    console.error("Upload error:", err);
+    say("⚠️ An error occurred while processing your document. Please try again.");
   }
 });
 
-// PDF + OCR
-async function pdfText(file){
-  const pdfjsLib = await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.min.mjs");
-  if (pdfjsLib?.GlobalWorkerOptions) {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.mjs";
-  }
-  const buf = await file.arrayBuffer();
-  const loadingTask = pdfjsLib.getDocument({ data: buf });
-  const pdf = await loadingTask.promise;
-  let full = "";
-  for (let p=1;p<=pdf.numPages;p++){ const page=await pdf.getPage(p); const c=await page.getTextContent(); full += c.items.map(i=>i.str).join(" ") + "\\n"; }
-  return full;
-}
-async function ocrImage(file){ const { createWorker } = Tesseract; const w = await createWorker("eng"); const { data } = await w.recognize(file); await w.terminate(); return data.text || ""; }
-
-// Helpers
-function firstLineAfter(text, label){
-  const i = text.search(new RegExp(label.replace(/[.*+?^${}()|[\\]\\\\]/g,"\\\\$&"), "i"));
-  if (i === -1) return "";
-  const rest = text.slice(i + label.length);
-  // stop at newline OR next label, whichever comes first
-  let stop = rest.indexOf("\\n");
-  if (stop === -1) stop = rest.length;
-  const line = rest.slice(0, stop);
-  return line.trim();
-}
-// Stop at next label strictly
-function valueAfterScoped(text, label){
-  const idx = text.search(new RegExp(label.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&"), "i"));
-  if (idx === -1) return "";
-  const start = idx + label.length;
-  const slice = text.slice(start);
-  let cut = slice.length;
-  for (const L of LABELS) {
-    const j = slice.search(new RegExp("\\\\b" + L.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&"), "i"));
-    if (j !== -1 && j < cut) cut = j;
-  }
-  return slice.slice(0, cut).trim();
-}
-// Cleaners
-const cleanName = s => (s||"").replace(/[^A-Za-z' -]/g," ").trim().split(/\s+/)[0].toUpperCase();
-const cleanAlpha = s => (s||"").replace(/[^A-Za-z -]/g," ").trim();
-const cleanDoc = s => (s||"").replace(/[^A-Za-z0-9]/g,"").toUpperCase().slice(0,32);
-
-// Extract
-function extract(t){
-  const rec = {};
-  // Names
-  const given = firstLineAfter(t,"Given Names:") || firstLineAfter(t,"Name:");
-  const surname = firstLineAfter(t,"Surname:");
-  rec.firstName = cleanName(given);
-  rec.lastName  = cleanName(surname);
-  // DOB / Expiry (strict)
-  const dobRaw = valueAfterScoped(t,"Date of Birth:") || valueAfterScoped(t,"DOB:");
-  rec.dob = (dobRaw.match(DATE_RE)||[])[0] || "";
-  const expRaw = valueAfterScoped(t,"Date of Expiry:") || valueAfterScoped(t,"Expiry Date:");
-  rec.expiry = (expRaw.match(DATE_RE)||[])[0] || "";
-  // Document number
-  const docRaw = valueAfterScoped(t,"Passport No:") || valueAfterScoped(t,"Passport Number:") ||
-                 valueAfterScoped(t,"ID Number:")   || valueAfterScoped(t,"ID No:");
-  rec.docNumber = cleanDoc(docRaw);
-  // Nationality (only word right after label)
-  const natLine = firstLineAfter(t,"Nationality:");
-  rec.nationality = cleanAlpha(natLine).split(" ")[0] || "";
-  // Address
-  const addr = valueAfterScoped(t,"Service Address:") || valueAfterScoped(t,"Residential Address:") || valueAfterScoped(t,"Address:");
-  const pc = (addr.match(UK_POST_RE)||[])[1] || "";
-  const parts = addr.replace(UK_POST_RE,"").split(",").map(s=>s.trim()).filter(Boolean);
-  rec.street = stripForbidden(parts[0]||""); rec.city = stripForbidden(parts[1]||""); rec.state = stripForbidden(parts[2]||""); rec.postal = pc.toUpperCase();
-  return rec;
-}
-
-function fill(r){
-  const map = { firstName:r.firstName, lastName:r.lastName, dob:r.dob, street:r.street, city:r.city, state:r.state, postal:r.postal };
-  Object.entries(map).forEach(([k,v])=>{ if(v && profileForm.elements[k]) profileForm.elements[k].value = v; });
-  if(r.docNumber) document.getElementById("docNumber").textContent = r.docNumber;
-  if(r.expiry) document.getElementById("docExpiry").textContent = r.expiry;
-  if(r.nationality) document.getElementById("nationality").textContent = r.nationality;
-}
-
-// CTA
-document.getElementById("submit").addEventListener("click",(e)=>{
+// ─── Submit ────────────────────────────────────────────────────────────────────
+document.getElementById("submit").addEventListener("click", async function(e) {
   e.preventDefault();
-  result.textContent = "Thanks! Your details have been submitted for verification. You’ll receive updates by email.";
+  await initSession();
+  setStep("confirm");
+
+  const profileData = {};
+  ["firstName","lastName","email","phone","country","dob","street","city","state","postal"].forEach(function(name) {
+    const el = profileForm.elements[name];
+    if (el) profileData[name] = el.value;
+  });
+
+  showProcessing("Submitting your application…");
+
+  try {
+    const resp = await fetch("/api/kyc/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId: sessionId,
+        profileData: profileData,
+        identityExtraction: identityExtraction,
+        addressExtraction: addressExtraction,
+      }),
+    });
+
+    removeProcessing();
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(function() { return {}; });
+      say("⚠️ Submission failed: " + (err.error || "please try again."));
+      return;
+    }
+
+    const subResult = await resp.json();
+    const recon = subResult.reconciliation || {};
+
+    if (subResult.status === "approved") {
+      result.textContent = "✅ Application submitted and pre-approved. You'll receive confirmation by email shortly.";
+      say("Your identity has been verified and your application submitted. Welcome aboard!");
+    } else {
+      result.textContent = "📋 Application submitted — pending manual review. Our team will contact you within 1–2 business days.";
+      say("Your application has been submitted for review. Our compliance team will be in touch within 1–2 business days.");
+    }
+
+    if (recon.suspiciousSignals && recon.suspiciousSignals.length > 0) {
+      say("Note: " + recon.suspiciousSignals.join(". "));
+    }
+  } catch (err) {
+    removeProcessing();
+    console.error("Submit error:", err);
+    say("⚠️ Submission failed due to a network error. Please try again.");
+  }
 });
+
+// ─── Init ──────────────────────────────────────────────────────────────────────
+(async function() {
+  updateChecklist();
+  await initSession();
+  say("👋 Welcome to DEMO! I'll guide you through verifying your identity. Please upload your photo ID and a recent proof of address — I'll extract your details automatically. Ready to begin?");
+})();
