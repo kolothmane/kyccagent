@@ -199,3 +199,33 @@ body{
   overflow:hidden !important; clip:rect(0 0 0 0) !important;
   white-space:nowrap !important; border:0 !important;
 }
+
+/* Processing spinner in chat messages */
+.msg.processing{
+  opacity:.85;
+  display:flex; align-items:center; gap:10px;
+}
+.spinner{
+  display:inline-block; width:16px; height:16px; border-radius:50%;
+  border:2px solid var(--stroke); border-top-color: var(--primary);
+  animation: spin .7s linear infinite; flex-shrink:0;
+}
+@keyframes spin{ to{ transform:rotate(360deg) } }
+
+/* Step done state */
+.steps-list > li.done{
+  opacity:.55;
+}
+
+/* Validation banners in the details panel */
+.validation-banner{
+  grid-column:1 / -1; border-radius:12px; padding:12px 14px; margin-bottom:8px; font-size:.93rem;
+}
+.validation-banner ul{ margin:6px 0 0; padding-left:18px }
+.validation-banner li{ margin-bottom:3px }
+.banner-error{
+  background:#fff5f5; border:1px solid rgba(239,68,68,.30); color:#7f1d1d;
+}
+.banner-warning{
+  background:#fffbeb; border:1px solid rgba(245,158,11,.30); color:#78350f;
+}
