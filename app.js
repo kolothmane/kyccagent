@@ -259,6 +259,13 @@ function guessCategory(fileName) {
   return "identity";
 }
 
+// ─── Map a document category to a human-readable label ───────────────────────
+function getCategoryLabel(category) {
+  if (category === "identity") return "identity document";
+  if (category === "address")  return "proof of address";
+  return "document";
+}
+
 // ─── File upload → backend check then extraction ──────────────────────────────
 fileInput.addEventListener("change", async function(e) {
   const f = e.target.files && e.target.files[0];
@@ -320,9 +327,10 @@ fileInput.addEventListener("change", async function(e) {
 
     // Document passed the validity check — proceed to extraction
     const detectedCategory = checkResult.detectedCategory || documentCategory;
-    const categoryLabel = detectedCategory === "identity" ? "identity document"
-                        : detectedCategory === "address"  ? "proof of address"
-                        : "document";
+    if (!checkResult.detectedCategory) {
+      console.warn("[upload] No detectedCategory from check; falling back to filename guess:", documentCategory);
+    }
+    const categoryLabel = getCategoryLabel(detectedCategory);
 
     if (checkResult.warnings && checkResult.warnings.length) {
       say("✅ " + f.name + " looks valid (" + categoryLabel + "). Note: " + checkResult.warnings.join("; ") + ". Extracting details…");
