@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>iPharma | Verification d'identite</title>
+  <title>Verification d'identite</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -15,12 +15,12 @@
 <body>
   <header class="site-header">
     <div class="container header-inner">
-      <a href="#" class="brand" aria-label="Accueil iPharma">
-        <span class="brand-name">iPharma</span>
+      <a href="#" class="brand" aria-label="Accueil">
+        <span class="brand-name" data-brand>Marque</span>
       </a>
 
       <nav class="top-nav" aria-label="Navigation principale">
-        <a href="#intro" class="nav-pill">Notre histoire</a>
+        <a href="#kyc-process" class="nav-pill">Processus KYC</a>
         <a href="#manual-kyc" class="nav-pill">Verification</a>
         <a href="#services" class="nav-pill">Nos services</a>
         <a href="#manual-kyc" class="nav-pill">Mon dossier</a>
@@ -41,7 +41,7 @@
     <section class="hero-shell" id="intro">
       <div class="hero-banner">
         <div class="container hero-inner">
-          <span class="hero-kicker">iPharma</span>
+          <span class="hero-kicker" data-brand>Marque</span>
           <h1>Une verification d'identite simple, guidee et securisee.</h1>
           <p class="hero-copy">
             L'utilisateur peut completer seul son parcours KYC sur la page, ou
@@ -56,7 +56,72 @@
             <button class="hero-secondary" type="button" data-open-chat>
               Automatiser avec l'assistant
             </button>
+            <a class="hero-secondary" href="#kyc-process">
+              Voir le processus KYC
+            </a>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="process-section" id="kyc-process">
+      <div class="container">
+        <div class="section-heading">
+          <span class="section-kicker">Vue d'ensemble</span>
+          <h2>Le processus KYC en 5 etapes</h2>
+          <p>Une representation claire du parcours avec les points de controle cles.</p>
+        </div>
+
+        <div class="process-flow" aria-label="Processus KYC visuel">
+          <div class="process-step" data-step="1">
+            <div class="process-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="process-label">
+              Demarrer le dossier
+              <span>Creation de session et consentement</span>
+            </div>
+          </div>
+          <div class="process-step" data-step="2">
+            <div class="process-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7zm3-4h12v4H6V3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="process-label">
+              Televerser les documents
+              <span>Piece d'identite et justificatif de domicile</span>
+            </div>
+          </div>
+          <div class="process-step" data-step="3">
+            <div class="process-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3H6a2 2 0 00-2 2v14l4-4h7a2 2 0 002-2V5a2 2 0 00-2-2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="process-label">
+              Extraction & controles
+              <span>OCR, validation et verification de qualite</span>
+            </div>
+          </div>
+          <div class="process-step" data-step="4">
+            <div class="process-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v8m-4-4h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="process-label">
+              Reconciliation
+              <span>Concordance entre documents et profil</span>
+            </div>
+          </div>
+          <div class="process-step" data-step="5">
+            <div class="process-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="process-label">
+              Decision
+              <span>Approbation immediate ou revue manuelle</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="process-actions">
+          <button id="startDemo" class="hero-secondary" type="button">Lancer la demo</button>
         </div>
       </div>
     </section>
@@ -280,7 +345,7 @@
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <span class="footer-brand">iPharma</span>
+      <span class="footer-brand" data-brand>Marque</span>
       <p>
         Interface KYC inspiree de Bot-Baybridge avec assistant flottant et
         parcours manuel conserve.
@@ -407,12 +472,25 @@
               </svg>
             </button>
           </div>
-          <p class="composer-note">Propulse par iPharma Identity Verification</p>
+          <p class="composer-note" data-brand-note>Propulse par Identity Verification</p>
         </div>
       </div>
     </aside>
   </div>
 
+  <script src="lib/branding.js"></script>
   <script src="app.js"></script>
+  <script>
+    (function applyBranding() {
+      var b = (window.BRANDING && window.BRANDING.name) || "VeriNova";
+      var s = (window.BRANDING && window.BRANDING.serviceLine) || "Identity Verification";
+      document.title = b + " | Verification d'identite";
+      document.querySelectorAll('[data-brand]').forEach(function(el){ el.textContent = b; });
+      var header = document.querySelector('.brand');
+      if (header) header.setAttribute('aria-label', 'Accueil ' + b);
+      var note = document.querySelector('[data-brand-note]');
+      if (note) note.textContent = 'Propulse par ' + b + ' ' + s;
+    })();
+  </script>
 </body>
 </html>

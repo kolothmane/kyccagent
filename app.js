@@ -1,10 +1,11 @@
 /**
- * iPharma KYC frontend controller
+ * KYC frontend controller (brandable)
  *
  * Keeps the manual KYC flow fully functional on the page while exposing the
  * same assistant through a floating widget.
  */
-console.log("Build: iPharma KYC - Bot-Baybridge inspired UI");
+const BRAND = (window.BRANDING && window.BRANDING.name) || "VeriNova";
+console.log("Build: " + BRAND + " KYC - Bot-Baybridge inspired UI");
 
 const messages = document.getElementById("messages");
 const input = document.getElementById("input");
@@ -264,7 +265,9 @@ function ensureChatWelcome() {
   if (messages && messages.querySelector(".msg")) return;
 
   const welcome =
-    "Bonjour, je suis votre assistant de verification d'identite iPharma. Je peux vous guider sur les documents acceptes, l'envoi depuis le chat et le statut de votre dossier.";
+    "Bonjour, je suis votre assistant de verification d'identite " +
+    BRAND +
+    ". Je peux vous guider sur les documents acceptes, l'envoi depuis le chat et le statut de votre dossier.";
 
   say(welcome, "agent", { mirrorActivity: false, tone: "info" });
   chatHistory.push({ role: "assistant", content: welcome });
@@ -610,12 +613,12 @@ function buildLocalChatFallback(message) {
   if (wantsGreeting(message)) {
     if (french) {
       return (
-        "Bonjour, je peux vous aider avec la verification d'identite iPharma. " +
+        "Bonjour, je peux vous aider avec la verification d'identite " + BRAND + ". " +
         nextStepHint
       );
     }
     return (
-      "Hello, I can help you with the iPharma identity verification. " +
+      "Hello, I can help you with the " + BRAND + " identity verification. " +
       nextStepHint
     );
   }
@@ -1196,3 +1199,51 @@ if (submitBtn) {
   updateChatShell();
   await initSession();
 })();
+
+// Demo animation for the visual KYC process section
+function startDemoProcess() {
+  const steps = Array.from(document.querySelectorAll('.process-step'));
+  if (!steps.length) return;
+
+  // reset state
+  steps.forEach(function(s){ s.classList.remove('is-active', 'is-done'); });
+  setStep('welcome');
+
+  const map = {
+    0: 'welcome',
+    1: 'upload',
+    2: 'review',
+    3: 'review',
+    4: 'confirm'
+  };
+
+  let i = 0;
+  const tick = function() {
+    steps.forEach(function(s, idx){
+      s.classList.toggle('is-active', idx === i);
+      s.classList.toggle('is-done', idx < i);
+    });
+    const stepKey = map[i] || 'confirm';
+    setStep(stepKey);
+    i += 1;
+    if (i < steps.length) {
+      window.setTimeout(tick, 1100);
+    } else {
+      // finish state
+      window.setTimeout(function(){
+        steps.forEach(function(s){ s.classList.remove('is-active'); s.classList.add('is-done'); });
+      }, 800);
+    }
+  };
+
+  tick();
+}
+
+const demoBtn = document.getElementById('startDemo');
+if (demoBtn) {
+  demoBtn.addEventListener('click', function(){
+    const sec = document.getElementById('kyc-process');
+    if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.setTimeout(startDemoProcess, 400);
+  });
+}
