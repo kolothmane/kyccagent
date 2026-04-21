@@ -281,7 +281,7 @@ input {
 
 .manual-grid {
   display: grid;
-  grid-template-columns: 380px minmax(0, 1fr);
+  grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
   gap: 24px;
   align-items: start;
 }
@@ -289,6 +289,7 @@ input {
 .manual-column {
   display: grid;
   gap: 18px;
+  min-width: 0;
 }
 
 .panel,
@@ -298,12 +299,13 @@ input {
   border-radius: var(--radius-xl);
   background: #ffffff;
   box-shadow: var(--shadow-md);
+  min-width: 0;
 }
 
 .panel-heading,
 .details-header {
   display: flex;
-  align-items: start;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 18px;
@@ -311,6 +313,20 @@ input {
 
 .details-panel {
   padding: 28px;
+  min-width: 0;
+}
+
+.details-header > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.details-header h2,
+.manual-column h2,
+.section-heading h2,
+.hero-inner h1 {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .steps-list {
@@ -395,6 +411,7 @@ input[type="file"] {
   background: #ffffff;
   color: var(--text);
   border-color: var(--border-strong);
+  flex-shrink: 0;
 }
 
 .secondary-chat-button:hover {
@@ -561,6 +578,7 @@ input[type="file"] {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
+  min-width: 0;
 }
 
 .form label {
@@ -569,10 +587,12 @@ input[type="file"] {
   font-size: 0.95rem;
   font-weight: 600;
   color: #1f2937;
+  min-width: 0;
 }
 
 .form input {
   width: 100%;
+  min-width: 0;
   height: 48px;
   padding: 0 14px;
   border: 1px solid var(--border-strong);
@@ -615,6 +635,7 @@ input[type="file"] {
   border-radius: var(--radius-lg);
   background: var(--surface-alt);
   border: 1px solid var(--border);
+  min-width: 0;
 }
 
 .docgrid strong {
@@ -625,6 +646,7 @@ input[type="file"] {
 
 .muted {
   color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 .actions {
@@ -1013,6 +1035,7 @@ input[type="file"] {
 
 .composer input {
   flex: 1;
+  min-width: 0;
   height: 44px;
   padding: 0 14px;
   border-radius: 14px;
@@ -1115,6 +1138,10 @@ input[type="file"] {
   .details-header {
     flex-direction: column;
   }
+
+  .secondary-chat-button {
+    width: 100%;
+  }
 }
 
 @media (max-width: 760px) {
@@ -1143,6 +1170,11 @@ input[type="file"] {
   .header-chat-cta,
   .secondary-chat-button {
     width: 100%;
+  }
+
+  .panel,
+  .details-panel {
+    padding: 20px;
   }
 
   .form,
