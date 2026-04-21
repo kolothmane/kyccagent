@@ -1,10 +1,10 @@
 /**
- * BayBridge KYC frontend controller
+ * iPharma KYC frontend controller
  *
  * Keeps the manual KYC flow fully functional on the page while exposing the
  * same assistant through a floating widget.
  */
-console.log("Build: BayBridge KYC - manual plus assistant widget");
+console.log("Build: iPharma KYC - Bot-Baybridge inspired UI");
 
 const messages = document.getElementById("messages");
 const input = document.getElementById("input");
@@ -24,7 +24,11 @@ const chatLauncher = document.getElementById("chatLauncher");
 const chatUnread = document.getElementById("chatUnread");
 const chatShell = document.getElementById("chatShell");
 const chatStatus = document.getElementById("chatStatus");
-const chatUploadBtn = document.getElementById("chatUpload");
+const chatMenuBtn = document.getElementById("chatMenuBtn");
+const chatMenu = document.getElementById("chatMenu");
+const chatOpenManualBtn = document.getElementById("chatOpenManual");
+const chatCloseActionBtn = document.getElementById("chatCloseAction");
+const chatAttachBtn = document.getElementById("chatAttachBtn");
 const chatMinimizeBtn = document.getElementById("chatMinimize");
 const chatCloseBtn = document.getElementById("chatClose");
 const openChatButtons = document.querySelectorAll("[data-open-chat]");
@@ -225,6 +229,7 @@ function updateChatShell() {
     chatShell.hidden = true;
     chatShell.classList.remove("is-minimized");
     chatLauncher.hidden = false;
+    if (chatMenu) chatMenu.hidden = true;
     return;
   }
 
@@ -235,12 +240,21 @@ function updateChatShell() {
   if (chatUnread) chatUnread.hidden = true;
 
   if (chatStatus) {
-    chatStatus.textContent = "Online";
+    chatStatus.textContent = "En ligne";
   }
 
   if (!chatIsMinimized && input) {
     window.setTimeout(() => input.focus(), 120);
   }
+}
+
+function closeChatMenu() {
+  if (chatMenu) chatMenu.hidden = true;
+}
+
+function toggleChatMenu() {
+  if (!chatMenu) return;
+  chatMenu.hidden = !chatMenu.hidden;
 }
 
 function ensureChatWelcome() {
@@ -250,7 +264,7 @@ function ensureChatWelcome() {
   if (messages && messages.querySelector(".msg")) return;
 
   const welcome =
-    "Welcome to BayBridge Assistant. I can guide you through identity verification, accepted documents, application status questions and document uploads from the chat.";
+    "Bonjour, je suis votre assistant de verification d'identite iPharma. Je peux vous guider sur les documents acceptes, l'envoi depuis le chat et le statut de votre dossier.";
 
   say(welcome, "agent", { mirrorActivity: false, tone: "info" });
   chatHistory.push({ role: "assistant", content: welcome });
@@ -259,6 +273,7 @@ function ensureChatWelcome() {
 function openChat() {
   chatIsOpen = true;
   chatIsMinimized = false;
+  closeChatMenu();
   updateChatShell();
   ensureChatWelcome();
 }
@@ -266,6 +281,7 @@ function openChat() {
 function closeChat() {
   chatIsOpen = false;
   chatIsMinimized = false;
+  closeChatMenu();
   updateChatShell();
 }
 
@@ -298,13 +314,13 @@ function updateChecklist() {
   const items = [
     {
       key: "identity",
-      label: "Photo ID / Passport",
-      sub: "Passport, national ID card or driving licence",
+      label: "Piece d'identite",
+      sub: "Passeport, carte nationale d'identite ou permis de conduire",
     },
     {
       key: "address",
-      label: "Proof of address",
-      sub: "Utility bill, bank statement, tax letter or insurance letter",
+      label: "Justificatif de domicile",
+      sub: "Facture, releve bancaire, courrier fiscal ou lettre d'assurance",
     },
   ];
 
@@ -323,7 +339,7 @@ function updateChecklist() {
       '<span class="check-state ' +
       (done ? "done" : "pending") +
       '">' +
-      (done ? "Complete" : "Pending") +
+      (done ? "Complet" : "En attente") +
       "</span>" +
       "</div>" +
       '<div class="check-sub">' +
@@ -333,7 +349,7 @@ function updateChecklist() {
     ul.appendChild(li);
   });
 
-  checklist.innerHTML = '<div class="check-title">Document checklist</div>';
+  checklist.innerHTML = '<div class="check-title">Checklist documentaire</div>';
   checklist.appendChild(ul);
 }
 
@@ -392,7 +408,7 @@ function showValidationBanner(errors, warnings) {
 
   const items = isError ? errors : warnings;
   const strong = document.createElement("strong");
-  strong.textContent = isError ? "Issues found" : "Notices";
+  strong.textContent = isError ? "Points a corriger" : "Informations";
   banner.appendChild(strong);
 
   const ul = document.createElement("ul");
@@ -594,12 +610,12 @@ function buildLocalChatFallback(message) {
   if (wantsGreeting(message)) {
     if (french) {
       return (
-        "Bonjour, je peux vous aider avec la verification d'identite BayBridge. " +
+        "Bonjour, je peux vous aider avec la verification d'identite iPharma. " +
         nextStepHint
       );
     }
     return (
-      "Hello, I can help you with the BayBridge identity verification. " +
+      "Hello, I can help you with the iPharma identity verification. " +
       nextStepHint
     );
   }
@@ -702,7 +718,7 @@ async function sendMessage(text) {
 
   say(trimmedText, "user", { mirrorActivity: false });
   chatHistory.push({ role: "user", content: trimmedText });
-  showProcessing("BayBridge Assistant is typing", "typing");
+  showProcessing("L'assistant redige sa reponse", "typing");
 
   const fallbackReply = buildLocalChatFallback(trimmedText);
   const controller = new AbortController();
@@ -765,8 +781,8 @@ function guessCategory(fileName) {
 }
 
 function getCategoryLabel(category) {
-  if (category === "identity") return "identity document";
-  if (category === "address") return "proof of address";
+  if (category === "identity") return "piece d'identite";
+  if (category === "address") return "justificatif de domicile";
   return "document";
 }
 
@@ -827,12 +843,41 @@ openChatButtons.forEach(function(button) {
   button.addEventListener("click", openChat);
 });
 
-if (chatUploadBtn && fileInput) {
-  chatUploadBtn.addEventListener("click", function() {
+if (chatMenuBtn) {
+  chatMenuBtn.addEventListener("click", function(event) {
+    event.stopPropagation();
+    toggleChatMenu();
+  });
+}
+
+if (chatOpenManualBtn) {
+  chatOpenManualBtn.addEventListener("click", function() {
+    closeChatMenu();
+    const section = document.getElementById("manual-kyc");
+    if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+
+if (chatCloseActionBtn) {
+  chatCloseActionBtn.addEventListener("click", function() {
+    closeChatMenu();
+    closeChat();
+  });
+}
+
+if (chatAttachBtn && fileInput) {
+  chatAttachBtn.addEventListener("click", function() {
     openChat();
     fileInput.click();
   });
 }
+
+window.addEventListener("click", function(event) {
+  if (!chatMenu || chatMenu.hidden) return;
+  if (chatMenu.contains(event.target)) return;
+  if (chatMenuBtn && chatMenuBtn.contains(event.target)) return;
+  closeChatMenu();
+});
 
 if (chatMinimizeBtn) {
   chatMinimizeBtn.addEventListener("click", toggleChatMinimize);
@@ -883,7 +928,7 @@ if (fileInput) {
 
     if (!allowed.includes(f.type)) {
       say(
-        "Unsupported file type. Please upload a JPEG, PNG, WebP or PDF document.",
+        "Format non pris en charge. Merci d'envoyer un document JPEG, PNG, WebP ou PDF.",
         "agent",
         { mirrorActivity: true, tone: "error" },
       );
@@ -891,7 +936,7 @@ if (fileInput) {
     }
 
     const documentCategory = guessCategory(f.name);
-    showProcessing("Checking " + f.name + "...");
+    showProcessing("Verification de " + f.name + "...");
 
     try {
       const prepared = await prepareImageForUpload(f);
@@ -902,7 +947,7 @@ if (fileInput) {
       if (approxBytes > 4 * 1024 * 1024) {
         removeProcessing();
         say(
-          "The document image is too large. Please use a smaller or lower-resolution file.",
+          "Le document est trop volumineux. Merci d'utiliser un fichier plus leger ou une image moins lourde.",
           "agent",
           { mirrorActivity: true, tone: "error" },
         );
@@ -927,7 +972,7 @@ if (fileInput) {
           return {};
         });
         say(
-          err.error || "Document check failed. Please try again.",
+          err.error || "La verification du document a echoue. Merci de reessayer.",
           "agent",
           { mirrorActivity: true, tone: "error" },
         );
@@ -943,9 +988,9 @@ if (fileInput) {
             : "The document could not be accepted.";
 
         say(
-          "Document rejected:\n" +
+          "Document refuse :\n" +
             issueList +
-            "\nUpload a valid, clear document and try again.",
+            "\nMerci d'envoyer un document clair et conforme.",
           "agent",
           { mirrorActivity: true, tone: "error" },
         );
@@ -957,25 +1002,25 @@ if (fileInput) {
 
       if (checkResult.warnings && checkResult.warnings.length) {
         say(
-          "Document accepted as a " +
+          "Document accepte comme " +
             categoryLabel +
-            ". Notes: " +
+            ". Notes : " +
             checkResult.warnings.join("; ") +
-            ". Extracting details.",
+            ". Extraction des informations en cours.",
           "agent",
           { mirrorActivity: true, tone: "warning" },
         );
       } else {
         say(
-          "Document accepted as a " +
+          "Document accepte comme " +
             categoryLabel +
-            ". Extracting details.",
+            ". Extraction des informations en cours.",
           "agent",
           { mirrorActivity: true, tone: "success" },
         );
       }
 
-      showProcessing("Extracting details from " + f.name + "...");
+      showProcessing("Extraction des informations depuis " + f.name + "...");
 
       const resp = await fetch("/api/kyc/upload", {
         method: "POST",
@@ -996,7 +1041,7 @@ if (fileInput) {
         const err = await resp.json().catch(function() {
           return {};
         });
-        say(err.error || "Upload failed. Please try again.", "agent", {
+        say(err.error || "Le televersement a echoue. Merci de reessayer.", "agent", {
           mirrorActivity: true,
           tone: "error",
         });
@@ -1030,15 +1075,15 @@ if (fileInput) {
 
       if (validation.passed) {
         say(
-          "Details extracted successfully. The applicant form has been filled automatically. Review the pre-filled details and submit when ready.",
+          "Informations extraites avec succes. Le formulaire a ete rempli automatiquement. Verifiez les champs puis soumettez le dossier quand vous etes pret.",
           "agent",
           { mirrorActivity: true, tone: "success" },
         );
       } else {
         say(
-          "Document processed with issues:\n" +
+          "Le document a ete traite avec des points de vigilance :\n" +
             validationErrors.join("\n") +
-            "\nPlease re-upload a valid document or correct the details manually.",
+            "\nMerci de renvoyer un document valide ou de corriger manuellement les informations.",
           "agent",
           { mirrorActivity: true, tone: "warning" },
         );
@@ -1047,7 +1092,7 @@ if (fileInput) {
       removeProcessing();
       console.error("Upload error:", err);
       say(
-        "An error occurred while processing your document. Please try again.",
+        "Une erreur est survenue pendant le traitement du document. Merci de reessayer.",
         "agent",
         { mirrorActivity: true, tone: "error" },
       );
@@ -1079,7 +1124,7 @@ if (submitBtn) {
       if (el) profileData[name] = el.value;
     });
 
-    showProcessing("Submitting your application...");
+    showProcessing("Soumission du dossier en cours...");
 
     try {
       const resp = await fetch("/api/kyc/submit", {
@@ -1099,7 +1144,7 @@ if (submitBtn) {
         const err = await resp.json().catch(function() {
           return {};
         });
-        say("Submission failed: " + (err.error || "please try again."), "agent", {
+        say("La soumission a echoue : " + (err.error || "merci de reessayer."), "agent", {
           mirrorActivity: true,
           tone: "error",
         });
@@ -1111,24 +1156,24 @@ if (submitBtn) {
 
       if (subResult.status === "approved") {
         result.textContent =
-          "Application submitted and pre-approved. You will receive confirmation by email shortly.";
+          "Dossier soumis et pre-approuve. Une confirmation vous sera envoyee par email.";
         say(
-          "Your identity has been verified and your application has been submitted.",
+          "Votre identite a ete verifiee et votre dossier a bien ete soumis.",
           "agent",
           { mirrorActivity: true, tone: "success" },
         );
       } else {
         result.textContent =
-          "Application submitted and pending manual review. Our team will contact you within 1 to 2 business days.";
+          "Dossier soumis et en attente de revue manuelle. Notre equipe reviendra vers vous sous 1 a 2 jours ouvrables.";
         say(
-          "Your application has been submitted for review. Our compliance team will be in touch within 1 to 2 business days.",
+          "Votre dossier a ete transmis pour revue. Notre equipe conformite vous contactera sous 1 a 2 jours ouvrables.",
           "agent",
           { mirrorActivity: true, tone: "warning" },
         );
       }
 
       if (recon.suspiciousSignals && recon.suspiciousSignals.length > 0) {
-        say("Review notes:\n" + recon.suspiciousSignals.join("\n"), "agent", {
+        say("Notes de revue :\n" + recon.suspiciousSignals.join("\n"), "agent", {
           mirrorActivity: true,
           tone: "warning",
         });
@@ -1137,7 +1182,7 @@ if (submitBtn) {
       removeProcessing();
       console.error("Submit error:", err);
       say(
-        "Submission failed due to a network error. Please try again.",
+        "La soumission a echoue a cause d'une erreur reseau. Merci de reessayer.",
         "agent",
         { mirrorActivity: true, tone: "error" },
       );
