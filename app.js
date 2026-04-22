@@ -3,6 +3,7 @@ const SERVICE_LINE =
   (window.BRANDING && window.BRANDING.serviceLine) || "Banque digitale nouvelle génération";
 const ACCOUNT_STORAGE_KEY = "baybankAccountState";
 const ADMIN_ESCALATIONS_STORAGE_KEY = "baybankAdminEscalations";
+const ADMIN_DOCUMENT_PREVIEWS_KEY = "baybankAdminDocumentPreviews";
 const CHAT_REQUEST_TIMEOUT_MS = 12000;
 const CRM_BLOCK_READ_MS = 2600;
 const CRM_LOADING_MS = 1000;
@@ -258,6 +259,40 @@ function writeAdminEscalations(items) {
   localStorage.setItem(ADMIN_ESCALATIONS_STORAGE_KEY, JSON.stringify(items || []));
 }
 
+function readAdminDocumentPreviews() {
+  return readStoredJson(localStorage.getItem(ADMIN_DOCUMENT_PREVIEWS_KEY)) || {};
+}
+
+function writeAdminDocumentPreviews(previews) {
+  try {
+    localStorage.setItem(ADMIN_DOCUMENT_PREVIEWS_KEY, JSON.stringify(previews || {}));
+  } catch (error) {
+    console.error("Document preview storage error:", error);
+  }
+}
+
+function persistDocumentPreview(category, asset) {
+  if (!sessionId || !category || !asset || !asset.previewUrl) return;
+
+  const previews = readAdminDocumentPreviews();
+  const current = previews[sessionId] || {};
+  current[category] = {
+    fileName: asset.fileName || "",
+    previewUrl: asset.previewUrl,
+    mimeType: asset.mimeType || "image/jpeg",
+  };
+  previews[sessionId] = current;
+  writeAdminDocumentPreviews(previews);
+}
+
+function getStoredDocumentPreview(category) {
+  if (!sessionId || !category) return null;
+  const previews = readAdminDocumentPreviews();
+  return previews[sessionId] && previews[sessionId][category]
+    ? previews[sessionId][category]
+    : null;
+}
+
 function upsertAdminEscalation(item) {
   const items = readAdminEscalations();
   const index = items.findIndex(function(existing) {
@@ -331,14 +366,20 @@ function persistAdminHumanReviewCase(submission, profileData) {
         label: "Pièce d'identité",
         fileName: documentNames.identity || "Document d'identité",
         extraction: identityExtraction || {},
-        previewUrl: documentAssets.identity && documentAssets.identity.previewUrl,
+        previewUrl:
+          (documentAssets.identity && documentAssets.identity.previewUrl) ||
+          (getStoredDocumentPreview("identity") &&
+            getStoredDocumentPreview("identity").previewUrl),
       },
       {
         category: "address",
         label: "Justificatif de domicile",
         fileName: documentNames.address || "Justificatif de domicile",
         extraction: addressExtraction || {},
-        previewUrl: documentAssets.address && documentAssets.address.previewUrl,
+        previewUrl:
+          (documentAssets.address && documentAssets.address.previewUrl) ||
+          (getStoredDocumentPreview("address") &&
+            getStoredDocumentPreview("address").previewUrl),
       },
     ],
     crmLogs: null,
@@ -1814,6 +1855,7 @@ function initUploadFlow() {
           previewUrl: "data:image/jpeg;base64," + base64,
           mimeType: mimeType,
         };
+        persistDocumentPreview(effectiveCategory, documentAssets[effectiveCategory]);
       }
 
       validationErrors = validation.errors || [];

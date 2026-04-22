@@ -1,6 +1,7 @@
 "use strict";
 
 const ADMIN_ESCALATIONS_STORAGE_KEY = "baybankAdminEscalations";
+const ADMIN_DOCUMENT_PREVIEWS_KEY = "baybankAdminDocumentPreviews";
 
 const siteHeader = document.getElementById("siteHeader");
 const navToggle = document.getElementById("navToggle");
@@ -55,6 +56,11 @@ function readLocalEscalations() {
   return readStoredJson(localStorage.getItem(ADMIN_ESCALATIONS_STORAGE_KEY));
 }
 
+function readDocumentPreviews() {
+  const parsed = readStoredJson(localStorage.getItem(ADMIN_DOCUMENT_PREVIEWS_KEY));
+  return parsed && typeof parsed === "object" ? parsed : {};
+}
+
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>"']/g, function(match) {
     return {
@@ -93,6 +99,7 @@ function statusToLabel(status) {
 
 function mergeEscalations(primaryItems, secondaryItems) {
   const map = new Map();
+  const previewsBySession = readDocumentPreviews();
 
   function keyFor(item) {
     return item.escalationId || item.submissionId || item.sessionId;
@@ -109,11 +116,29 @@ function mergeEscalations(primaryItems, secondaryItems) {
     const current = map.get(key);
     const merged = Object.assign({}, current || {}, item);
 
-    if (current && Array.isArray(current.documents) && Array.isArray(item.documents)) {
-      merged.documents = item.documents.map(function(document, index) {
-        const localDocument = current.documents[index] || {};
+    if (Array.isArray((current && current.documents) || item.documents)) {
+      const localDocuments = Array.isArray(current && current.documents)
+        ? current.documents
+        : [];
+      const incomingDocuments = Array.isArray(item.documents)
+        ? item.documents
+        : localDocuments;
+
+      merged.documents = incomingDocuments.map(function(document, index) {
+        const localDocument = localDocuments[index] || {};
+        const previewSet = previewsBySession[item.sessionId] || {};
+        const previewAsset = previewSet[document.category] || {};
         return Object.assign({}, localDocument, document, {
-          previewUrl: document.previewUrl || localDocument.previewUrl || "",
+          previewUrl:
+            document.previewUrl ||
+            localDocument.previewUrl ||
+            previewAsset.previewUrl ||
+            "",
+          fileName:
+            document.fileName ||
+            localDocument.fileName ||
+            previewAsset.fileName ||
+            "",
         });
       });
     }
