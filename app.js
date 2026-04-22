@@ -197,6 +197,12 @@ function looksLikeEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
 }
 
+function looksLikePhone(value) {
+  const normalized = String(value || "").replace(/[^\d+]/g, "");
+  const digits = normalized.replace(/\D/g, "");
+  return digits.length >= 8 && /^[+]?[\d]+$/.test(normalized);
+}
+
 function cleanText(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
 }
@@ -1390,7 +1396,7 @@ function createAccountPreview(formData) {
     firstName: existing.firstName || "",
     lastName: existing.lastName || "",
     contactEmail: formData.accountEmail,
-    phone: existing.phone || "",
+    phone: formData.accountPhone || existing.phone || "",
     country: existing.country || "",
     accountId: existing.accountId || generateId("acct"),
     customerId: existing.customerId || generateId("client"),
@@ -1411,17 +1417,24 @@ function initAccountPage() {
 
     const formData = {
       accountEmail: getFormFieldValue(accountForm, "accountEmail"),
+      accountPhone: getFormFieldValue(accountForm, "accountPhone"),
       accountPassword: getFormFieldValue(accountForm, "accountPassword"),
     };
 
     const missing = [];
     if (!formData.accountEmail) missing.push("adresse e-mail");
+    if (!formData.accountPhone) missing.push("numéro de téléphone");
     if (!formData.accountPassword || formData.accountPassword.length < 8) {
       missing.push("mot de passe (8 caractères minimum)");
     }
 
     if (missing.length) {
       setInlineFeedback("Merci de compléter : " + missing.join(", ") + ".", "error");
+      return;
+    }
+
+    if (!looksLikePhone(formData.accountPhone)) {
+      setInlineFeedback("Merci de saisir un numéro de téléphone valide.", "error");
       return;
     }
 
