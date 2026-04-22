@@ -2,6 +2,7 @@ const BRAND = (window.BRANDING && window.BRANDING.name) || "BayBank";
 const SERVICE_LINE =
   (window.BRANDING && window.BRANDING.serviceLine) || "Banque digitale nouvelle génération";
 const ACCOUNT_STORAGE_KEY = "baybankAccountState";
+const ADMIN_ESCALATIONS_STORAGE_KEY = "baybankAdminEscalations";
 const CHAT_REQUEST_TIMEOUT_MS = 12000;
 const CRM_BLOCK_READ_MS = 2600;
 const CRM_LOADING_MS = 1000;
@@ -244,6 +245,33 @@ function persistAccountState() {
   }
 }
 
+function readAdminEscalations() {
+  return readStoredJson(localStorage.getItem(ADMIN_ESCALATIONS_STORAGE_KEY)) || [];
+}
+
+function writeAdminEscalations(items) {
+  localStorage.setItem(ADMIN_ESCALATIONS_STORAGE_KEY, JSON.stringify(items || []));
+}
+
+function upsertAdminEscalation(item) {
+  const items = readAdminEscalations();
+  const index = items.findIndex(function(existing) {
+    return (
+      (item.escalationId && existing.escalationId === item.escalationId) ||
+      (item.submissionId && existing.submissionId === item.submissionId) ||
+      (item.sessionId && existing.sessionId === item.sessionId)
+    );
+  });
+
+  if (index >= 0) {
+    items[index] = Object.assign({}, items[index], item);
+  } else {
+    items.unshift(item);
+  }
+
+  writeAdminEscalations(items);
+}
+
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>"']/g, function(match) {
     return {
@@ -252,7 +280,61 @@ function escapeHtml(value) {
       ">": "&gt;",
       '"': "&quot;",
       "'": "&#39;",
-    }[match];
+  }[match];
+  });
+}
+
+function persistAdminHumanReviewCase(submission, profileData) {
+  if (!submission || !submission.humanReview || !submission.humanReview.required) return;
+
+  upsertAdminEscalation({
+    escalationId: submission.escalationId || "esc_" + generateId("local"),
+    sessionId: sessionId,
+    submissionId: submission.submissionId,
+    submittedAt: submission.submittedAt,
+    updatedAt: submission.submittedAt,
+    status: "pending",
+    humanReview: submission.humanReview,
+    reconciliation: submission.reconciliation || {},
+    account: {
+      accountId:
+        (submission.accountTimeline && submission.accountTimeline.accountId) ||
+        (accountState && accountState.accountId),
+      customerId:
+        (submission.accountTimeline && submission.accountTimeline.customerId) ||
+        (accountState && accountState.customerId),
+      owner:
+        (submission.accountTimeline && submission.accountTimeline.owner) ||
+        (accountState && accountState.owner),
+      accountName: accountState && accountState.accountName,
+    },
+    client: {
+      firstName: profileData.firstName,
+      lastName: profileData.lastName,
+      email: profileData.email,
+      phone: profileData.phone,
+      country: profileData.country,
+      dob: profileData.dob,
+      street: profileData.street,
+      city: profileData.city,
+      state: profileData.state,
+      postal: profileData.postal,
+    },
+    documents: [
+      {
+        category: "identity",
+        label: "Pièce d'identité",
+        fileName: documentNames.identity || "Document d'identité",
+        extraction: identityExtraction || {},
+      },
+      {
+        category: "address",
+        label: "Justificatif de domicile",
+        fileName: documentNames.address || "Justificatif de domicile",
+        extraction: addressExtraction || {},
+      },
+    ],
+    crmLogs: null,
   });
 }
 
@@ -1825,6 +1907,10 @@ function initSubmitFlow() {
           identityExtraction: identityExtraction,
           addressExtraction: addressExtraction,
           accountData: accountState,
+          documentFiles: {
+            identity: documentNames.identity,
+            address: documentNames.address,
+          },
         }),
       });
 
@@ -1863,6 +1949,7 @@ function initSubmitFlow() {
           accountState.customerId,
       });
       persistAccountState();
+      persistAdminHumanReviewCase(submission, profileData);
       updateAccountCtas();
       renderAccountState();
       syncJourneyStage();
