@@ -1840,6 +1840,17 @@ input:focus-visible {
   background: #fff1bf;
 }
 
+.button-danger {
+  color: #ffffff;
+  background: var(--danger);
+  border-color: var(--playful-foreground);
+  box-shadow: var(--playful-shadow-hard);
+}
+
+.button-danger:hover {
+  background: #c73d59;
+}
+
 .button-small {
   min-height: 46px;
   padding: 0 18px;

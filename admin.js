@@ -27,6 +27,7 @@ const submittedAtNode = document.getElementById("adminSubmittedAt");
 const ownerNode = document.getElementById("adminOwner");
 const approveBtn = document.getElementById("adminApproveBtn");
 const rejectBtn = document.getElementById("adminRejectBtn");
+const deleteBtn = document.getElementById("adminDeleteBtn");
 const decisionNoteNode = document.getElementById("adminDecisionNote");
 const clientInfoNode = document.getElementById("adminClientInfo");
 const escalationMessageNode = document.getElementById("adminEscalationMessage");
@@ -209,6 +210,14 @@ function updateStoredEscalation(item) {
   const merged = mergeEscalations([item], readLocalEscalations());
   writeLocalEscalations(merged);
   return merged;
+}
+
+function removeStoredEscalation(escalationId) {
+  const next = readLocalEscalations().filter(function(item) {
+    return item.escalationId !== escalationId;
+  });
+  writeLocalEscalations(next);
+  return next;
 }
 
 function renderStats(items) {
@@ -447,6 +456,9 @@ function renderDetail(record) {
   const pending = record.status === "pending";
   approveBtn.disabled = adminBusy || !pending;
   rejectBtn.disabled = adminBusy || !pending;
+  if (deleteBtn) {
+    deleteBtn.disabled = adminBusy;
+  }
 }
 
 function renderAll() {
@@ -551,6 +563,52 @@ async function submitDecision(action) {
   renderAll();
 }
 
+async function deleteSelectedEscalation() {
+  const selected = escalations.find(function(item) {
+    return item.escalationId === selectedEscalationId;
+  });
+
+  if (!selected || adminBusy) return;
+
+  const fullName =
+    [selected.client?.firstName, selected.client?.lastName]
+      .filter(Boolean)
+      .join(" ")
+      .trim() || "ce dossier";
+  const confirmed = window.confirm(
+    "Supprimer la demande de revue humaine pour " + fullName + " ?"
+  );
+
+  if (!confirmed) return;
+
+  adminBusy = true;
+  renderDetail(selected);
+
+  try {
+    const response = await fetch("/api/admin/escalations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        escalationId: selected.escalationId,
+        action: "delete",
+        agentName: "Agent conformité BayBank",
+      }),
+    });
+
+    if (!response.ok) throw new Error("admin delete failed");
+  } catch (error) {
+    console.error("Admin delete error:", error);
+  }
+
+  escalations = escalations.filter(function(item) {
+    return item.escalationId !== selected.escalationId;
+  });
+  removeStoredEscalation(selected.escalationId);
+  selectedEscalationId = null;
+  adminBusy = false;
+  renderAll();
+}
+
 function initChrome() {
   function syncHeader() {
     if (!siteHeader) return;
@@ -589,6 +647,10 @@ function initActions() {
     rejectBtn.addEventListener("click", function() {
       submitDecision("reject");
     });
+  }
+
+  if (deleteBtn) {
+    deleteBtn.addEventListener("click", deleteSelectedEscalation);
   }
 }
 
