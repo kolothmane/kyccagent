@@ -1535,6 +1535,12 @@ img {
   font-size: 1.34rem;
 }
 
+.admin-section-card > .card-badge,
+.admin-doc-card > .card-badge {
+  justify-self: start;
+  align-self: start;
+}
+
 .admin-data-grid,
 .admin-doc-grid {
   display: grid;
@@ -1567,6 +1573,8 @@ img {
   background: rgba(244, 114, 182, 0.14);
   box-shadow: 3px 3px 0 0 rgba(30, 41, 59, 0.08);
   line-height: 1.65;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .admin-signal-items {
@@ -1851,6 +1859,14 @@ input:focus-visible {
   background: #c73d59;
 }
 
+.button:disabled,
+.button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.58;
+  transform: none;
+  box-shadow: var(--playful-shadow-active);
+}
+
 .button-small {
   min-height: 46px;
   padding: 0 18px;
@@ -1906,6 +1922,11 @@ input:focus-visible {
 .mini-label,
 .card-badge,
 .panel-kicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
   padding: 8px 14px;
   border: 2px solid var(--playful-foreground);
   border-radius: var(--playful-radius-full);

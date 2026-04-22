@@ -100,6 +100,16 @@ function statusToLabel(status) {
   return "En attente";
 }
 
+function isPendingStatus(status) {
+  return [
+    "pending",
+    "pending_review",
+    "manual_review",
+    "in_review",
+    "open",
+  ].includes(String(status || "").trim());
+}
+
 function mergeEscalations(primaryItems, secondaryItems) {
   const map = new Map();
   const previewsBySession = readDocumentPreviews();
@@ -150,7 +160,15 @@ function mergeEscalations(primaryItems, secondaryItems) {
   });
 
   return Array.from(map.values()).sort(function(a, b) {
-    const weight = { pending: 0, approved: 1, rejected: 2 };
+    const weight = {
+      pending: 0,
+      pending_review: 0,
+      manual_review: 0,
+      in_review: 0,
+      open: 0,
+      approved: 1,
+      rejected: 2,
+    };
     const aWeight = weight[a.status] ?? 9;
     const bWeight = weight[b.status] ?? 9;
     if (aWeight !== bWeight) return aWeight - bWeight;
@@ -221,7 +239,7 @@ function removeStoredEscalation(escalationId) {
 }
 
 function renderStats(items) {
-  const pending = items.filter(function(item) { return item.status === "pending"; }).length;
+  const pending = items.filter(function(item) { return isPendingStatus(item.status); }).length;
   const approved = items.filter(function(item) { return item.status === "approved"; }).length;
   const rejected = items.filter(function(item) { return item.status === "rejected"; }).length;
 
@@ -453,7 +471,7 @@ function renderDetail(record) {
   renderDocuments(record);
   renderCrmLogs(record);
 
-  const pending = record.status === "pending";
+  const pending = isPendingStatus(record.status);
   approveBtn.disabled = adminBusy || !pending;
   rejectBtn.disabled = adminBusy || !pending;
   if (deleteBtn) {
@@ -530,10 +548,14 @@ async function submitDecision(action) {
     return item.escalationId === selectedEscalationId;
   });
 
-  if (!selected || adminBusy || selected.status !== "pending") return;
+  if (!selected || adminBusy || !isPendingStatus(selected.status)) return;
 
   adminBusy = true;
   renderDetail(selected);
+  if (decisionNoteNode) {
+    decisionNoteNode.className = "result-card is-warning";
+    decisionNoteNode.textContent = "Décision en cours de traitement...";
+  }
 
   let updated = null;
 
@@ -555,6 +577,12 @@ async function submitDecision(action) {
   } catch (error) {
     console.error("Admin decision error:", error);
     updated = applyLocalDecision(selected, action);
+  }
+
+  if (!updated) {
+    adminBusy = false;
+    renderDetail(selected);
+    return;
   }
 
   escalations = updateStoredEscalation(updated);
@@ -583,6 +611,10 @@ async function deleteSelectedEscalation() {
 
   adminBusy = true;
   renderDetail(selected);
+  if (decisionNoteNode) {
+    decisionNoteNode.className = "result-card is-warning";
+    decisionNoteNode.textContent = "Suppression de la demande en cours...";
+  }
 
   try {
     const response = await fetch("/api/admin/escalations", {
