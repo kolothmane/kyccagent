@@ -7,6 +7,108 @@ const ACCEPTED_CHAT_FORMATS = "JPEG, PNG, WebP, GIF ou PDF";
 const IDENTITY_DOCUMENTS = "un passeport, une carte nationale d'identité ou un permis de conduire";
 const ADDRESS_DOCUMENTS =
   "une facture récente, un relevé bancaire, une lettre d'assurance, un avis de taxe ou un courrier officiel mentionnant l'adresse complète";
+const FRENCH_DEPARTMENT_BY_PREFIX = {
+  "01": "Ain",
+  "02": "Aisne",
+  "03": "Allier",
+  "04": "Alpes-de-Haute-Provence",
+  "05": "Hautes-Alpes",
+  "06": "Alpes-Maritimes",
+  "07": "Ardèche",
+  "08": "Ardennes",
+  "09": "Ariège",
+  "10": "Aube",
+  "11": "Aude",
+  "12": "Aveyron",
+  "13": "Bouches-du-Rhône",
+  "14": "Calvados",
+  "15": "Cantal",
+  "16": "Charente",
+  "17": "Charente-Maritime",
+  "18": "Cher",
+  "19": "Corrèze",
+  "20": "Corse",
+  "21": "Côte-d'Or",
+  "22": "Côtes-d'Armor",
+  "23": "Creuse",
+  "24": "Dordogne",
+  "25": "Doubs",
+  "26": "Drôme",
+  "27": "Eure",
+  "28": "Eure-et-Loir",
+  "29": "Finistère",
+  "30": "Gard",
+  "31": "Haute-Garonne",
+  "32": "Gers",
+  "33": "Gironde",
+  "34": "Hérault",
+  "35": "Ille-et-Vilaine",
+  "36": "Indre",
+  "37": "Indre-et-Loire",
+  "38": "Isère",
+  "39": "Jura",
+  "40": "Landes",
+  "41": "Loir-et-Cher",
+  "42": "Loire",
+  "43": "Haute-Loire",
+  "44": "Loire-Atlantique",
+  "45": "Loiret",
+  "46": "Lot",
+  "47": "Lot-et-Garonne",
+  "48": "Lozère",
+  "49": "Maine-et-Loire",
+  "50": "Manche",
+  "51": "Marne",
+  "52": "Haute-Marne",
+  "53": "Mayenne",
+  "54": "Meurthe-et-Moselle",
+  "55": "Meuse",
+  "56": "Morbihan",
+  "57": "Moselle",
+  "58": "Nièvre",
+  "59": "Nord",
+  "60": "Oise",
+  "61": "Orne",
+  "62": "Pas-de-Calais",
+  "63": "Puy-de-Dôme",
+  "64": "Pyrénées-Atlantiques",
+  "65": "Hautes-Pyrénées",
+  "66": "Pyrénées-Orientales",
+  "67": "Bas-Rhin",
+  "68": "Haut-Rhin",
+  "69": "Rhône",
+  "70": "Haute-Saône",
+  "71": "Saône-et-Loire",
+  "72": "Sarthe",
+  "73": "Savoie",
+  "74": "Haute-Savoie",
+  "75": "Paris",
+  "76": "Seine-Maritime",
+  "77": "Seine-et-Marne",
+  "78": "Yvelines",
+  "79": "Deux-Sèvres",
+  "80": "Somme",
+  "81": "Tarn",
+  "82": "Tarn-et-Garonne",
+  "83": "Var",
+  "84": "Vaucluse",
+  "85": "Vendée",
+  "86": "Vienne",
+  "87": "Haute-Vienne",
+  "88": "Vosges",
+  "89": "Yonne",
+  "90": "Territoire de Belfort",
+  "91": "Essonne",
+  "92": "Hauts-de-Seine",
+  "93": "Seine-Saint-Denis",
+  "94": "Val-de-Marne",
+  "95": "Val-d'Oise",
+  "971": "Guadeloupe",
+  "972": "Martinique",
+  "973": "Guyane",
+  "974": "La Réunion",
+  "976": "Mayotte",
+};
 
 const currentPage = document.body.dataset.page || "landing";
 
@@ -58,7 +160,9 @@ const chatCloseBtn = document.getElementById("chatClose");
 const openChatButtons = document.querySelectorAll("[data-open-chat]");
 
 let sessionId = sessionStorage.getItem("kycSessionId") || null;
-let accountState = readStoredJson(sessionStorage.getItem(ACCOUNT_STORAGE_KEY));
+let accountState = sanitizeAccountState(
+  readStoredJson(sessionStorage.getItem(ACCOUNT_STORAGE_KEY)),
+);
 let journeyFinished = Boolean(accountState && accountState.kycStatus);
 let chatHistory = [];
 let identityExtraction = null;
@@ -89,8 +193,43 @@ function readStoredJson(raw) {
   }
 }
 
+function looksLikeEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
+}
+
+function cleanText(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function getFormFieldValue(form, name) {
+  if (!form || !form.elements || !form.elements[name]) return "";
+  return String(form.elements[name].value || "").trim();
+}
+
+function sanitizeAccountState(state) {
+  if (!state || typeof state !== "object") return null;
+
+  const next = Object.assign({}, state);
+
+  if (next.country && (looksLikeEmail(next.country) || next.country === next.contactEmail)) {
+    next.country = "";
+  }
+  if (next.phone && looksLikeEmail(next.phone)) {
+    next.phone = "";
+  }
+  if (next.firstName && looksLikeEmail(next.firstName)) {
+    next.firstName = "";
+  }
+  if (next.lastName && looksLikeEmail(next.lastName)) {
+    next.lastName = "";
+  }
+
+  return next;
+}
+
 function persistAccountState() {
   if (accountState) {
+    accountState = sanitizeAccountState(accountState);
     sessionStorage.setItem(ACCOUNT_STORAGE_KEY, JSON.stringify(accountState));
   } else {
     sessionStorage.removeItem(ACCOUNT_STORAGE_KEY);
@@ -136,6 +275,122 @@ function pickOwner(country) {
   const normalized = normaliseText(country);
   const index = normalized.length % managers.length;
   return managers[index];
+}
+
+function splitAddressChunks(address) {
+  return String(address || "")
+    .split(/\n|,/)
+    .map(cleanText)
+    .filter(Boolean);
+}
+
+function parsePostalCity(value) {
+  const text = cleanText(value);
+  if (!text) return { postal: "", city: "" };
+
+  let match = text.match(/\b([A-Z]{1,3}-?\d{4,6}|\d{4,6})\b[\s,.-]+(.+)$/i);
+  if (match) {
+    return {
+      postal: match[1].replace(/\s+/g, ""),
+      city: cleanText(match[2]),
+    };
+  }
+
+  match = text.match(/^(.+?)[\s,.-]+([A-Z]{1,3}-?\d{4,6}|\d{4,6})\b$/i);
+  if (match) {
+    return {
+      postal: match[2].replace(/\s+/g, ""),
+      city: cleanText(match[1]),
+    };
+  }
+
+  return { postal: "", city: "" };
+}
+
+function deriveFrenchDepartment(postal, country, addressText) {
+  const digits = String(postal || "").replace(/\D/g, "");
+  if (!digits) return "";
+
+  const normalizedCountry = normaliseText(country);
+  const normalizedAddress = normaliseText(addressText);
+  const probablyFrance =
+    normalizedCountry.includes("france") ||
+    normalizedAddress.includes("france") ||
+    (!normalizedCountry && digits.length === 5);
+
+  if (!probablyFrance) return "";
+
+  if (digits.startsWith("97") || digits.startsWith("98")) {
+    return FRENCH_DEPARTMENT_BY_PREFIX[digits.slice(0, 3)] || "";
+  }
+
+  return FRENCH_DEPARTMENT_BY_PREFIX[digits.slice(0, 2)] || "";
+}
+
+function normalizeExtractionAddress(extraction) {
+  const rawAddress = cleanText(extraction.serviceAddress || extraction.address);
+  const chunks = splitAddressChunks(rawAddress);
+  let street = cleanText(extraction.street);
+  let city = cleanText(extraction.city);
+  let state = cleanText(extraction.state || extraction.region || extraction.province);
+  let postal = cleanText(
+    extraction.postal || extraction.postalCode || extraction.zipCode || extraction.zip,
+  );
+  let country = cleanText(extraction.country);
+
+  if (city && !postal) {
+    const parsedCity = parsePostalCity(city);
+    postal = postal || parsedCity.postal;
+    city = parsedCity.city || city;
+  }
+
+  if (postal && !/^[A-Z]{1,3}-?\d{4,6}$/i.test(postal) && !/^\d{4,6}$/.test(postal)) {
+    const parsedPostal = parsePostalCity(postal);
+    postal = parsedPostal.postal || postal;
+    if (!city) city = parsedPostal.city;
+  }
+
+  chunks.forEach(function(chunk) {
+    const parsed = parsePostalCity(chunk);
+    if (!postal && parsed.postal) postal = parsed.postal;
+    if (!city && parsed.city) city = parsed.city;
+  });
+
+  if (!street) {
+    street =
+      chunks.find(function(chunk) {
+        return /\d/.test(chunk) && !parsePostalCity(chunk).postal;
+      }) || "";
+  }
+
+  if (!street && chunks[0]) {
+    const headLine = chunks[0];
+    const parsedHead = parsePostalCity(headLine);
+    if (parsedHead.postal && parsedHead.city) {
+      street = cleanText(headLine.replace(parsedHead.postal, "").replace(parsedHead.city, ""));
+    } else {
+      street = headLine;
+    }
+  }
+
+  if (!country) {
+    const tail = chunks[chunks.length - 1] || "";
+    if (tail && !/\d/.test(tail) && tail !== city && tail !== state) {
+      country = tail;
+    }
+  }
+
+  if (!state) {
+    state = deriveFrenchDepartment(postal, country, rawAddress);
+  }
+
+  return {
+    street: street,
+    city: city,
+    state: state,
+    postal: postal,
+    country: country,
+  };
 }
 
 function updateBranding() {
@@ -433,11 +688,14 @@ function prefillProfileFromAccount() {
   if (!accountState || !profileForm) return;
 
   const map = {
+    email: accountState.contactEmail,
     firstName: accountState.firstName,
     lastName: accountState.lastName,
-    email: accountState.contactEmail,
     phone: accountState.phone,
-    country: accountState.country,
+    country:
+      accountState.country && !looksLikeEmail(accountState.country)
+        ? accountState.country
+        : "",
   };
 
   Object.keys(map).forEach(function(key) {
@@ -489,26 +747,35 @@ function renderAccountState() {
     accountPill.textContent = statusText;
   }
 
+  const rows = [];
+  const fullName = [accountState.firstName, accountState.lastName].filter(Boolean).join(" ");
+
+  if (fullName) rows.push({ label: "Titulaire", value: fullName });
+  if (accountState.contactEmail) {
+    rows.push({ label: "Adresse e-mail", value: accountState.contactEmail });
+  }
+  if (accountState.phone) {
+    rows.push({ label: "Téléphone", value: accountState.phone });
+  }
+  if (accountState.country && !looksLikeEmail(accountState.country)) {
+    rows.push({ label: "Pays de résidence", value: accountState.country });
+  }
+  rows.push({ label: "Compte", value: accountState.accountId });
+  rows.push({ label: "Conseiller", value: accountState.owner });
+
   accountStatus.innerHTML =
     '<div class="summary-grid">' +
-    '<div class="summary-row"><span>Titulaire</span><strong>' +
-    escapeHtml([accountState.firstName, accountState.lastName].filter(Boolean).join(" ")) +
-    "</strong></div>" +
-    '<div class="summary-row"><span>Adresse e-mail</span><strong>' +
-    escapeHtml(accountState.contactEmail) +
-    "</strong></div>" +
-    '<div class="summary-row"><span>Téléphone</span><strong>' +
-    escapeHtml(accountState.phone || "—") +
-    "</strong></div>" +
-    '<div class="summary-row"><span>Pays de résidence</span><strong>' +
-    escapeHtml(accountState.country || "—") +
-    "</strong></div>" +
-    '<div class="summary-row"><span>Compte</span><strong>' +
-    escapeHtml(accountState.accountId) +
-    "</strong></div>" +
-    '<div class="summary-row"><span>Conseiller</span><strong>' +
-    escapeHtml(accountState.owner) +
-    "</strong></div>" +
+    rows
+      .map(function(row) {
+        return (
+          '<div class="summary-row"><span>' +
+          escapeHtml(row.label) +
+          "</span><strong>" +
+          escapeHtml(row.value || "—") +
+          "</strong></div>"
+        );
+      })
+      .join("") +
     "</div>";
 
   if (kycGate) {
@@ -617,17 +884,16 @@ function updateChecklist() {
 function fillForm(extraction) {
   if (!profileForm || !extraction) return;
 
-  const address = extraction.address || extraction.serviceAddress || "";
-  const addressParts = address.split(",");
+  const normalizedAddress = normalizeExtractionAddress(extraction);
   const map = {
     firstName: extraction.firstName,
     lastName: extraction.lastName,
     dob: extraction.dateOfBirth,
-    street: extraction.street || (addressParts[0] || "").trim(),
-    city: extraction.city || (addressParts[1] || "").trim(),
-    state: extraction.state || (addressParts[2] || "").trim(),
-    postal: extraction.postal,
-    country: extraction.country,
+    street: normalizedAddress.street,
+    city: normalizedAddress.city,
+    state: normalizedAddress.state,
+    postal: normalizedAddress.postal,
+    country: normalizedAddress.country,
   };
 
   Object.keys(map).forEach(function(key) {
@@ -1118,19 +1384,18 @@ async function prepareImageForUpload(file) {
 
 function createAccountPreview(formData) {
   const existing = accountState || {};
+  const emailHandle = String(formData.accountEmail || "").split("@")[0] || "client";
 
   return {
-    firstName: formData.accountFirstName,
-    lastName: formData.accountLastName,
+    firstName: existing.firstName || "",
+    lastName: existing.lastName || "",
     contactEmail: formData.accountEmail,
-    phone: formData.accountPhone,
-    country: formData.accountCountry,
+    phone: existing.phone || "",
+    country: existing.country || "",
     accountId: existing.accountId || generateId("acct"),
     customerId: existing.customerId || generateId("client"),
-    owner: existing.owner || pickOwner(formData.accountCountry),
-    accountName:
-      [formData.accountFirstName, formData.accountLastName].filter(Boolean).join(" ") ||
-      "Compte BayBank",
+    owner: existing.owner || pickOwner(existing.country || ""),
+    accountName: existing.accountName || "Compte " + emailHandle,
     planName: "BayBank Everyday",
     createdAt: existing.createdAt || new Date().toISOString(),
     kycStatus: existing.kycStatus || null,
@@ -1145,20 +1410,12 @@ function initAccountPage() {
     await initSession();
 
     const formData = {
-      accountFirstName: accountForm.elements.accountFirstName.value.trim(),
-      accountLastName: accountForm.elements.accountLastName.value.trim(),
-      accountEmail: accountForm.elements.accountEmail.value.trim(),
-      accountPhone: accountForm.elements.accountPhone.value.trim(),
-      accountCountry: accountForm.elements.accountCountry.value.trim(),
-      accountPassword: accountForm.elements.accountPassword.value.trim(),
+      accountEmail: getFormFieldValue(accountForm, "accountEmail"),
+      accountPassword: getFormFieldValue(accountForm, "accountPassword"),
     };
 
     const missing = [];
-    if (!formData.accountFirstName) missing.push("prénom");
-    if (!formData.accountLastName) missing.push("nom");
     if (!formData.accountEmail) missing.push("adresse e-mail");
-    if (!formData.accountPhone) missing.push("téléphone");
-    if (!formData.accountCountry) missing.push("pays de résidence");
     if (!formData.accountPassword || formData.accountPassword.length < 8) {
       missing.push("mot de passe (8 caractères minimum)");
     }
@@ -1510,6 +1767,10 @@ function initSubmitFlow() {
       journeyFinished = true;
 
       accountState = Object.assign({}, accountState, {
+        firstName: profileData.firstName || accountState.firstName,
+        lastName: profileData.lastName || accountState.lastName,
+        phone: profileData.phone || accountState.phone,
+        country: profileData.country || accountState.country,
         kycStatus: submission.status,
         submissionId: submission.submissionId,
         submittedAt: submission.submittedAt,
@@ -1655,6 +1916,7 @@ function initChat() {
   updateBranding();
   updateAccountCtas();
   initHeader();
+  if (accountState) persistAccountState();
   prefillAccountForm();
   prefillProfileFromAccount();
   renderAccountState();

@@ -54,8 +54,9 @@
           <span class="eyebrow">Étape 1 · Création du compte</span>
           <h1>Créez votre espace BayBank avant de poursuivre la vérification.</h1>
           <p>
-            Cette première étape initialise votre dossier client. Une fois votre espace créé, vous
-            serez redirigé vers la page de vérification pour envoyer vos documents.
+            Cette première étape initialise simplement votre accès. Une fois votre espace créé,
+            vous serez redirigé vers la page de vérification pour compléter le reste du profil et
+            envoyer vos documents.
           </p>
           <button type="button" class="button button-secondary" data-open-chat>
             Ouvrir l'assistant BayBank
@@ -66,8 +67,9 @@
           <span class="mini-label">Ce qui suit</span>
           <strong>Le parcours continue sur la page KYC.</strong>
           <p>
-            Vous pourrez alors envoyer votre pièce d'identité et votre justificatif de domicile,
-            soit manuellement, soit avec l'aide du chat.
+            Vous pourrez alors renseigner vos informations personnelles, envoyer votre pièce
+            d'identité et votre justificatif de domicile, soit manuellement, soit avec l'aide du
+            chat.
           </p>
         </div>
       </div>
@@ -80,11 +82,11 @@
             <span class="card-badge">Parcours BayBank</span>
             <h2>Une ouverture pensée comme un vrai produit bancaire.</h2>
             <p>
-              Le compte est créé en premier, puis la vérification se fait sur une page distincte,
-              avec un journal d'ouverture alimenté au fil du dossier.
+              L'ouverture commence par vos identifiants d'accès. Les informations client détaillées
+              et les documents sont ensuite récupérés sur la page de vérification.
             </p>
             <ul class="feature-list compact">
-              <li>Coordonnées personnelles et accès sécurisé</li>
+              <li>Adresse e-mail et mot de passe sécurisés</li>
               <li>Redirection directe vers la vérification d'identité</li>
               <li>Assistant BayBank disponible pour guider les prochaines étapes</li>
             </ul>
@@ -102,33 +104,14 @@
           </div>
 
           <form id="accountForm" class="account-form">
-            <div class="form-grid two-columns">
-              <label class="form-field">
-                <span>Prénom</span>
-                <input type="text" name="accountFirstName" autocomplete="given-name" />
-              </label>
-              <label class="form-field">
-                <span>Nom</span>
-                <input type="text" name="accountLastName" autocomplete="family-name" />
-              </label>
-            </div>
-
-            <div class="form-grid two-columns">
+            <div class="form-grid one-column">
               <label class="form-field">
                 <span>Adresse e-mail</span>
                 <input type="email" name="accountEmail" autocomplete="email" />
               </label>
-              <label class="form-field">
-                <span>Téléphone</span>
-                <input type="tel" name="accountPhone" autocomplete="tel" />
-              </label>
             </div>
 
-            <div class="form-grid two-columns">
-              <label class="form-field">
-                <span>Pays de résidence</span>
-                <input type="text" name="accountCountry" autocomplete="country-name" />
-              </label>
+            <div class="form-grid one-column">
               <label class="form-field">
                 <span>Mot de passe</span>
                 <input type="password" name="accountPassword" autocomplete="new-password" />
@@ -136,8 +119,8 @@
             </div>
 
             <p class="form-note">
-              Après la création du compte, BayBank vous redirige vers l'étape de vérification
-              d'identité.
+              Après la création du compte, BayBank vous redirige vers l'étape KYC pour compléter
+              le reste des informations et téléverser les documents.
             </p>
 
             <div id="accountFormMessage" class="inline-feedback" aria-live="polite"></div>
