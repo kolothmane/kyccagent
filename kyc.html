@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Outfit:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200,0,0&family=Outfit:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
   <link rel="stylesheet" href="styles.css" />
@@ -39,8 +39,8 @@
           </nav>
 
           <div class="header-actions">
-            <a href="open-account.html" class="ghost-link">Retour à l'ouverture</a>
-            <button type="button" class="button button-secondary" data-open-chat>
+            <a href="open-account.html" class="ghost-link" data-icon="west">Retour à l'ouverture</a>
+            <button type="button" class="button button-secondary" data-open-chat data-icon="forum">
               Ouvrir l'assistant
             </button>
           </div>
@@ -53,7 +53,7 @@
     <section class="page-hero page-hero-compact">
       <div class="container page-hero-grid">
         <div class="page-hero-copy">
-          <span class="eyebrow">Étape 2 · Vérification</span>
+          <span class="eyebrow" data-icon="verified_user">Étape 2 · Vérification</span>
           <h1>Finalisez votre ouverture de compte BayBank.</h1>
           <p>
             Envoyez votre pièce d'identité et votre justificatif de domicile, ou laissez
@@ -63,7 +63,7 @@
         </div>
 
         <div class="page-hero-card">
-          <span class="mini-label">Deux options</span>
+          <span class="mini-label" data-icon="tune">Deux options</span>
           <strong>Un parcours manuel ou assisté.</strong>
           <p>
             Vous pouvez compléter le formulaire à la main et téléverser vos documents, ou ouvrir
@@ -78,7 +78,7 @@
         <section class="panel kyc-panel-account">
           <div class="panel-heading">
             <div>
-              <span class="section-kicker">Compte BayBank</span>
+              <span class="section-kicker" data-icon="account_box">Compte BayBank</span>
               <h2>Votre dossier client</h2>
             </div>
             <span id="accountPill" class="status-badge neutral">À préparer</span>
@@ -91,7 +91,7 @@
         <section class="panel kyc-panel-documents">
           <div class="panel-heading">
             <div>
-              <span class="section-kicker">Documents</span>
+              <span class="section-kicker" data-icon="upload_file">Documents</span>
               <h2>Envoyer les pièces requises</h2>
             </div>
             <div id="pageStatus" class="inline-status" hidden></div>
@@ -100,24 +100,24 @@
           <div class="upload-grid">
             <article class="upload-card" data-upload-card="identity">
               <div class="upload-topline">
-                <span class="card-badge">Pièce d'identité</span>
+                <span class="card-badge" data-icon="badge">Pièce d'identité</span>
                 <strong id="identityUploadStatus">En attente</strong>
               </div>
               <p>Passeport, carte nationale d'identité ou permis de conduire.</p>
               <div id="identityUploadFile" class="upload-file-name">Aucun fichier envoyé</div>
-              <button id="uploadIdentityBtn" type="button" class="button button-secondary button-small">
+              <button id="uploadIdentityBtn" type="button" class="button button-secondary button-small" data-icon="upload_file">
                 Ajouter un document
               </button>
             </article>
 
             <article class="upload-card" data-upload-card="address">
               <div class="upload-topline">
-                <span class="card-badge">Justificatif de domicile</span>
+                <span class="card-badge" data-icon="home_pin">Justificatif de domicile</span>
                 <strong id="addressUploadStatus">En attente</strong>
               </div>
               <p>Facture, relevé bancaire, lettre d'assurance ou courrier officiel récent.</p>
               <div id="addressUploadFile" class="upload-file-name">Aucun fichier envoyé</div>
-              <button id="uploadAddressBtn" type="button" class="button button-secondary button-small">
+              <button id="uploadAddressBtn" type="button" class="button button-secondary button-small" data-icon="upload_file">
                 Ajouter un document
               </button>
             </article>
@@ -133,7 +133,7 @@
         <section class="panel kyc-panel-form">
           <div class="panel-heading">
             <div>
-              <span class="section-kicker">Formulaire KYC</span>
+              <span class="section-kicker" data-icon="fact_check">Formulaire KYC</span>
               <h2>Vérifier les données extraites</h2>
             </div>
           </div>
@@ -213,7 +213,7 @@
           <div id="result" class="result-card" aria-live="polite"></div>
 
           <div class="panel-actions">
-            <button id="submit" type="button" class="button button-primary button-wide">
+            <button id="submit" type="button" class="button button-primary button-wide" data-icon="task_alt">
               Terminer l'ouverture de compte
             </button>
           </div>
@@ -222,7 +222,7 @@
         <section class="panel kyc-panel-crm">
           <div class="panel-heading">
             <div>
-              <span class="section-kicker">Activité</span>
+              <span class="section-kicker" data-icon="receipt_long">Activité</span>
               <h2>Journal d'ouverture</h2>
             </div>
             <span id="crmStatus" class="status-badge neutral">En attente</span>
@@ -237,7 +237,7 @@
         <section class="panel kyc-panel-journey">
           <div class="panel-heading">
             <div>
-              <span class="section-kicker">Suivi</span>
+              <span class="section-kicker" data-icon="timeline">Suivi</span>
               <h2>Étapes du dossier</h2>
             </div>
           </div>

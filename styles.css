@@ -1,41 +1,41 @@
 :root {
-  --brand-navy: #10264d;
-  --brand-blue: #1789ff;
-  --brand-cyan: #3bb3ec;
-  --brand-teal: #13c7be;
-  --ink-strong: #18243f;
-  --ink-soft: #5d6980;
-  --line: #dbe5f4;
-  --line-strong: #c8d5ea;
+  --brand-navy: #2b2d60;
+  --brand-blue: #0d61d3;
+  --brand-cyan: #3180ed;
+  --brand-teal: #7eda9d;
+  --ink-strong: #2b2d60;
+  --ink-soft: #5d6792;
+  --line: #dbe4f4;
+  --line-strong: #c6d0e9;
   --surface: #ffffff;
-  --surface-muted: #f5f8ff;
-  --surface-soft: #f8fbff;
-  --surface-accent: #edf5ff;
-  --success: #18b56d;
-  --warning: #d28a16;
-  --danger: #dc4966;
-  --shadow-xs: 0 8px 20px rgba(16, 38, 77, 0.06);
-  --shadow-sm: 0 18px 45px rgba(16, 38, 77, 0.08);
-  --shadow-lg: 0 30px 90px rgba(16, 38, 77, 0.12);
+  --surface-muted: #f4f6fb;
+  --surface-soft: #fbfcff;
+  --surface-accent: #eef4ff;
+  --success: #7eda9d;
+  --warning: #ff9a60;
+  --danger: #ff7792;
+  --shadow-xs: 0 8px 18px rgba(198, 208, 233, 0.34);
+  --shadow-sm: 0 14px 36px rgba(198, 208, 233, 0.4);
+  --shadow-lg: 0 24px 60px rgba(198, 208, 233, 0.46);
   --radius-sm: 16px;
   --radius-md: 24px;
   --radius-lg: 32px;
-  --playful-background: #fffdf5;
-  --playful-foreground: #1e293b;
-  --playful-muted: #f1f5f9;
-  --playful-muted-foreground: #64748b;
-  --playful-accent: #8b5cf6;
+  --playful-background: #f4f6fb;
+  --playful-foreground: #2b2d60;
+  --playful-muted: #eef3fb;
+  --playful-muted-foreground: #5d6792;
+  --playful-accent: #0d61d3;
   --playful-accent-foreground: #ffffff;
-  --playful-secondary: #f472b6;
-  --playful-tertiary: #fbbf24;
-  --playful-quaternary: #34d399;
-  --playful-border: #e2e8f0;
-  --playful-ring: rgba(139, 92, 246, 0.24);
-  --playful-shadow-hard: 4px 4px 0 0 #1e293b;
-  --playful-shadow-hover: 6px 6px 0 0 #1e293b;
-  --playful-shadow-active: 2px 2px 0 0 #1e293b;
-  --playful-shadow-soft: 8px 8px 0 0 #f1f5f9;
-  --playful-shadow-pink: 8px 8px 0 0 rgba(244, 114, 182, 0.38);
+  --playful-secondary: #ff7792;
+  --playful-tertiary: #fae54d;
+  --playful-quaternary: #7eda9d;
+  --playful-border: #c6d0e9;
+  --playful-ring: rgba(13, 97, 211, 0.2);
+  --playful-shadow-hard: 0 8px 24px rgba(198, 208, 233, 0.48);
+  --playful-shadow-hover: 0 12px 28px rgba(198, 208, 233, 0.56);
+  --playful-shadow-active: 0 4px 14px rgba(198, 208, 233, 0.36);
+  --playful-shadow-soft: 0 10px 26px rgba(198, 208, 233, 0.34);
+  --playful-shadow-pink: 0 12px 30px rgba(255, 119, 146, 0.2);
   --playful-radius-sm: 8px;
   --playful-radius-md: 16px;
   --playful-radius-lg: 24px;
@@ -57,8 +57,9 @@ body {
   font-family: "Inter", sans-serif;
   color: var(--ink-strong);
   background:
-    radial-gradient(circle at top left, rgba(59, 179, 236, 0.12), transparent 34%),
-    linear-gradient(180deg, #f8fbff 0%, #ffffff 30%);
+    radial-gradient(circle at top left, rgba(13, 97, 211, 0.12), transparent 32%),
+    radial-gradient(circle at top right, rgba(126, 218, 157, 0.14), transparent 24%),
+    linear-gradient(180deg, #f7f9fe 0%, #ffffff 34%);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -108,7 +109,7 @@ img {
   padding: 10px 0;
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(14px);
-  box-shadow: inset 0 -1px 0 rgba(16, 38, 77, 0.08);
+  box-shadow: inset 0 -1px 0 rgba(198, 208, 233, 0.8);
 }
 
 .header-row {
@@ -1253,7 +1254,7 @@ img {
 }
 
 .crm-item.is-human-review .crm-dot {
-  background: linear-gradient(135deg, #dc4966, #f472b6);
+  background: linear-gradient(135deg, #ff7792, #ff9a60);
 }
 
 .crm-meta {
@@ -1584,8 +1585,8 @@ img {
   padding: 18px 20px;
   border: 2px solid var(--playful-foreground);
   border-radius: 22px;
-  background: rgba(244, 114, 182, 0.14);
-  box-shadow: 3px 3px 0 0 rgba(30, 41, 59, 0.08);
+  background: rgba(255, 119, 146, 0.12);
+  box-shadow: 0 8px 18px rgba(198, 208, 233, 0.32);
   line-height: 1.65;
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -1610,7 +1611,7 @@ img {
   border-radius: 22px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.95)),
-    radial-gradient(circle at top right, rgba(139, 92, 246, 0.12), transparent 24%);
+    radial-gradient(circle at top right, rgba(13, 97, 211, 0.12), transparent 24%);
   box-shadow: var(--playful-shadow-hard);
 }
 
@@ -1656,11 +1657,11 @@ body {
   color: var(--playful-foreground);
   background-color: var(--playful-background);
   background-image:
-    radial-gradient(circle at 12% 10%, rgba(244, 114, 182, 0.16) 0, transparent 18%),
-    radial-gradient(circle at 88% 10%, rgba(251, 191, 36, 0.22) 0, transparent 18%),
-    radial-gradient(circle at 82% 78%, rgba(52, 211, 153, 0.16) 0, transparent 20%),
-    radial-gradient(circle, rgba(30, 41, 59, 0.08) 1px, transparent 1px),
-    linear-gradient(180deg, #fffdf5 0%, #fffaf0 100%);
+    radial-gradient(circle at 12% 10%, rgba(13, 97, 211, 0.16) 0, transparent 18%),
+    radial-gradient(circle at 88% 10%, rgba(250, 229, 77, 0.2) 0, transparent 18%),
+    radial-gradient(circle at 82% 78%, rgba(126, 218, 157, 0.16) 0, transparent 20%),
+    radial-gradient(circle, rgba(198, 208, 233, 0.9) 1px, transparent 1px),
+    linear-gradient(180deg, #f7f9fe 0%, #ffffff 100%);
   background-size: auto, auto, auto, 24px 24px, auto;
   background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
 }
@@ -1848,7 +1849,7 @@ input:focus-visible {
 }
 
 .button-primary:hover {
-  background: #7c4df2;
+  background: #0b58c2;
 }
 
 .button-secondary {
@@ -1859,7 +1860,7 @@ input:focus-visible {
 }
 
 .button-secondary:hover {
-  background: #fff1bf;
+  background: rgba(13, 97, 211, 0.06);
 }
 
 .button-danger {
@@ -1870,7 +1871,7 @@ input:focus-visible {
 }
 
 .button-danger:hover {
-  background: #c73d59;
+  background: #f25f81;
 }
 
 .button:disabled,
@@ -1910,7 +1911,7 @@ input:focus-visible {
   width: 210px;
   height: 210px;
   border-radius: 38% 62% 60% 40%;
-  background: rgba(52, 211, 153, 0.16);
+  background: rgba(126, 218, 157, 0.16);
   transform: rotate(18deg);
 }
 
@@ -1922,9 +1923,9 @@ input:focus-visible {
   height: 232px;
   border-radius: 56% 44% 46% 54%;
   background:
-    radial-gradient(circle at 30% 30%, rgba(251, 191, 36, 0.34) 0 24%, transparent 25%),
-    radial-gradient(circle at 70% 64%, rgba(244, 114, 182, 0.24) 0 28%, transparent 29%),
-    radial-gradient(circle at center, rgba(139, 92, 246, 0.12) 0 42%, transparent 43%);
+    radial-gradient(circle at 30% 30%, rgba(250, 229, 77, 0.34) 0 24%, transparent 25%),
+    radial-gradient(circle at 70% 64%, rgba(255, 119, 146, 0.24) 0 28%, transparent 29%),
+    radial-gradient(circle at center, rgba(13, 97, 211, 0.12) 0 42%, transparent 43%);
 }
 
 .hero-orb {
@@ -1945,7 +1946,7 @@ input:focus-visible {
   border: 2px solid var(--playful-foreground);
   border-radius: var(--playful-radius-full);
   background: #ffffff;
-  box-shadow: 3px 3px 0 0 rgba(30, 41, 59, 0.1);
+  box-shadow: 0 8px 18px rgba(198, 208, 233, 0.34);
   color: var(--playful-accent);
   font-size: 0.77rem;
   font-weight: 800;
@@ -1953,8 +1954,77 @@ input:focus-visible {
 }
 
 .card-badge {
-  background: rgba(244, 114, 182, 0.12);
+  background: rgba(13, 97, 211, 0.08);
   color: var(--playful-foreground);
+}
+
+.button[data-icon],
+.ghost-link[data-icon],
+.eyebrow[data-icon],
+.section-kicker[data-icon],
+.mini-label[data-icon],
+.card-badge[data-icon],
+.panel-kicker[data-icon] {
+  gap: 10px;
+}
+
+.ghost-link[data-icon] {
+  display: inline-flex;
+  align-items: center;
+}
+
+.button[data-icon]::before,
+.ghost-link[data-icon]::before,
+.eyebrow[data-icon]::before,
+.section-kicker[data-icon]::before,
+.mini-label[data-icon]::before,
+.card-badge[data-icon]::before,
+.panel-kicker[data-icon]::before {
+  content: attr(data-icon);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: "Material Symbols Outlined";
+  font-size: 20px;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  font-variation-settings: "FILL" 0, "wght" 200, "GRAD" 0, "opsz" 24;
+}
+
+.button[data-icon]::before {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.button-secondary[data-icon]::before {
+  background: rgba(13, 97, 211, 0.08);
+  color: var(--brand-blue);
+}
+
+.button-danger[data-icon]::before {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.ghost-link[data-icon]::before,
+.eyebrow[data-icon]::before,
+.section-kicker[data-icon]::before,
+.mini-label[data-icon]::before,
+.card-badge[data-icon]::before,
+.panel-kicker[data-icon]::before {
+  font-size: 18px;
+  color: var(--brand-blue);
+}
+
+.panel-dark .panel-kicker[data-icon]::before,
+.cta-card .eyebrow[data-icon]::before {
+  color: #ffffff;
 }
 
 .hero-copy h1,
@@ -2113,8 +2183,8 @@ input:focus-visible {
 .panel-dark {
   color: #ffffff;
   background:
-    radial-gradient(circle at top right, rgba(251, 191, 36, 0.24), transparent 24%),
-    linear-gradient(160deg, #1e293b, #111827 86%);
+    radial-gradient(circle at top right, rgba(250, 229, 77, 0.24), transparent 24%),
+    linear-gradient(160deg, #2b2d60, #202553 86%);
   border-color: var(--playful-foreground);
   box-shadow: var(--playful-shadow-pink);
 }
@@ -2138,8 +2208,8 @@ input:focus-visible {
 
 .panel-light {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 246, 214, 0.92)),
-    radial-gradient(circle at top right, rgba(244, 114, 182, 0.16), transparent 22%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 246, 251, 0.94)),
+    radial-gradient(circle at top right, rgba(126, 218, 157, 0.14), transparent 22%);
 }
 
 .stacked-card + .stacked-card {
@@ -2184,8 +2254,8 @@ input:focus-visible {
 
 .alt-section {
   background:
-    linear-gradient(180deg, rgba(241, 245, 249, 0.46), rgba(255, 255, 255, 0)),
-    radial-gradient(circle at 12% 22%, rgba(139, 92, 246, 0.08), transparent 20%);
+    linear-gradient(180deg, rgba(244, 246, 251, 0.82), rgba(255, 255, 255, 0)),
+    radial-gradient(circle at 12% 22%, rgba(13, 97, 211, 0.08), transparent 20%);
 }
 
 .section-heading {
@@ -2211,7 +2281,7 @@ input:focus-visible {
   max-width: 430px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.94)),
-    radial-gradient(circle at top right, rgba(139, 92, 246, 0.12), transparent 22%);
+    radial-gradient(circle at top right, rgba(13, 97, 211, 0.12), transparent 22%);
 }
 
 .service-stack {
@@ -2221,8 +2291,8 @@ input:focus-visible {
 .cta-card {
   align-items: center;
   background:
-    radial-gradient(circle at top right, rgba(251, 191, 36, 0.32), transparent 24%),
-    linear-gradient(145deg, #8b5cf6, #7c3aed);
+    radial-gradient(circle at top right, rgba(250, 229, 77, 0.32), transparent 24%),
+    linear-gradient(145deg, #0d61d3, #3180ed);
   border-color: var(--playful-foreground);
   box-shadow: var(--playful-shadow-hover);
 }
@@ -2322,7 +2392,7 @@ input:focus-visible {
 .form-field input:focus {
   border-color: var(--playful-accent);
   box-shadow:
-    inset 0 -2px 0 rgba(139, 92, 246, 0.12),
+    inset 0 -2px 0 rgba(13, 97, 211, 0.12),
     0 0 0 4px var(--playful-ring);
 }
 
@@ -2338,7 +2408,7 @@ input:focus-visible {
   padding: 0 14px;
   border: 2px solid var(--playful-foreground);
   border-radius: 999px;
-  box-shadow: 3px 3px 0 0 rgba(30, 41, 59, 0.08);
+  box-shadow: 0 8px 18px rgba(198, 208, 233, 0.32);
 }
 
 .status-badge.neutral {
@@ -2348,17 +2418,17 @@ input:focus-visible {
 
 .status-badge.pending {
   color: var(--playful-foreground);
-  background: rgba(251, 191, 36, 0.22);
+  background: rgba(250, 229, 77, 0.22);
 }
 
 .status-badge.success {
   color: var(--playful-foreground);
-  background: rgba(52, 211, 153, 0.22);
+  background: rgba(126, 218, 157, 0.22);
 }
 
 .status-badge.alert {
   color: var(--playful-foreground);
-  background: rgba(244, 114, 182, 0.26);
+  background: rgba(255, 119, 146, 0.24);
 }
 
 .account-status-card,
@@ -2373,16 +2443,16 @@ input:focus-visible {
 }
 
 .result-card.is-success {
-  background: rgba(52, 211, 153, 0.18);
+  background: rgba(126, 218, 157, 0.18);
 }
 
 .result-card.is-warning {
-  background: rgba(251, 191, 36, 0.18);
+  background: rgba(250, 229, 77, 0.18);
 }
 
 .result-card.is-alert,
 .result-card.is-error {
-  background: rgba(244, 114, 182, 0.2);
+  background: rgba(255, 119, 146, 0.18);
 }
 
 .account-status-card,
@@ -2391,15 +2461,15 @@ input:focus-visible {
 .crm-empty {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.96)),
-    radial-gradient(circle at top right, rgba(244, 114, 182, 0.1), transparent 24%);
+    radial-gradient(circle at top right, rgba(13, 97, 211, 0.08), transparent 24%);
 }
 
 .gate-banner {
-  background: rgba(251, 191, 36, 0.14);
+  background: rgba(250, 229, 77, 0.14);
 }
 
 .gate-banner.is-ready {
-  background: rgba(52, 211, 153, 0.16);
+  background: rgba(126, 218, 157, 0.16);
   border-color: var(--playful-foreground);
 }
 
@@ -2407,34 +2477,34 @@ input:focus-visible {
   border-radius: 24px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(255, 250, 240, 0.96)),
-    radial-gradient(circle at top right, rgba(139, 92, 246, 0.12), transparent 22%);
+    radial-gradient(circle at top right, rgba(13, 97, 211, 0.12), transparent 22%);
 }
 
 .upload-card.is-complete {
   border-color: var(--playful-foreground);
-  box-shadow: 6px 6px 0 0 rgba(52, 211, 153, 0.3);
+  box-shadow: 0 12px 28px rgba(126, 218, 157, 0.28);
 }
 
 .chip {
   border: 2px solid var(--playful-foreground);
-  background: rgba(244, 114, 182, 0.12);
+  background: rgba(13, 97, 211, 0.08);
   color: var(--playful-foreground);
-  box-shadow: 3px 3px 0 0 rgba(30, 41, 59, 0.08);
+  box-shadow: 0 8px 18px rgba(198, 208, 233, 0.32);
 }
 
 .upload-feedback-success {
   color: var(--playful-foreground);
-  background: rgba(52, 211, 153, 0.2);
+  background: rgba(126, 218, 157, 0.2);
 }
 
 .upload-feedback-warning {
   color: var(--playful-foreground);
-  background: rgba(251, 191, 36, 0.2);
+  background: rgba(250, 229, 77, 0.2);
 }
 
 .upload-feedback-error {
   color: var(--playful-foreground);
-  background: rgba(244, 114, 182, 0.18);
+  background: rgba(255, 119, 146, 0.18);
 }
 
 .validation-banner strong,
@@ -2443,26 +2513,26 @@ input:focus-visible {
 }
 
 .banner-error {
-  background: rgba(244, 114, 182, 0.16);
+  background: rgba(255, 119, 146, 0.16);
 }
 
 .banner-warning {
-  background: rgba(251, 191, 36, 0.16);
+  background: rgba(250, 229, 77, 0.16);
 }
 
 .journey-item {
   border-radius: 22px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.94)),
-    radial-gradient(circle at top right, rgba(251, 191, 36, 0.12), transparent 22%);
+    radial-gradient(circle at top right, rgba(250, 229, 77, 0.12), transparent 22%);
 }
 
 .journey-index {
   border: 2px solid var(--playful-foreground);
   border-radius: 18px;
-  background: rgba(139, 92, 246, 0.14);
+  background: rgba(13, 97, 211, 0.12);
   color: var(--playful-foreground);
-  box-shadow: 3px 3px 0 0 rgba(30, 41, 59, 0.08);
+  box-shadow: 0 8px 18px rgba(198, 208, 233, 0.32);
 }
 
 .journey-item.is-current {
@@ -2474,11 +2544,11 @@ input:focus-visible {
 
 .journey-item.is-done {
   border-color: var(--playful-foreground);
-  background: rgba(52, 211, 153, 0.12);
+  background: rgba(126, 218, 157, 0.12);
 }
 
 .journey-item.is-done .journey-index {
-  background: rgba(52, 211, 153, 0.24);
+  background: rgba(126, 218, 157, 0.24);
   color: var(--playful-foreground);
 }
 
@@ -2495,13 +2565,13 @@ input:focus-visible {
 .crm-item {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.94)),
-    radial-gradient(circle at top right, rgba(139, 92, 246, 0.12), transparent 24%);
+    radial-gradient(circle at top right, rgba(13, 97, 211, 0.12), transparent 24%);
 }
 
 .crm-item.is-human-review {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 239, 244, 0.96)),
-    radial-gradient(circle at top right, rgba(244, 114, 182, 0.18), transparent 24%);
+    radial-gradient(circle at top right, rgba(255, 119, 146, 0.18), transparent 24%);
 }
 
 .crm-dot {
@@ -2513,7 +2583,7 @@ input:focus-visible {
 .crm-loader {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 250, 240, 0.96)),
-    radial-gradient(circle at top right, rgba(251, 191, 36, 0.18), transparent 26%);
+    radial-gradient(circle at top right, rgba(250, 229, 77, 0.18), transparent 26%);
 }
 
 .crm-loader-copy {
@@ -2528,7 +2598,7 @@ input:focus-visible {
 
 .crm-loader-bars span {
   border: 2px solid rgba(30, 41, 59, 0.12);
-  background: linear-gradient(90deg, rgba(251, 191, 36, 0.22), rgba(139, 92, 246, 0.18));
+  background: linear-gradient(90deg, rgba(250, 229, 77, 0.22), rgba(13, 97, 211, 0.18));
 }
 
 .crm-footer,
