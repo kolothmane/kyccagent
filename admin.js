@@ -116,7 +116,28 @@ function buildEscalationRef(item) {
     escalationId: item.escalationId || "",
     submissionId: item.submissionId || "",
     sessionId: item.sessionId || "",
+    fingerprint: buildEscalationFingerprint(item),
   };
+}
+
+function buildEscalationFingerprint(item) {
+  if (!item || typeof item !== "object") return "";
+
+  const fullName = [
+    item.client && item.client.firstName,
+    item.client && item.client.lastName,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  const reason =
+    (item.humanReview && item.humanReview.message) ||
+    ((item.humanReview && item.humanReview.reasons) || []).join(" | ") ||
+    "";
+  const accountId = (item.account && item.account.accountId) || "";
+  const submittedAt = item.submittedAt || item.updatedAt || "";
+
+  return [accountId, submittedAt, fullName, reason].join("::");
 }
 
 function matchesEscalation(item, ref) {
@@ -125,7 +146,8 @@ function matchesEscalation(item, ref) {
   return Boolean(
     (ref.escalationId && item.escalationId === ref.escalationId) ||
       (ref.submissionId && item.submissionId === ref.submissionId) ||
-      (ref.sessionId && item.sessionId === ref.sessionId),
+      (ref.sessionId && item.sessionId === ref.sessionId) ||
+      (ref.fingerprint && buildEscalationFingerprint(item) === ref.fingerprint),
   );
 }
 
@@ -136,7 +158,8 @@ function isEscalationDeleted(item) {
   return deletedRefs.some(function(ref) {
     return Boolean(
       (ref.escalationId && item.escalationId === ref.escalationId) ||
-        (ref.submissionId && item.submissionId === ref.submissionId),
+        (ref.submissionId && item.submissionId === ref.submissionId) ||
+        (ref.fingerprint && buildEscalationFingerprint(item) === ref.fingerprint),
     );
   });
 }
@@ -154,6 +177,7 @@ function markEscalationDeleted(ref) {
   deletedRefs.unshift({
     escalationId: ref.escalationId || "",
     submissionId: ref.submissionId || "",
+    fingerprint: ref.fingerprint || "",
   });
 
   writeDeletedEscalations(deletedRefs.slice(0, 100));

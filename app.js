@@ -271,9 +271,32 @@ function isDeletedAdminEscalation(ref) {
   return deletedItems.some(function(item) {
     return Boolean(
       (ref.escalationId && item.escalationId === ref.escalationId) ||
-        (ref.submissionId && item.submissionId === ref.submissionId),
+        (ref.submissionId && item.submissionId === ref.submissionId) ||
+        (ref.fingerprint && item.fingerprint === ref.fingerprint),
     );
   });
+}
+
+function buildAdminEscalationFingerprint(submission, profileData) {
+  const fullName = [profileData && profileData.firstName, profileData && profileData.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  const reason =
+    (submission &&
+      submission.humanReview &&
+      (submission.humanReview.message ||
+        ((submission.humanReview.reasons || []).join(" | ")))) ||
+    "";
+  const accountId =
+    (submission &&
+      submission.accountTimeline &&
+      submission.accountTimeline.accountId) ||
+    (accountState && accountState.accountId) ||
+    "";
+  const submittedAt = (submission && submission.submittedAt) || "";
+
+  return [accountId, submittedAt, fullName, reason].join("::");
 }
 
 function readAdminDocumentPreviews() {
@@ -347,6 +370,7 @@ function persistAdminHumanReviewCase(submission, profileData) {
   const ref = {
     escalationId: submission.escalationId || "",
     submissionId: submission.submissionId || "",
+    fingerprint: buildAdminEscalationFingerprint(submission, profileData),
   };
 
   if (isDeletedAdminEscalation(ref)) return;
