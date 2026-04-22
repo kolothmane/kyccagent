@@ -3,122 +3,165 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Northstar | Ouverture de compte & KYC</title>
+  <title>BayBank | Ouverture de compte business</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
     rel="stylesheet"
   />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="page-aura page-aura-left" aria-hidden="true"></div>
-  <div class="page-aura page-aura-right" aria-hidden="true"></div>
+  <div class="page-glow page-glow-top" aria-hidden="true"></div>
+  <div class="page-glow page-glow-side" aria-hidden="true"></div>
 
   <header class="site-header">
     <div class="container header-inner">
-      <a href="#intro" class="brand" aria-label="Accueil">
-        <span class="brand-mark">N</span>
+      <a href="#home" class="brand" aria-label="Accueil BayBank">
+        <span class="brand-mark">B</span>
         <span class="brand-copy">
-          <strong data-brand>Northstar</strong>
-          <span data-service>Treasury OS</span>
+          <strong data-brand>BayBank</strong>
+          <span data-service>Business Banking</span>
         </span>
       </a>
 
       <nav class="top-nav" aria-label="Navigation principale">
-        <a href="#account">Compte</a>
+        <a href="#home">Produit</a>
+        <a href="#benefits">Pourquoi BayBank</a>
+        <a href="#account">Ouvrir un compte</a>
         <a href="#manual-kyc">KYC</a>
-        <a href="#crm-panel">CRM</a>
-        <a href="#manual-kyc">Activation</a>
       </nav>
 
       <div class="header-actions">
-        <a href="#account" class="ghost-link">Creer un compte</a>
-        <button class="header-primary" type="button" data-open-chat>
-          Parler a l'assistant
+        <a href="#account" class="ghost-link">Connexion entreprise</a>
+        <button class="primary-button header-button" type="button" data-open-chat>
+          Ouvrir l'assistant
         </button>
-      </div>
-
-      <div class="sr-only">
-        <span id="elapsed">00:00</span>
-        <div id="bar"></div>
       </div>
     </div>
   </header>
 
   <main>
-    <section class="hero" id="intro">
+    <section class="hero" id="home">
       <div class="container hero-grid">
         <div class="hero-copy">
-          <span class="eyebrow">Ouverture de compte business</span>
-          <h1>Creer un compte, passer le KYC et activer l'espace client dans un seul parcours.</h1>
+          <span class="eyebrow">Fintech onboarding</span>
+          <h1>Ouvrez un compte BayBank et finalisez votre KYC sans friction.</h1>
           <p>
-            Cette demo simule un produit SaaS premium de finance fictif. L'utilisateur cree d'abord
-            son espace, transmet ses justificatifs, verifie les donnees extraites, puis la plateforme
-            genere une synchronisation CRM factice a la fin du dossier.
+            BayBank centralise l'ouverture de compte, la collecte documentaire et la
+            verification KYC dans un seul parcours. Le flux manuel reste disponible,
+            et l'assistant peut vous aider a televerser vos documents puis pre-remplir
+            les champs du dossier.
           </p>
 
           <div class="hero-actions">
-            <a href="#account" class="primary-button hero-primary">Commencer l'onboarding</a>
+            <a href="#account" class="primary-button hero-primary">Creer un compte</a>
             <button type="button" class="secondary-button hero-secondary" data-open-chat>
-              Automatiser avec l'assistant
+              Se faire guider par le chat
             </button>
           </div>
 
           <div class="hero-proof">
             <article class="proof-card">
-              <strong>08 min</strong>
-              <span>pour ouvrir un dossier et finaliser le KYC</span>
+              <strong>1 parcours</strong>
+              <span>Creation de compte, verification KYC et activation client.</span>
             </article>
             <article class="proof-card">
               <strong>2 documents</strong>
-              <span>piece d'identite et justificatif de domicile</span>
+              <span>Piece d'identite et justificatif de domicile recents.</span>
             </article>
             <article class="proof-card">
-              <strong>CRM sync</strong>
-              <span>timeline client generee automatiquement a la fin</span>
+              <strong>Auto-fill</strong>
+              <span>Les champs KYC se remplissent des qu'un document est accepte.</span>
             </article>
           </div>
         </div>
 
         <aside class="hero-panel">
-          <div class="panel-glow" aria-hidden="true"></div>
           <div class="hero-panel-card">
+            <span class="eyebrow subtle">Flux BayBank</span>
             <div class="hero-panel-header">
-              <span class="eyebrow subtle">Northstar onboarding</span>
-              <strong>Business Account Activation</strong>
+              <strong>Verification d'identite business</strong>
+              <p>
+                Un parcours pense pour un produit fintech fictif, avec un vrai tunnel
+                de creation de compte avant le KYC.
+              </p>
             </div>
 
             <div class="hero-timeline">
               <div class="timeline-item is-active">
                 <span>01</span>
                 <div>
-                  <strong>Creation du compte</strong>
-                  <p>Workspace, contact principal et acces admin.</p>
+                  <strong>Creer l'espace</strong>
+                  <p>Initialiser l'organisation et le contact principal.</p>
                 </div>
               </div>
               <div class="timeline-item">
                 <span>02</span>
                 <div>
-                  <strong>Verification KYC</strong>
-                  <p>Collecte documentaire et extraction automatique.</p>
+                  <strong>Envoyer les documents</strong>
+                  <p>Verifier l'identite et l'adresse avec les fichiers demandes.</p>
                 </div>
               </div>
               <div class="timeline-item">
                 <span>03</span>
                 <div>
-                  <strong>Activation CRM</strong>
-                  <p>Creation factice des logs de relation client.</p>
+                  <strong>Confirmer les donnees</strong>
+                  <p>Relire les champs extraits avant l'activation finale.</p>
                 </div>
               </div>
             </div>
 
             <div class="hero-note">
-              Le chatbot flottant peut aider a chaque etape et televerser un document directement dans le dossier.
+              L'assistant BayBank peut repondre aux questions, declencher l'upload
+              depuis le chat et pre-remplir le formulaire KYC a partir d'un document
+              accepte.
             </div>
           </div>
         </aside>
+      </div>
+    </section>
+
+    <section class="benefits" id="benefits">
+      <div class="container">
+        <div class="section-heading">
+          <span class="eyebrow subtle">Pourquoi BayBank</span>
+          <h2>Un onboarding plus propre pour un produit bancaire moderne.</h2>
+          <p>
+            Toute la page a ete repensee pour une experience fintech orientee
+            ouverture de compte business et verification KYC.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <div class="feature-icon">01</div>
+            <h3>Creation de compte avant verification</h3>
+            <p>
+              L'utilisateur commence par creer son espace BayBank, puis enchaine sur
+              le KYC sans quitter la page.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">02</div>
+            <h3>Assistant utile, pas bloquant</h3>
+            <p>
+              Le chat accompagne le parcours et peut televerser les documents pour
+              auto-remplir les champs, mais le flux KYC reste fonctionnel seul.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">03</div>
+            <h3>Journal de dossier integre</h3>
+            <p>
+              A la fin du KYC, la page affiche la creation des evenements produit et
+              client comme dans un vrai onboarding fintech.
+            </p>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -126,57 +169,57 @@
       <div class="container workflow-grid">
         <aside class="workflow-sidebar">
           <section class="status-card sticky-card">
-            <span class="eyebrow subtle">Activation client</span>
-            <h2>Suivi du dossier</h2>
+            <span class="eyebrow subtle">Statut du dossier</span>
+            <h2>Suivi de l'ouverture</h2>
 
             <ol class="journey-list">
               <li data-journey-step="account">
                 <span>01</span>
                 <div>
                   <strong>Creer le compte</strong>
-                  <p>Initialiser l'espace business et le contact principal.</p>
+                  <p>Renseigner l'organisation et l'administrateur principal.</p>
                 </div>
               </li>
               <li data-journey-step="upload">
                 <span>02</span>
                 <div>
-                  <strong>Televerser les documents</strong>
-                  <p>Piece d'identite et justificatif de domicile.</p>
+                  <strong>Envoyer les documents</strong>
+                  <p>Ajouter une piece d'identite puis un justificatif de domicile.</p>
                 </div>
               </li>
               <li data-journey-step="review">
                 <span>03</span>
                 <div>
-                  <strong>Verifier les donnees</strong>
-                  <p>Confirmer les champs extraits avant soumission.</p>
+                  <strong>Verifier les champs</strong>
+                  <p>Valider les donnees extraites avant soumission.</p>
                 </div>
               </li>
               <li data-journey-step="done">
                 <span>04</span>
                 <div>
-                  <strong>Activer le compte</strong>
-                  <p>Decision KYC et generation des logs CRM.</p>
+                  <strong>Activer le dossier</strong>
+                  <p>Finaliser le KYC et enregistrer le compte client.</p>
                 </div>
               </li>
             </ol>
 
             <div id="accountStatus" class="account-status-card">
               <div class="placeholder-title">Aucun compte cree</div>
-              <p>Le KYC se debloque des que le compte business est initialise.</p>
+              <p>Le dossier KYC sera disponible des que l'espace BayBank sera cree.</p>
             </div>
           </section>
 
           <section class="status-card" id="crm-panel">
             <div class="card-topline">
               <div>
-                <span class="eyebrow subtle">CRM simule</span>
-                <h3>Journal d'activation</h3>
+                <span class="eyebrow subtle">Operations</span>
+                <h3>Journal du dossier</h3>
               </div>
               <span id="crmStatus" class="status-badge neutral">En attente</span>
             </div>
 
             <div id="crmEmpty" class="empty-panel">
-              Les logs CRM apparaitront apres la soumission finale du KYC.
+              Les evenements du compte apparaitront ici apres la soumission finale.
             </div>
             <div id="crmFeed" class="crm-feed" aria-live="polite"></div>
           </section>
@@ -185,8 +228,8 @@
             <span class="eyebrow subtle">Conformite</span>
             <div class="checklist" aria-live="polite"></div>
             <div class="security-note">
-              Formats acceptes : PDF, JPEG, PNG, WebP et GIF. Les justificatifs de domicile doivent
-              generalement dater de moins de 90 jours.
+              Formats acceptes : PDF, JPEG, PNG, WebP et GIF. Les justificatifs de
+              domicile doivent en general dater de moins de 90 jours.
             </div>
           </section>
         </aside>
@@ -196,24 +239,24 @@
             <div class="card-header">
               <div>
                 <span class="eyebrow subtle">Etape 1</span>
-                <h2>Creer votre espace client</h2>
+                <h2>Creer votre compte BayBank</h2>
                 <p>
-                  Ouvrez un compte fictif avant de lancer les controles KYC. Les informations de compte
-                  pre-remplissent ensuite le dossier de verification.
+                  Renseignez les informations de l'organisation. Une fois le compte
+                  initialise, le dossier KYC s'ouvre automatiquement.
                 </p>
               </div>
-              <span class="card-chip">Business onboarding</span>
+              <span class="card-chip">Business account</span>
             </div>
 
             <form id="accountForm" class="account-form" novalidate>
               <label>
-                Nom de l'espace
-                <input id="workspaceName" name="workspaceName" placeholder="Northstar Paris Ops" />
+                Nom de l'organisation
+                <input id="workspaceName" name="workspaceName" placeholder="BayBank Paris Ops" />
               </label>
 
               <label>
                 Email professionnel
-                <input id="accountEmail" name="accountEmail" type="email" placeholder="team@northstar.example" />
+                <input id="accountEmail" name="accountEmail" type="email" placeholder="team@baybank.example" />
               </label>
 
               <label>
@@ -228,17 +271,17 @@
 
               <label>
                 Prenom administrateur
-                <input id="accountFirstName" name="accountFirstName" placeholder="Kenza" />
+                <input id="accountFirstName" name="accountFirstName" placeholder="Sara" />
               </label>
 
               <label>
                 Nom administrateur
-                <input id="accountLastName" name="accountLastName" placeholder="Alaoui" />
+                <input id="accountLastName" name="accountLastName" placeholder="Meyer" />
               </label>
 
               <label>
-                Type d'entreprise
-                <input id="companyType" name="companyType" placeholder="SaaS B2B" />
+                Activite
+                <input id="companyType" name="companyType" placeholder="Fintech B2B" />
               </label>
 
               <label>
@@ -261,17 +304,18 @@
                 <span class="eyebrow subtle">Etape 2</span>
                 <h2>Televerser les justificatifs et verifier les donnees</h2>
                 <p>
-                  Le dossier KYC reste fonctionnel sans chatbot. L'assistant est simplement une couche
-                  d'automatisation optionnelle.
+                  Le parcours KYC fonctionne sans le chat. L'assistant BayBank reste
+                  une aide optionnelle pour automatiser l'upload et pre-remplir le
+                  formulaire.
                 </p>
               </div>
               <button class="secondary-button" type="button" data-open-chat>
-                Automatiser avec l'assistant
+                Ouvrir l'assistant
               </button>
             </div>
 
             <div id="kycGate" class="gate-banner">
-              Creez d'abord votre compte business pour debloquer le dossier KYC.
+              Creez d'abord votre compte BayBank pour debloquer le dossier KYC.
             </div>
 
             <div class="upload-row">
@@ -289,15 +333,16 @@
                   <ul class="requirement-list">
                     <li>Passeport, carte nationale d'identite ou permis de conduire</li>
                     <li>Facture, releve bancaire, lettre d'assurance ou courrier officiel</li>
-                    <li>Justificatif de domicile recent avec l'adresse complete</li>
+                    <li>Justificatif recent avec l'adresse complete du titulaire</li>
                   </ul>
                 </section>
 
                 <section class="mini-card">
-                  <h3>Workflow automatique</h3>
+                  <h3>Ce que fait l'assistant</h3>
                   <p>
-                    Si un document est accepte, les informations extraites alimentent automatiquement
-                    le formulaire KYC a droite. La soumission finale declenche ensuite la simulation CRM.
+                    Depuis le chat, l'utilisateur peut poser une question, joindre un
+                    document et laisser BayBank remplir automatiquement les champs
+                    KYC des qu'une extraction valide est disponible.
                   </p>
                 </section>
               </div>
@@ -374,7 +419,7 @@
 
                   <div class="actions">
                     <button id="submit" class="primary-button submit-button" type="button">
-                      Soumettre le KYC et activer le compte
+                      Soumettre le KYC
                     </button>
                   </div>
                   <p id="result" class="result"></p>
@@ -389,11 +434,17 @@
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <div>
-        <strong data-brand>Northstar</strong>
-        <span class="footer-copy">Produit fictif de demo pour onboarding business et KYC.</span>
+      <div class="footer-brand">
+        <strong data-brand>BayBank</strong>
+        <span class="footer-copy">
+          Plateforme fictive d'ouverture de compte business et de verification KYC.
+        </span>
       </div>
-      <span class="footer-copy">Simulation d'activation, verification et CRM</span>
+      <div class="footer-links">
+        <a href="#home">Accueil</a>
+        <a href="#account">Ouvrir un compte</a>
+        <a href="#manual-kyc">Verification</a>
+      </div>
     </div>
   </footer>
 
@@ -401,7 +452,7 @@
     id="chatLauncher"
     class="chat-launcher"
     type="button"
-    aria-label="Ouvrir l'assistant"
+    aria-label="Ouvrir l'assistant BayBank"
   >
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path
@@ -430,15 +481,15 @@
               </svg>
             </button>
             <div id="chatMenu" class="chat-menu" hidden>
-              <button id="chatOpenManual" type="button">Ouvrir le dossier</button>
+              <button id="chatOpenManual" type="button">Aller au dossier</button>
               <button id="chatCloseAction" type="button">Fermer l'assistant</button>
             </div>
           </div>
 
           <div class="chat-service-meta">
-            <div class="chat-avatar">N</div>
+            <div class="chat-avatar">B</div>
             <div>
-              <p data-chat-title>Northstar Onboarding</p>
+              <p data-chat-title>BayBank Assistant</p>
               <span id="chatStatus" class="chat-status">En ligne</span>
             </div>
           </div>
@@ -476,10 +527,10 @@
             <span>Aujourd'hui</span>
           </div>
           <div class="empty" id="emptyState">
-            <div class="empty-title">Assistant d'activation pret</div>
+            <div class="empty-title">Assistant BayBank pret</div>
             <div class="empty-sub">
-              Posez une question sur l'ouverture de compte, les documents acceptes, le KYC
-              ou laissez l'assistant televerser un fichier depuis le chat.
+              Posez une question sur l'ouverture de compte, les documents acceptes
+              ou joignez un fichier depuis le chat pour pre-remplir le KYC.
             </div>
           </div>
         </div>
@@ -516,7 +567,7 @@
               </svg>
             </button>
           </div>
-          <p class="composer-note" data-brand-note>Propulse par Northstar Treasury OS</p>
+          <p class="composer-note" data-brand-note>Assistance BayBank Business Banking</p>
         </div>
       </div>
     </aside>
@@ -527,10 +578,10 @@
   <script>
     (function applyBranding() {
       var config = window.BRANDING || {};
-      var brand = config.name || "Northstar";
-      var service = config.serviceLine || "Treasury OS";
+      var brand = config.name || "BayBank";
+      var service = config.serviceLine || "Business Banking";
 
-      document.title = brand + " | Ouverture de compte & KYC";
+      document.title = brand + " | Ouverture de compte business";
       document.querySelectorAll("[data-brand]").forEach(function(el) {
         el.textContent = brand;
       });
@@ -538,9 +589,9 @@
         el.textContent = service;
       });
       var note = document.querySelector("[data-brand-note]");
-      if (note) note.textContent = "Propulse par " + brand + " " + service;
+      if (note) note.textContent = "Assistance " + brand + " " + service;
       var chatTitle = document.querySelector("[data-chat-title]");
-      if (chatTitle) chatTitle.textContent = brand + " Onboarding";
+      if (chatTitle) chatTitle.textContent = brand + " Assistant";
     })();
   </script>
 </body>
