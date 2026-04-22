@@ -1276,9 +1276,14 @@ img {
   bottom: 18px;
   z-index: 38;
   width: min(420px, calc(100vw - 20px));
+  max-height: calc(100vh - 128px);
 }
 
 .chat-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: calc(100vh - 128px);
   overflow: hidden;
   border-radius: 30px;
   background: #ffffff;
@@ -1479,7 +1484,8 @@ img {
 }
 
 .chat-scroll {
-  height: 472px;
+  flex: 1 1 auto;
+  min-height: 240px;
   padding: 0 20px 16px;
   overflow-y: auto;
   border-top: 1px solid rgba(16, 38, 77, 0.08);
@@ -1616,6 +1622,11 @@ img {
 .chat-shell.is-minimized .chat-scroll,
 .chat-shell.is-minimized .chat-composer-wrap {
   display: none;
+}
+
+.chat-shell.is-minimized,
+.chat-shell.is-minimized .chat-card {
+  max-height: none;
 }
 
 .typing-bubble {
@@ -1774,10 +1785,12 @@ img {
     right: 10px;
     bottom: 10px;
     width: calc(100vw - 20px);
+    max-height: calc(100vh - 96px);
   }
 
   .chat-card {
     border-radius: 26px;
+    max-height: calc(100vh - 96px);
   }
 }
 
@@ -1824,7 +1837,7 @@ img {
   }
 
   .chat-scroll {
-    height: 430px;
+    min-height: 220px;
     padding: 0 14px 14px;
   }
 
