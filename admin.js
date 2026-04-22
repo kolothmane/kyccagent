@@ -3,6 +3,7 @@
 const ADMIN_ESCALATIONS_STORAGE_KEY = "baybankAdminEscalations";
 const ADMIN_DOCUMENT_PREVIEWS_KEY = "baybankAdminDocumentPreviews";
 const ADMIN_DELETED_ESCALATIONS_KEY = "baybankDeletedEscalations";
+const ACCOUNT_STORAGE_KEY = "baybankAccountState";
 
 const siteHeader = document.getElementById("siteHeader");
 const navToggle = document.getElementById("navToggle");
@@ -67,6 +68,35 @@ function readDeletedEscalations() {
 
 function writeDeletedEscalations(items) {
   localStorage.setItem(ADMIN_DELETED_ESCALATIONS_KEY, JSON.stringify(items || []));
+}
+
+function readAccountState() {
+  try {
+    const raw = sessionStorage.getItem(ACCOUNT_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function hasActiveAccountContext() {
+  const account = readAccountState();
+  if (!account) return false;
+
+  return Boolean(
+    account.accountId ||
+      account.customerId ||
+      account.submissionId ||
+      account.contactEmail ||
+      account.email,
+  );
+}
+
+function clearLocalAdminState() {
+  writeLocalEscalations([]);
+  writeDeletedEscalations([]);
 }
 
 function readDocumentPreviews() {
@@ -637,6 +667,16 @@ async function loadEscalations() {
     remoteItems = Array.isArray(data.items) ? data.items : [];
   } catch (error) {
     console.error("Admin fetch error:", error);
+  }
+
+  if (!remoteItems.length && localItems.length && !hasActiveAccountContext()) {
+    clearLocalAdminState();
+    escalations = [];
+    selectedEscalationId = null;
+    selectedEscalationRef = null;
+    renderAll();
+    if (refreshBtn) refreshBtn.disabled = false;
+    return;
   }
 
   escalations = mergeEscalations(remoteItems, localItems);
