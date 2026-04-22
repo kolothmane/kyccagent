@@ -1700,6 +1700,8 @@ input:focus-visible {
   background: rgba(255, 255, 255, 0.94);
   box-shadow: var(--playful-shadow-hard);
   backdrop-filter: blur(18px);
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .brand-logo {
@@ -3102,6 +3104,49 @@ input:focus-visible {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1220px) {
+  .header-row {
+    gap: 14px;
+    padding: 10px 14px;
+  }
+
+  .brand {
+    gap: 10px;
+    flex: 0 1 auto;
+  }
+
+  .brand-copy span {
+    font-size: 0.8rem;
+  }
+
+  .navbar-wrap {
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .site-nav {
+    gap: 8px;
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-wrap: nowrap;
+  }
+
+  .site-nav a {
+    padding: 10px 12px;
+    font-size: 0.92rem;
+  }
+
+  .header-actions {
+    gap: 10px;
+    flex: 0 0 auto;
+  }
+
+  .header-actions .button {
+    min-height: 52px;
+    padding: 0 18px;
   }
 }
 
