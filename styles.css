@@ -1369,7 +1369,7 @@ img {
 }
 
 .admin-shell {
-  padding-top: 12px;
+  padding-top: 24px;
 }
 
 .admin-stats {
@@ -1413,6 +1413,11 @@ img {
 .admin-doc-card,
 .admin-data-item {
   min-width: 0;
+}
+
+.admin-detail-panel {
+  position: relative;
+  z-index: 2;
 }
 
 .admin-case-list,
@@ -1510,6 +1515,15 @@ img {
 .admin-action-row {
   margin: 22px 0 16px;
   flex-wrap: wrap;
+  position: sticky;
+  top: 112px;
+  z-index: 6;
+  padding: 14px;
+  border: 2px solid var(--playful-foreground);
+  border-radius: 24px;
+  background: rgba(255, 253, 245, 0.96);
+  box-shadow: var(--playful-shadow-hard);
+  backdrop-filter: blur(12px);
 }
 
 .admin-section-grid {

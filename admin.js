@@ -39,6 +39,7 @@ const crmLogsNode = document.getElementById("adminCrmLogs");
 
 let escalations = [];
 let selectedEscalationId = null;
+let selectedEscalationRef = null;
 let adminBusy = false;
 
 function readStoredJson(raw) {
@@ -98,6 +99,25 @@ function statusToLabel(status) {
   if (status === "approved") return "Validé";
   if (status === "rejected") return "Refusé";
   return "En attente";
+}
+
+function buildEscalationRef(item) {
+  if (!item || typeof item !== "object") return null;
+  return {
+    escalationId: item.escalationId || "",
+    submissionId: item.submissionId || "",
+    sessionId: item.sessionId || "",
+  };
+}
+
+function matchesEscalation(item, ref) {
+  if (!item || !ref) return false;
+
+  return Boolean(
+    (ref.escalationId && item.escalationId === ref.escalationId) ||
+      (ref.submissionId && item.submissionId === ref.submissionId) ||
+      (ref.sessionId && item.sessionId === ref.sessionId),
+  );
 }
 
 function isPendingStatus(status) {
@@ -230,9 +250,9 @@ function updateStoredEscalation(item) {
   return merged;
 }
 
-function removeStoredEscalation(escalationId) {
+function removeStoredEscalation(ref) {
   const next = readLocalEscalations().filter(function(item) {
-    return item.escalationId !== escalationId;
+    return !matchesEscalation(item, ref);
   });
   writeLocalEscalations(next);
   return next;
@@ -264,7 +284,7 @@ function renderList(items) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "admin-case-card";
-    if (item.escalationId === selectedEscalationId) {
+    if (matchesEscalation(item, selectedEscalationRef)) {
       button.classList.add("is-selected");
     }
 
@@ -284,7 +304,9 @@ function renderList(items) {
       "</div>";
 
     button.addEventListener("click", function() {
-      selectedEscalationId = item.escalationId;
+      selectedEscalationRef = buildEscalationRef(item);
+      selectedEscalationId =
+        item.escalationId || item.submissionId || item.sessionId || null;
       renderAll();
     });
 
@@ -480,7 +502,7 @@ function renderDetail(record) {
 }
 
 function renderAll() {
-  const hasSelection = Boolean(selectedEscalationId);
+  const hasSelection = Boolean(selectedEscalationRef);
   if (adminGrid) {
     adminGrid.classList.toggle("has-selection", hasSelection);
   }
@@ -489,6 +511,7 @@ function renderAll() {
 
   if (!escalations.length) {
     selectedEscalationId = null;
+    selectedEscalationRef = null;
     if (adminGrid) {
       adminGrid.classList.remove("has-selection");
     }
@@ -497,18 +520,19 @@ function renderAll() {
     return;
   }
 
-  if (!selectedEscalationId) {
+  if (!selectedEscalationRef) {
     if (detailNode) detailNode.hidden = true;
     if (detailEmptyNode) detailEmptyNode.hidden = false;
     return;
   }
 
   const selected = escalations.find(function(item) {
-    return item.escalationId === selectedEscalationId;
+    return matchesEscalation(item, selectedEscalationRef);
   });
 
   if (!selected) {
     selectedEscalationId = null;
+    selectedEscalationRef = null;
     if (adminGrid) {
       adminGrid.classList.remove("has-selection");
     }
@@ -545,7 +569,7 @@ async function loadEscalations() {
 
 async function submitDecision(action) {
   const selected = escalations.find(function(item) {
-    return item.escalationId === selectedEscalationId;
+    return matchesEscalation(item, selectedEscalationRef);
   });
 
   if (!selected || adminBusy || !isPendingStatus(selected.status)) return;
@@ -586,14 +610,16 @@ async function submitDecision(action) {
   }
 
   escalations = updateStoredEscalation(updated);
-  selectedEscalationId = updated.escalationId;
+  selectedEscalationRef = buildEscalationRef(updated);
+  selectedEscalationId =
+    updated.escalationId || updated.submissionId || updated.sessionId || null;
   adminBusy = false;
   renderAll();
 }
 
 async function deleteSelectedEscalation() {
   const selected = escalations.find(function(item) {
-    return item.escalationId === selectedEscalationId;
+    return matchesEscalation(item, selectedEscalationRef);
   });
 
   if (!selected || adminBusy) return;
@@ -633,10 +659,11 @@ async function deleteSelectedEscalation() {
   }
 
   escalations = escalations.filter(function(item) {
-    return item.escalationId !== selected.escalationId;
+    return !matchesEscalation(item, selectedEscalationRef);
   });
-  removeStoredEscalation(selected.escalationId);
+  removeStoredEscalation(selectedEscalationRef);
   selectedEscalationId = null;
+  selectedEscalationRef = null;
   adminBusy = false;
   renderAll();
 }
@@ -665,6 +692,7 @@ function initActions() {
   if (backToListBtn) {
     backToListBtn.addEventListener("click", function() {
       selectedEscalationId = null;
+      selectedEscalationRef = null;
       renderAll();
     });
   }
