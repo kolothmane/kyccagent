@@ -3,6 +3,8 @@ const SERVICE_LINE =
   (window.BRANDING && window.BRANDING.serviceLine) || "Banque digitale nouvelle génération";
 const ACCOUNT_STORAGE_KEY = "baybankAccountState";
 const CHAT_REQUEST_TIMEOUT_MS = 12000;
+const CRM_BLOCK_READ_MS = 2600;
+const CRM_LOADING_MS = 1000;
 const ACCEPTED_CHAT_FORMATS = "JPEG, PNG, WebP, GIF ou PDF";
 const IDENTITY_DOCUMENTS = "un passeport, une carte nationale d'identité ou un permis de conduire";
 const ADDRESS_DOCUMENTS =
@@ -478,6 +480,14 @@ function setPageStatus(label) {
   pageStatus.textContent = label;
 }
 
+function setResultMessage(message, tone) {
+  if (!result) return;
+
+  result.className = "result-card";
+  if (tone) result.classList.add("is-" + tone);
+  result.textContent = message || "";
+}
+
 function setCrmStatus(label, tone) {
   if (!crmStatus) return;
 
@@ -492,12 +502,32 @@ function clearTimelineTimers() {
   timelineTimers = [];
 }
 
-function renderCrmLog(log) {
+function renderCrmLoading(message) {
+  if (!crmFeed) return;
+  if (crmEmpty) crmEmpty.hidden = true;
+
+  crmFeed.innerHTML =
+    '<div class="crm-loader">' +
+    '<div class="crm-loader-copy">' +
+    escapeHtml(message || "Chargement de l'étape suivante…") +
+    "</div>" +
+    '<div class="crm-loader-bars">' +
+    "<span></span>" +
+    "<span></span>" +
+    "<span></span>" +
+    "</div>" +
+    "</div>";
+}
+
+function renderCrmLog(log, index, total) {
   if (!crmFeed) return;
   if (crmEmpty) crmEmpty.hidden = true;
 
   const item = document.createElement("article");
   item.className = "crm-item";
+  if (log && log.kind === "human-review") {
+    item.classList.add("is-human-review");
+  }
 
   const time = new Date(log.timestamp || Date.now());
   const displayTime = new Intl.DateTimeFormat("fr-FR", {
@@ -519,11 +549,19 @@ function renderCrmLog(log) {
     "<p>" +
     escapeHtml(log.detail) +
     "</p>" +
+    '<div class="crm-footer">' +
     "<time>" +
     escapeHtml(displayTime) +
     "</time>" +
+    '<span class="crm-step">Bloc ' +
+    escapeHtml(String(index + 1)) +
+    " / " +
+    escapeHtml(String(total)) +
+    "</span>" +
+    "</div>" +
     "</div>";
 
+  crmFeed.innerHTML = "";
   crmFeed.appendChild(item);
 }
 
@@ -540,20 +578,35 @@ function runAccountTimeline(timeline) {
   }
 
   if (crmEmpty) crmEmpty.hidden = true;
-  setCrmStatus("Mise à jour", "pending");
+  setCrmStatus("Traitement en cours", "pending");
+  renderCrmLoading("Préparation du journal d'ouverture…");
+
+  let delay = CRM_LOADING_MS;
 
   events.forEach(function(event, index) {
-    const timer = window.setTimeout(function() {
-      renderCrmLog(event);
-      if (index === events.length - 1) {
-        setCrmStatus(
-          timeline.statusLabel || "Compte actif",
-          timeline.statusTone || "success",
-        );
-      }
-    }, index * 320);
+    timelineTimers.push(
+      window.setTimeout(function() {
+        renderCrmLog(event, index, events.length);
 
-    timelineTimers.push(timer);
+        if (index === events.length - 1) {
+          setCrmStatus(
+            timeline.statusLabel || "Compte actif",
+            timeline.statusTone || "success",
+          );
+        }
+      }, delay),
+    );
+
+    delay += CRM_BLOCK_READ_MS;
+
+    if (index < events.length - 1) {
+      timelineTimers.push(
+        window.setTimeout(function() {
+          renderCrmLoading("Chargement du prochain bloc d'ouverture…");
+        }, delay),
+      );
+      delay += CRM_LOADING_MS;
+    }
   });
 }
 
@@ -736,13 +789,17 @@ function renderAccountState() {
   }
 
   const statusText =
-    accountState.kycStatus === "approved"
+    accountState.humanReviewRequired
+      ? "Agent humain saisi"
+      : accountState.kycStatus === "approved"
       ? "Compte actif"
       : accountState.kycStatus === "pending_review"
         ? "Revue en cours"
         : "Compte créé";
   const statusTone =
-    accountState.kycStatus === "approved"
+    accountState.humanReviewRequired
+      ? "alert"
+      : accountState.kycStatus === "approved"
       ? "success"
       : accountState.kycStatus === "pending_review"
         ? "pending"
@@ -762,6 +819,9 @@ function renderAccountState() {
   }
   if (accountState.phone) {
     rows.push({ label: "Téléphone", value: accountState.phone });
+  }
+  if (accountState.humanReviewRequired) {
+    rows.push({ label: "Revue", value: "Agent humain assigné" });
   }
   if (accountState.country && !looksLikeEmail(accountState.country)) {
     rows.push({ label: "Pays de résidence", value: accountState.country });
@@ -785,9 +845,16 @@ function renderAccountState() {
     "</div>";
 
   if (kycGate) {
-    kycGate.className = "gate-banner is-ready";
-    kycGate.textContent =
-      "Votre compte est prêt. Vous pouvez maintenant envoyer vos documents et finaliser le dossier.";
+    if (accountState.humanReviewRequired) {
+      kycGate.className = "gate-banner";
+      kycGate.textContent =
+        accountState.humanReviewReason ||
+        "Une anomalie a été détectée. Le dossier a été remonté à un agent humain pour revue.";
+    } else {
+      kycGate.className = "gate-banner is-ready";
+      kycGate.textContent =
+        "Votre compte est prêt. Vous pouvez maintenant envoyer vos documents et finaliser le dossier.";
+    }
   }
 
   if (fileInput) fileInput.disabled = false;
@@ -974,9 +1041,7 @@ function ensureAccountBeforeKyc(message) {
   const text =
     message || "Créez d'abord votre espace BayBank avant d'envoyer des documents.";
 
-  if (result && currentPage === "kyc") {
-    result.textContent = text;
-  }
+  if (currentPage === "kyc") setResultMessage(text, "error");
 
   setInlineFeedback(text, "error");
   setUploadFeedback(text, "warning");
@@ -1725,7 +1790,7 @@ function initSubmitFlow() {
     if (missingDocuments.length) {
       const message =
         "Merci d'ajouter encore : " + missingDocuments.join(" et ") + ".";
-      if (result) result.textContent = message;
+      setResultMessage(message, "warning");
       setUploadFeedback(message, "warning");
       syncJourneyStage();
       return;
@@ -1771,13 +1836,14 @@ function initSubmitFlow() {
         });
         const message =
           "La soumission a échoué : " + (error.error || "merci de réessayer.");
-        if (result) result.textContent = message;
+        setResultMessage(message, "error");
         say(message, "agent");
         return;
       }
 
       const submission = await response.json();
       journeyFinished = true;
+      const humanReview = submission.humanReview || { required: false };
 
       accountState = Object.assign({}, accountState, {
         firstName: profileData.firstName || accountState.firstName,
@@ -1785,6 +1851,8 @@ function initSubmitFlow() {
         phone: profileData.phone || accountState.phone,
         country: profileData.country || accountState.country,
         kycStatus: submission.status,
+        humanReviewRequired: Boolean(humanReview.required),
+        humanReviewReason: humanReview.message || "",
         submissionId: submission.submissionId,
         submittedAt: submission.submittedAt,
         accountId:
@@ -1802,19 +1870,31 @@ function initSubmitFlow() {
       const timeline = submission.accountTimeline || null;
 
       if (submission.status === "approved") {
-        if (result) {
-          result.textContent =
-            "Compte activé. Votre dossier a été validé et votre espace BayBank est prêt.";
-        }
+        setResultMessage(
+          "Compte activé. Votre dossier a été validé et votre espace BayBank est prêt.",
+          "success",
+        );
         say(
           "Le dossier est validé. Votre compte BayBank est activé et le profil client a bien été enregistré.",
           "agent",
         );
+      } else if (humanReview.required) {
+        setResultMessage(
+          humanReview.message ||
+            "Une anomalie a été détectée entre les documents. Le dossier a été remonté à un agent humain pour revue.",
+          "alert",
+        );
+        say(
+          (humanReview.message ||
+            "Une anomalie a été détectée entre les documents. Le dossier a été remonté à un agent humain pour revue.") +
+            " Le journal d'ouverture vous indique maintenant cette escalade.",
+          "agent",
+        );
       } else {
-        if (result) {
-          result.textContent =
-            "Dossier transmis. L'ouverture de compte se poursuit pendant la revue du dossier.";
-        }
+        setResultMessage(
+          "Dossier transmis. L'ouverture de compte se poursuit pendant la revue du dossier.",
+          "warning",
+        );
         say(
           "Le dossier a bien été transmis. La revue est en cours et le journal d'ouverture continue à se mettre à jour.",
           "agent",
@@ -1839,7 +1919,7 @@ function initSubmitFlow() {
       console.error("Submit error:", error);
       const message =
         "La soumission a échoué à cause d'une erreur réseau. Merci de réessayer.";
-      if (result) result.textContent = message;
+      setResultMessage(message, "error");
       say(message, "agent");
     }
   });

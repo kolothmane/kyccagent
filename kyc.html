@@ -219,62 +219,60 @@
           </div>
         </section>
 
-        <aside class="kyc-side">
-          <section class="panel">
-            <div class="panel-heading">
+        <section class="panel kyc-panel-crm">
+          <div class="panel-heading">
+            <div>
+              <span class="section-kicker">Activité</span>
+              <h2>Journal d'ouverture</h2>
+            </div>
+            <span id="crmStatus" class="status-badge neutral">En attente</span>
+          </div>
+
+          <div id="crmEmpty" class="crm-empty">
+            Les événements liés au compte apparaîtront ici à la soumission du dossier.
+          </div>
+          <div id="crmFeed" class="crm-feed"></div>
+        </section>
+
+        <section class="panel kyc-panel-journey">
+          <div class="panel-heading">
+            <div>
+              <span class="section-kicker">Suivi</span>
+              <h2>Étapes du dossier</h2>
+            </div>
+          </div>
+
+          <div class="journey-list">
+            <article class="journey-item" data-journey-step>
+              <span class="journey-index">1</span>
               <div>
-                <span class="section-kicker">Suivi</span>
-                <h2>Étapes du dossier</h2>
+                <strong>Compte créé</strong>
+                <p>Initialisation de l'espace BayBank.</p>
               </div>
-            </div>
-
-            <div class="journey-list">
-              <article class="journey-item" data-journey-step>
-                <span class="journey-index">1</span>
-                <div>
-                  <strong>Compte créé</strong>
-                  <p>Initialisation de l'espace BayBank.</p>
-                </div>
-              </article>
-              <article class="journey-item" data-journey-step>
-                <span class="journey-index">2</span>
-                <div>
-                  <strong>Documents reçus</strong>
-                  <p>Collecte de la pièce d'identité et du justificatif.</p>
-                </div>
-              </article>
-              <article class="journey-item" data-journey-step>
-                <span class="journey-index">3</span>
-                <div>
-                  <strong>Données vérifiées</strong>
-                  <p>Relecture du formulaire et rapprochement des informations.</p>
-                </div>
-              </article>
-              <article class="journey-item" data-journey-step>
-                <span class="journey-index">4</span>
-                <div>
-                  <strong>Ouverture finalisée</strong>
-                  <p>Le journal d'ouverture se complète automatiquement.</p>
-                </div>
-              </article>
-            </div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-heading">
+            </article>
+            <article class="journey-item" data-journey-step>
+              <span class="journey-index">2</span>
               <div>
-                <span class="section-kicker">Activité</span>
-                <h2>Journal d'ouverture</h2>
+                <strong>Documents reçus</strong>
+                <p>Collecte de la pièce d'identité et du justificatif.</p>
               </div>
-              <span id="crmStatus" class="status-badge neutral">En attente</span>
-            </div>
-
-            <div id="crmEmpty" class="crm-empty">
-              Les événements liés au compte apparaîtront ici à la soumission du dossier.
-            </div>
-            <div id="crmFeed" class="crm-feed"></div>
-          </section>
-        </aside>
+            </article>
+            <article class="journey-item" data-journey-step>
+              <span class="journey-index">3</span>
+              <div>
+                <strong>Données vérifiées</strong>
+                <p>Relecture du formulaire et rapprochement des informations.</p>
+              </div>
+            </article>
+            <article class="journey-item" data-journey-step>
+              <span class="journey-index">4</span>
+              <div>
+                <strong>Décision du dossier</strong>
+                <p>Validation automatique ou reprise par un agent humain selon les contrôles.</p>
+              </div>
+            </article>
+          </div>
+        </section>
       </div>
     </section>
   </main>

@@ -918,11 +918,12 @@ img {
 }
 
 .kyc-grid {
-  grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.78fr);
+  grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
   grid-template-areas:
     "account account"
     "documents documents"
-    "form side";
+    "form crm"
+    "journey journey";
   align-items: start;
 }
 
@@ -938,11 +939,13 @@ img {
   grid-area: form;
 }
 
-.kyc-side {
-  grid-area: side;
-  display: grid;
-  gap: 22px;
+.kyc-panel-crm {
+  grid-area: crm;
   align-self: start;
+}
+
+.kyc-panel-journey {
+  grid-area: journey;
 }
 
 .upload-grid {
@@ -954,6 +957,7 @@ img {
 .upload-card {
   display: grid;
   gap: 14px;
+  min-width: 0;
   padding: 22px;
   border-radius: 22px;
   border: 1px solid rgba(16, 38, 77, 0.08);
@@ -969,6 +973,7 @@ img {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 14px;
 }
 
@@ -978,9 +983,13 @@ img {
 }
 
 .upload-file-name {
+  min-width: 0;
   min-height: 22px;
+  max-width: 100%;
   color: var(--ink-soft);
   font-weight: 600;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .file-chips {
@@ -1216,9 +1225,7 @@ img {
 }
 
 .crm-feed {
-  display: grid;
-  gap: 14px;
-  min-height: 0;
+  min-height: 240px;
 }
 
 .crm-item {
@@ -1226,9 +1233,15 @@ img {
   grid-template-columns: 18px minmax(0, 1fr);
   gap: 14px;
   padding: 18px;
+  min-height: 240px;
+  align-content: start;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(16, 38, 77, 0.06);
+}
+
+.crm-item.is-human-review {
+  border-color: rgba(220, 73, 102, 0.22);
 }
 
 .crm-dot {
@@ -1237,6 +1250,10 @@ img {
   margin-top: 4px;
   border-radius: 999px;
   background: linear-gradient(135deg, var(--brand-blue), var(--brand-cyan));
+}
+
+.crm-item.is-human-review .crm-dot {
+  background: linear-gradient(135deg, #dc4966, #f472b6);
 }
 
 .crm-meta {
@@ -1258,6 +1275,71 @@ img {
 
 .crm-item p {
   margin: 8px 0;
+}
+
+.crm-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.crm-step {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.crm-loader {
+  display: grid;
+  gap: 18px;
+  min-height: 240px;
+  align-content: center;
+  padding: 24px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(16, 38, 77, 0.06);
+}
+
+.crm-loader-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  color: var(--ink-strong);
+}
+
+.crm-loader-copy::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(23, 137, 255, 0.18);
+}
+
+.crm-loader-bars {
+  display: grid;
+  gap: 10px;
+}
+
+.crm-loader-bars span {
+  display: block;
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(16, 38, 77, 0.08), rgba(16, 38, 77, 0.16));
+}
+
+.crm-loader-bars span:nth-child(1) {
+  width: 68%;
+}
+
+.crm-loader-bars span:nth-child(2) {
+  width: 88%;
+}
+
+.crm-loader-bars span:nth-child(3) {
+  width: 52%;
 }
 
 .inline-status {
@@ -1887,6 +1969,16 @@ input:focus-visible {
   padding: 22px 0 84px;
 }
 
+.kyc-grid {
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  grid-template-areas:
+    "account account"
+    "documents documents"
+    "form crm"
+    "journey journey";
+  gap: 24px;
+}
+
 .form-panel,
 .panel {
   padding: 32px;
@@ -1959,6 +2051,11 @@ input:focus-visible {
   background: rgba(52, 211, 153, 0.22);
 }
 
+.status-badge.alert {
+  color: var(--playful-foreground);
+  background: rgba(244, 114, 182, 0.26);
+}
+
 .account-status-card,
 .checklist,
 .document-summary,
@@ -1968,6 +2065,19 @@ input:focus-visible {
 .upload-feedback,
 .inline-status {
   border-radius: 22px;
+}
+
+.result-card.is-success {
+  background: rgba(52, 211, 153, 0.18);
+}
+
+.result-card.is-warning {
+  background: rgba(251, 191, 36, 0.18);
+}
+
+.result-card.is-alert,
+.result-card.is-error {
+  background: rgba(244, 114, 182, 0.2);
 }
 
 .account-status-card,
@@ -2071,10 +2181,54 @@ input:focus-visible {
   border-radius: 22px;
 }
 
+.crm-item,
+.crm-loader {
+  border: 2px solid var(--playful-foreground);
+  box-shadow: var(--playful-shadow-hard);
+}
+
+.crm-item {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.94)),
+    radial-gradient(circle at top right, rgba(139, 92, 246, 0.12), transparent 24%);
+}
+
+.crm-item.is-human-review {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 239, 244, 0.96)),
+    radial-gradient(circle at top right, rgba(244, 114, 182, 0.18), transparent 24%);
+}
+
 .crm-dot {
   margin-top: 2px;
   border: 2px solid var(--playful-foreground);
   background: var(--playful-accent);
+}
+
+.crm-loader {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 250, 240, 0.96)),
+    radial-gradient(circle at top right, rgba(251, 191, 36, 0.18), transparent 26%);
+}
+
+.crm-loader-copy {
+  color: var(--playful-foreground);
+}
+
+.crm-loader-copy::before {
+  border: 2px solid var(--playful-foreground);
+  background: var(--playful-tertiary);
+  box-shadow: 2px 2px 0 0 rgba(30, 41, 59, 0.08);
+}
+
+.crm-loader-bars span {
+  border: 2px solid rgba(30, 41, 59, 0.12);
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.22), rgba(139, 92, 246, 0.18));
+}
+
+.crm-footer,
+.crm-step {
+  color: var(--playful-muted-foreground);
 }
 
 .inline-status {
@@ -2592,7 +2746,8 @@ input:focus-visible {
       "account"
       "documents"
       "form"
-      "side";
+      "crm"
+      "journey";
   }
 
   .hero-metrics,
