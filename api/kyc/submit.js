@@ -10,20 +10,20 @@ function plusMinutes(isoDate, minutes) {
 function pickLifecycle(status) {
   return status === "approved"
     ? {
-        statusLabel: "CRM synchronise",
+        statusLabel: "Compte actif",
         statusTone: "success",
         lifecycle: "Active customer",
-        closingNote: "Compte active et transmis a l'equipe customer success.",
+        closingNote: "Dossier approuve et compte pret pour l'activation bancaire.",
       }
     : {
-        statusLabel: "CRM en attente",
+        statusLabel: "Revue en cours",
         statusTone: "warning",
         lifecycle: "Pending compliance review",
-        closingNote: "Compte cree mais garde en file de revue conformite.",
+        closingNote: "Dossier transmis a l'equipe conformite pour verification complementaire.",
       };
 }
 
-function buildCrmSimulation({
+function buildAccountTimeline({
   status,
   submittedAt,
   sessionId,
@@ -32,22 +32,23 @@ function buildCrmSimulation({
   reconciliation,
 }) {
   const workspaceId =
-    (accountData && accountData.workspaceId) || "ws_" + randomUUID().split("-")[0];
+    (accountData && accountData.workspaceId) || "org_" + randomUUID().split("-")[0];
   const customerId =
-    (accountData && accountData.customerId) || "crm_" + randomUUID().split("-")[0];
+    (accountData && accountData.customerId) ||
+    "client_" + randomUUID().split("-")[0];
   const workspaceName =
     (accountData && accountData.workspaceName) ||
     profileData.companyName ||
-    "Northstar Workspace";
-  const owner =
-    (accountData && accountData.owner) || "Compliance Pod";
-  const contactName = [
-    profileData.firstName || (accountData && accountData.firstName),
-    profileData.lastName || (accountData && accountData.lastName),
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .trim() || "Primary contact";
+    "BayBank Workspace";
+  const owner = (accountData && accountData.owner) || "Relationship Team";
+  const contactName =
+    [
+      profileData.firstName || (accountData && accountData.firstName),
+      profileData.lastName || (accountData && accountData.lastName),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .trim() || "Primary contact";
   const lifecycle = pickLifecycle(status);
   const suspiciousSignals = Array.isArray(reconciliation.suspiciousSignals)
     ? reconciliation.suspiciousSignals
@@ -68,57 +69,55 @@ function buildCrmSimulation({
     events: [
       {
         system: "Product",
-        label: "Compte business initialise",
+        label: "Compte cree",
         detail:
           workspaceName +
-          " a ete provisionne avec l'administrateur principal " +
+          " a ete initialise avec le contact principal " +
           contactName +
           ".",
         timestamp: submittedAt,
       },
       {
         system: "Compliance",
-        label: "Dossier KYC relie au compte",
+        label: "Dossier KYC rattache",
         detail:
           "La session " +
           sessionId +
-          " a ete associee au workspace " +
+          " a ete reliee a l'organisation " +
           workspaceId +
           ".",
         timestamp: plusMinutes(submittedAt, 1),
       },
       {
         system: "Risk",
-        label: "Reconciliation documentaire finalisee",
+        label: "Controle documentaire termine",
         detail: riskSummary,
         timestamp: plusMinutes(submittedAt, 2),
       },
       {
-        system: "CRM",
-        label: "Contact CRM synchronise",
+        system: "Operations",
+        label: "Profil client enregistre",
         detail:
           contactName +
-          " a ete rattache au customer ID " +
+          " a ete associe au dossier client " +
           customerId +
-          " avec le proprietaire " +
-          owner +
           ".",
         timestamp: plusMinutes(submittedAt, 3),
       },
       {
-        system: "Sales Ops",
-        label: "Note interne generee",
-        detail: lifecycle.closingNote,
+        system: "Relationship",
+        label: "Responsable assigne",
+        detail: owner + " prend le relais sur le suivi du compte.",
         timestamp: plusMinutes(submittedAt, 4),
       },
       {
-        system: "CRM",
-        label: "Cycle de vie client mis a jour",
+        system: "Banking",
+        label: "Cycle de vie mis a jour",
         detail:
-          "Le statut CRM est passe a " +
-          lifecycle.lifecycle +
-          " pour le compte " +
+          "Le compte " +
           workspaceName +
+          " est maintenant classe comme " +
+          lifecycle.lifecycle +
           ".",
         timestamp: plusMinutes(submittedAt, 5),
       },
@@ -155,7 +154,7 @@ module.exports = async (req, res) => {
   };
   const status = statusMap[reconciliation.recommendedAction] || "pending_review";
 
-  const crmSimulation = buildCrmSimulation({
+  const accountTimeline = buildAccountTimeline({
     status,
     submittedAt,
     sessionId,
@@ -171,6 +170,7 @@ module.exports = async (req, res) => {
     submittedAt,
     status,
     reconciliation,
-    crmSimulation,
+    accountTimeline,
+    crmSimulation: accountTimeline,
   });
 };
