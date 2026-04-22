@@ -75,150 +75,149 @@
 
     <section class="kyc-workspace" id="manualKyc" data-chat-manual-target>
       <div class="container kyc-grid">
-        <div class="kyc-main">
-          <section class="panel">
-            <div class="panel-heading">
-              <div>
-                <span class="section-kicker">Compte BayBank</span>
-                <h2>Votre dossier client</h2>
-              </div>
-              <span id="accountPill" class="status-badge neutral">À préparer</span>
+        <section class="panel kyc-panel-account">
+          <div class="panel-heading">
+            <div>
+              <span class="section-kicker">Compte BayBank</span>
+              <h2>Votre dossier client</h2>
             </div>
+            <span id="accountPill" class="status-badge neutral">À préparer</span>
+          </div>
 
-            <div id="accountStatus" class="account-status-card"></div>
-            <div id="kycGate" class="gate-banner"></div>
-          </section>
+          <div id="accountStatus" class="account-status-card"></div>
+          <div id="kycGate" class="gate-banner"></div>
+        </section>
 
-          <section class="panel">
-            <div class="panel-heading">
-              <div>
-                <span class="section-kicker">Documents</span>
-                <h2>Envoyer les pièces requises</h2>
-              </div>
-              <div id="pageStatus" class="inline-status" hidden></div>
+        <section class="panel kyc-panel-documents">
+          <div class="panel-heading">
+            <div>
+              <span class="section-kicker">Documents</span>
+              <h2>Envoyer les pièces requises</h2>
             </div>
+            <div id="pageStatus" class="inline-status" hidden></div>
+          </div>
 
-            <div class="upload-grid">
-              <article class="upload-card" data-upload-card="identity">
-                <div class="upload-topline">
-                  <span class="card-badge">Pièce d'identité</span>
-                  <strong id="identityUploadStatus">En attente</strong>
-                </div>
-                <p>Passeport, carte nationale d'identité ou permis de conduire.</p>
-                <div id="identityUploadFile" class="upload-file-name">Aucun fichier envoyé</div>
-                <button id="uploadIdentityBtn" type="button" class="button button-secondary button-small">
-                  Ajouter un document
-                </button>
-              </article>
-
-              <article class="upload-card" data-upload-card="address">
-                <div class="upload-topline">
-                  <span class="card-badge">Justificatif de domicile</span>
-                  <strong id="addressUploadStatus">En attente</strong>
-                </div>
-                <p>Facture, relevé bancaire, lettre d'assurance ou courrier officiel récent.</p>
-                <div id="addressUploadFile" class="upload-file-name">Aucun fichier envoyé</div>
-                <button id="uploadAddressBtn" type="button" class="button button-secondary button-small">
-                  Ajouter un document
-                </button>
-              </article>
-            </div>
-
-            <input id="file" type="file" accept=".pdf,image/jpeg,image/png,image/webp,image/gif" hidden />
-            <div id="fileChips" class="file-chips"></div>
-            <div id="uploadFeedback" class="upload-feedback" hidden></div>
-            <div class="checklist"></div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-heading">
-              <div>
-                <span class="section-kicker">Formulaire KYC</span>
-                <h2>Vérifier les données extraites</h2>
+          <div class="upload-grid">
+            <article class="upload-card" data-upload-card="identity">
+              <div class="upload-topline">
+                <span class="card-badge">Pièce d'identité</span>
+                <strong id="identityUploadStatus">En attente</strong>
               </div>
-            </div>
-
-            <form id="profile" class="profile-form">
-              <div class="form-grid two-columns">
-                <label class="form-field">
-                  <span>Prénom</span>
-                  <input type="text" name="firstName" autocomplete="given-name" />
-                </label>
-                <label class="form-field">
-                  <span>Nom</span>
-                  <input type="text" name="lastName" autocomplete="family-name" />
-                </label>
-              </div>
-
-              <div class="form-grid two-columns">
-                <label class="form-field">
-                  <span>Adresse e-mail</span>
-                  <input type="email" name="email" autocomplete="email" />
-                </label>
-                <label class="form-field">
-                  <span>Téléphone</span>
-                  <input type="tel" name="phone" autocomplete="tel" />
-                </label>
-              </div>
-
-              <div class="form-grid two-columns">
-                <label class="form-field">
-                  <span>Pays de résidence</span>
-                  <input type="text" name="country" autocomplete="country-name" />
-                </label>
-                <label class="form-field">
-                  <span>Date de naissance</span>
-                  <input type="date" name="dob" />
-                </label>
-              </div>
-
-              <div class="form-grid one-column">
-                <label class="form-field">
-                  <span>Adresse</span>
-                  <input type="text" name="street" autocomplete="street-address" />
-                </label>
-              </div>
-
-              <div class="form-grid three-columns">
-                <label class="form-field">
-                  <span>Ville</span>
-                  <input type="text" name="city" autocomplete="address-level2" />
-                </label>
-                <label class="form-field">
-                  <span>Région / Province</span>
-                  <input type="text" name="state" autocomplete="address-level1" />
-                </label>
-                <label class="form-field">
-                  <span>Code postal</span>
-                  <input type="text" name="postal" autocomplete="postal-code" />
-                </label>
-              </div>
-            </form>
-
-            <div class="document-summary">
-              <div class="summary-item">
-                <span>Numéro du document</span>
-                <strong id="docNumber">—</strong>
-              </div>
-              <div class="summary-item">
-                <span>Date d'expiration</span>
-                <strong id="docExpiry">—</strong>
-              </div>
-              <div class="summary-item">
-                <span>Nationalité</span>
-                <strong id="nationality">—</strong>
-              </div>
-            </div>
-
-            <div id="result" class="result-card" aria-live="polite"></div>
-
-            <div class="panel-actions">
-              <button id="submit" type="button" class="button button-primary button-wide">
-                Terminer l'ouverture de compte
+              <p>Passeport, carte nationale d'identité ou permis de conduire.</p>
+              <div id="identityUploadFile" class="upload-file-name">Aucun fichier envoyé</div>
+              <button id="uploadIdentityBtn" type="button" class="button button-secondary button-small">
+                Ajouter un document
               </button>
+            </article>
+
+            <article class="upload-card" data-upload-card="address">
+              <div class="upload-topline">
+                <span class="card-badge">Justificatif de domicile</span>
+                <strong id="addressUploadStatus">En attente</strong>
+              </div>
+              <p>Facture, relevé bancaire, lettre d'assurance ou courrier officiel récent.</p>
+              <div id="addressUploadFile" class="upload-file-name">Aucun fichier envoyé</div>
+              <button id="uploadAddressBtn" type="button" class="button button-secondary button-small">
+                Ajouter un document
+              </button>
+            </article>
+          </div>
+
+          <input id="file" type="file" accept=".pdf,image/jpeg,image/png,image/webp,image/gif" hidden />
+          <div id="fileChips" class="file-chips"></div>
+          <div id="uploadFeedback" class="upload-feedback" hidden></div>
+          <div class="checklist"></div>
+          <div id="validationFeedback" class="validation-feedback-slot"></div>
+        </section>
+
+        <section class="panel kyc-panel-form">
+          <div class="panel-heading">
+            <div>
+              <span class="section-kicker">Formulaire KYC</span>
+              <h2>Vérifier les données extraites</h2>
             </div>
-          </section>
-        </div>
+          </div>
+
+          <form id="profile" class="profile-form">
+            <div class="form-grid two-columns">
+              <label class="form-field">
+                <span>Prénom</span>
+                <input type="text" name="firstName" autocomplete="given-name" />
+              </label>
+              <label class="form-field">
+                <span>Nom</span>
+                <input type="text" name="lastName" autocomplete="family-name" />
+              </label>
+            </div>
+
+            <div class="form-grid two-columns">
+              <label class="form-field">
+                <span>Adresse e-mail</span>
+                <input type="email" name="email" autocomplete="email" />
+              </label>
+              <label class="form-field">
+                <span>Téléphone</span>
+                <input type="tel" name="phone" autocomplete="tel" />
+              </label>
+            </div>
+
+            <div class="form-grid two-columns">
+              <label class="form-field">
+                <span>Pays de résidence</span>
+                <input type="text" name="country" autocomplete="country-name" />
+              </label>
+              <label class="form-field">
+                <span>Date de naissance</span>
+                <input type="date" name="dob" />
+              </label>
+            </div>
+
+            <div class="form-grid one-column">
+              <label class="form-field">
+                <span>Adresse</span>
+                <input type="text" name="street" autocomplete="street-address" />
+              </label>
+            </div>
+
+            <div class="form-grid three-columns">
+              <label class="form-field">
+                <span>Ville</span>
+                <input type="text" name="city" autocomplete="address-level2" />
+              </label>
+              <label class="form-field">
+                <span>Région / Province</span>
+                <input type="text" name="state" autocomplete="address-level1" />
+              </label>
+              <label class="form-field">
+                <span>Code postal</span>
+                <input type="text" name="postal" autocomplete="postal-code" />
+              </label>
+            </div>
+          </form>
+
+          <div class="document-summary">
+            <div class="summary-item">
+              <span>Numéro du document</span>
+              <strong id="docNumber">—</strong>
+            </div>
+            <div class="summary-item">
+              <span>Date d'expiration</span>
+              <strong id="docExpiry">—</strong>
+            </div>
+            <div class="summary-item">
+              <span>Nationalité</span>
+              <strong id="nationality">—</strong>
+            </div>
+          </div>
+
+          <div id="result" class="result-card" aria-live="polite"></div>
+
+          <div class="panel-actions">
+            <button id="submit" type="button" class="button button-primary button-wide">
+              Terminer l'ouverture de compte
+            </button>
+          </div>
+        </section>
 
         <aside class="kyc-side">
           <section class="panel">

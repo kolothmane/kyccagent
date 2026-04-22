@@ -898,13 +898,30 @@ img {
 
 .kyc-grid {
   grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.78fr);
+  grid-template-areas:
+    "account account"
+    "documents documents"
+    "form side";
   align-items: start;
 }
 
-.kyc-main,
+.kyc-panel-account {
+  grid-area: account;
+}
+
+.kyc-panel-documents {
+  grid-area: documents;
+}
+
+.kyc-panel-form {
+  grid-area: form;
+}
+
 .kyc-side {
+  grid-area: side;
   display: grid;
   gap: 22px;
+  align-self: start;
 }
 
 .upload-grid {
@@ -1037,7 +1054,7 @@ img {
 }
 
 .validation-banner {
-  margin-bottom: 20px;
+  margin-bottom: 0;
   padding: 18px 20px;
   border-radius: 20px;
 }
@@ -1062,6 +1079,14 @@ img {
 .banner-warning {
   background: rgba(210, 138, 22, 0.1);
   border: 1px solid rgba(210, 138, 22, 0.16);
+}
+
+.validation-feedback-slot {
+  margin-top: 20px;
+}
+
+.validation-feedback-slot:empty {
+  display: none;
 }
 
 .document-summary {
@@ -1164,11 +1189,15 @@ img {
   padding: 18px;
   border-radius: 20px;
   background: var(--surface-soft);
+  min-height: 122px;
+  display: flex;
+  align-items: center;
 }
 
 .crm-feed {
   display: grid;
   gap: 14px;
+  min-height: 0;
 }
 
 .crm-item {
@@ -1694,6 +1723,14 @@ img {
   .page-hero-card {
     max-width: none;
     justify-self: stretch;
+  }
+
+  .kyc-grid {
+    grid-template-areas:
+      "account"
+      "documents"
+      "form"
+      "side";
   }
 
   .hero-metrics,

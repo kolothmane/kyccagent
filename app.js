@@ -651,11 +651,12 @@ function fillForm(extraction) {
 }
 
 function showValidationBanner(errors, warnings) {
-  document.querySelectorAll(".validation-banner").forEach(function(node) {
-    node.remove();
-  });
+  const slot = document.getElementById("validationFeedback");
+  if (!slot) return;
 
-  if (!profileForm || (!errors.length && !warnings.length)) return;
+  slot.innerHTML = "";
+
+  if ((!errors.length && !warnings.length)) return;
 
   const banner = document.createElement("div");
   const isError = errors.length > 0;
@@ -674,7 +675,7 @@ function showValidationBanner(errors, warnings) {
   });
 
   banner.appendChild(list);
-  profileForm.parentElement.insertBefore(banner, profileForm);
+  slot.appendChild(banner);
 }
 
 async function initSession() {
