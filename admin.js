@@ -7,6 +7,7 @@ const siteHeader = document.getElementById("siteHeader");
 const navToggle = document.getElementById("navToggle");
 const navbarCollapse = document.getElementById("navbarCollapse");
 const refreshBtn = document.getElementById("adminRefresh");
+const adminGrid = document.querySelector(".admin-grid");
 
 const pendingCountNode = document.getElementById("adminPendingCount");
 const approvedCountNode = document.getElementById("adminApprovedCount");
@@ -17,6 +18,7 @@ const caseListNode = document.getElementById("adminCaseList");
 
 const detailEmptyNode = document.getElementById("adminDetailEmpty");
 const detailNode = document.getElementById("adminDetail");
+const backToListBtn = document.getElementById("adminBackToList");
 const clientNameNode = document.getElementById("adminClientName");
 const decisionStatusNode = document.getElementById("adminDecisionStatus");
 const accountIdNode = document.getElementById("adminAccountId");
@@ -256,8 +258,7 @@ function renderList(items) {
 
     button.addEventListener("click", function() {
       selectedEscalationId = item.escalationId;
-      renderList(escalations);
-      renderDetail(item);
+      renderAll();
     });
 
     caseListNode.appendChild(button);
@@ -449,22 +450,44 @@ function renderDetail(record) {
 }
 
 function renderAll() {
+  const hasSelection = Boolean(selectedEscalationId);
+  if (adminGrid) {
+    adminGrid.classList.toggle("has-selection", hasSelection);
+  }
+
   renderList(escalations);
 
   if (!escalations.length) {
     selectedEscalationId = null;
+    if (adminGrid) {
+      adminGrid.classList.remove("has-selection");
+    }
     if (detailNode) detailNode.hidden = true;
     if (detailEmptyNode) detailEmptyNode.hidden = false;
     return;
   }
 
-  const selected =
-    escalations.find(function(item) { return item.escalationId === selectedEscalationId; }) ||
-    escalations.find(function(item) { return item.status === "pending"; }) ||
-    escalations[0];
+  if (!selectedEscalationId) {
+    if (detailNode) detailNode.hidden = true;
+    if (detailEmptyNode) detailEmptyNode.hidden = false;
+    return;
+  }
 
-  selectedEscalationId = selected.escalationId;
-  renderList(escalations);
+  const selected = escalations.find(function(item) {
+    return item.escalationId === selectedEscalationId;
+  });
+
+  if (!selected) {
+    selectedEscalationId = null;
+    if (adminGrid) {
+      adminGrid.classList.remove("has-selection");
+    }
+    if (detailNode) detailNode.hidden = true;
+    if (detailEmptyNode) detailEmptyNode.hidden = false;
+    renderList(escalations);
+    return;
+  }
+
   renderDetail(selected);
 }
 
@@ -547,6 +570,13 @@ function initChrome() {
 function initActions() {
   if (refreshBtn) {
     refreshBtn.addEventListener("click", loadEscalations);
+  }
+
+  if (backToListBtn) {
+    backToListBtn.addEventListener("click", function() {
+      selectedEscalationId = null;
+      renderAll();
+    });
   }
 
   if (approveBtn) {

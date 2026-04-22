@@ -1386,6 +1386,26 @@ img {
   align-items: start;
 }
 
+.admin-grid:not(.has-selection) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.admin-grid:not(.has-selection) .admin-detail-panel {
+  display: none;
+}
+
+.admin-grid.has-selection {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.admin-grid.has-selection .admin-list-panel {
+  display: none;
+}
+
+.admin-grid.has-selection .admin-detail-panel {
+  display: block;
+}
+
 .admin-list-panel,
 .admin-detail-panel,
 .admin-section-card,
@@ -1449,6 +1469,14 @@ img {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-detail-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 12px;
 }
 
