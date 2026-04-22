@@ -12,14 +12,14 @@ function pickLifecycle(status) {
     ? {
         statusLabel: "Compte actif",
         statusTone: "success",
-        lifecycle: "Active customer",
-        closingNote: "Dossier approuve et compte pret pour l'activation bancaire.",
+        lifecycle: "Client actif",
+        closingNote: "Dossier approuvé et compte prêt pour les opérations bancaires.",
       }
     : {
         statusLabel: "Revue en cours",
-        statusTone: "warning",
-        lifecycle: "Pending compliance review",
-        closingNote: "Dossier transmis a l'equipe conformite pour verification complementaire.",
+        statusTone: "pending",
+        lifecycle: "Revue conformité en cours",
+        closingNote: "Dossier transmis à l'équipe conformité pour vérification complémentaire.",
       };
 }
 
@@ -31,15 +31,20 @@ function buildAccountTimeline({
   accountData,
   reconciliation,
 }) {
-  const workspaceId =
-    (accountData && accountData.workspaceId) || "org_" + randomUUID().split("-")[0];
+  const accountId =
+    (accountData && accountData.accountId) || "acct_" + randomUUID().split("-")[0];
   const customerId =
-    (accountData && accountData.customerId) ||
-    "client_" + randomUUID().split("-")[0];
-  const workspaceName =
-    (accountData && accountData.workspaceName) ||
-    profileData.companyName ||
-    "BayBank Workspace";
+    (accountData && accountData.customerId) || "client_" + randomUUID().split("-")[0];
+  const accountName =
+    (accountData && accountData.accountName) ||
+    [
+      profileData.firstName || (accountData && accountData.firstName),
+      profileData.lastName || (accountData && accountData.lastName),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .trim() ||
+    "Compte BayBank";
   const owner = (accountData && accountData.owner) || "Relationship Team";
   const contactName =
     [
@@ -48,7 +53,7 @@ function buildAccountTimeline({
     ]
       .filter(Boolean)
       .join(" ")
-      .trim() || "Primary contact";
+      .trim() || "Titulaire principal";
   const lifecycle = pickLifecycle(status);
   const suspiciousSignals = Array.isArray(reconciliation.suspiciousSignals)
     ? reconciliation.suspiciousSignals
@@ -57,10 +62,10 @@ function buildAccountTimeline({
   const riskSummary =
     suspiciousSignals.length > 0
       ? suspiciousSignals.join(" | ")
-      : "No material mismatch detected across uploaded documents.";
+      : "Aucun écart matériel détecté entre les documents reçus.";
 
   return {
-    workspaceId,
+    accountId,
     customerId,
     owner,
     statusLabel: lifecycle.statusLabel,
@@ -68,57 +73,39 @@ function buildAccountTimeline({
     lifecycle: lifecycle.lifecycle,
     events: [
       {
-        system: "Product",
-        label: "Compte cree",
-        detail:
-          workspaceName +
-          " a ete initialise avec le contact principal " +
-          contactName +
-          ".",
+        system: "Account",
+        label: "Compte initialisé",
+        detail: accountName + " a été créé avec le contact principal " + contactName + ".",
         timestamp: submittedAt,
       },
       {
         system: "Compliance",
-        label: "Dossier KYC rattache",
-        detail:
-          "La session " +
-          sessionId +
-          " a ete reliee a l'organisation " +
-          workspaceId +
-          ".",
+        label: "Dossier KYC rattaché",
+        detail: "La session " + sessionId + " a été reliée au compte " + accountId + ".",
         timestamp: plusMinutes(submittedAt, 1),
       },
       {
         system: "Risk",
-        label: "Controle documentaire termine",
+        label: "Contrôle documentaire terminé",
         detail: riskSummary,
         timestamp: plusMinutes(submittedAt, 2),
       },
       {
-        system: "Operations",
-        label: "Profil client enregistre",
-        detail:
-          contactName +
-          " a ete associe au dossier client " +
-          customerId +
-          ".",
+        system: "Client",
+        label: "Profil client enregistré",
+        detail: contactName + " a été associé au dossier client " + customerId + ".",
         timestamp: plusMinutes(submittedAt, 3),
       },
       {
         system: "Relationship",
-        label: "Responsable assigne",
-        detail: owner + " prend le relais sur le suivi du compte.",
+        label: "Conseiller assigné",
+        detail: owner + " prend en charge le suivi du compte.",
         timestamp: plusMinutes(submittedAt, 4),
       },
       {
-        system: "Banking",
-        label: "Cycle de vie mis a jour",
-        detail:
-          "Le compte " +
-          workspaceName +
-          " est maintenant classe comme " +
-          lifecycle.lifecycle +
-          ".",
+        system: "Lifecycle",
+        label: "Cycle de vie mis à jour",
+        detail: "Le compte " + accountName + " est désormais classé comme " + lifecycle.lifecycle + ".",
         timestamp: plusMinutes(submittedAt, 5),
       },
     ],
@@ -171,6 +158,5 @@ module.exports = async (req, res) => {
     status,
     reconciliation,
     accountTimeline,
-    crmSimulation: accountTimeline,
   });
 };

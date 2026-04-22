@@ -1,17 +1,23 @@
 const BRAND = (window.BRANDING && window.BRANDING.name) || "BayBank";
-const SERVICE_LINE = (window.BRANDING && window.BRANDING.serviceLine) || "Business Banking";
+const SERVICE_LINE =
+  (window.BRANDING && window.BRANDING.serviceLine) || "Banque digitale nouvelle génération";
 const ACCOUNT_STORAGE_KEY = "baybankAccountState";
 const CHAT_REQUEST_TIMEOUT_MS = 12000;
-const ACCEPTED_CHAT_FORMATS = "JPEG, PNG, WebP, GIF, or PDF";
-const IDENTITY_DOCUMENTS = "passport, national ID card, or driving licence";
+const ACCEPTED_CHAT_FORMATS = "JPEG, PNG, WebP, GIF ou PDF";
+const IDENTITY_DOCUMENTS = "un passeport, une carte nationale d'identité ou un permis de conduire";
 const ADDRESS_DOCUMENTS =
-  "a recent utility bill, bank statement, tax letter, insurance letter, or official government correspondence showing the full postal address";
+  "une facture récente, un relevé bancaire, une lettre d'assurance, un avis de taxe ou un courrier officiel mentionnant l'adresse complète";
+
+const currentPage = document.body.dataset.page || "landing";
+
+const siteHeader = document.getElementById("siteHeader");
+const navToggle = document.getElementById("navToggle");
+const navbarCollapse = document.getElementById("navbarCollapse");
 
 const messages = document.getElementById("messages");
 const input = document.getElementById("input");
 const sendBtn = document.getElementById("send");
 const fileInput = document.getElementById("file");
-const uploadButton = document.querySelector('label[for="file"]');
 const fileChips = document.getElementById("fileChips");
 const profileForm = document.getElementById("profile");
 const result = document.getElementById("result");
@@ -19,11 +25,19 @@ const checklist = document.querySelector(".checklist");
 const pageStatus = document.getElementById("pageStatus");
 const submitBtn = document.getElementById("submit");
 const kycGate = document.getElementById("kycGate");
+const accountPill = document.getElementById("accountPill");
 
 const accountForm = document.getElementById("accountForm");
 const createAccountBtn = document.getElementById("createAccountBtn");
 const accountFormMessage = document.getElementById("accountFormMessage");
 const accountStatus = document.getElementById("accountStatus");
+
+const uploadIdentityBtn = document.getElementById("uploadIdentityBtn");
+const uploadAddressBtn = document.getElementById("uploadAddressBtn");
+const identityUploadStatus = document.getElementById("identityUploadStatus");
+const addressUploadStatus = document.getElementById("addressUploadStatus");
+const identityUploadFile = document.getElementById("identityUploadFile");
+const addressUploadFile = document.getElementById("addressUploadFile");
 
 const crmFeed = document.getElementById("crmFeed");
 const crmEmpty = document.getElementById("crmEmpty");
@@ -53,11 +67,17 @@ let uploadedDocuments = [];
 let validationErrors = [];
 let validationWarnings = [];
 let recentFiles = [];
-let currentStep = "welcome";
+let currentStep = currentPage === "kyc" ? "upload" : "account";
 let chatIsOpen = false;
 let chatIsMinimized = false;
 let chatHasWelcomed = false;
 let timelineTimers = [];
+let pendingUploadIntent = null;
+
+const documentNames = {
+  identity: "",
+  address: "",
+};
 
 function readStoredJson(raw) {
   if (!raw) return null;
@@ -118,9 +138,61 @@ function pickOwner(country) {
   return managers[index];
 }
 
+function updateBranding() {
+  document.querySelectorAll("[data-brand]").forEach(function(node) {
+    node.textContent = BRAND;
+  });
+
+  document.querySelectorAll("[data-service]").forEach(function(node) {
+    node.textContent = SERVICE_LINE;
+  });
+}
+
+function updateAccountCtas() {
+  document.querySelectorAll("[data-account-cta]").forEach(function(node) {
+    if (!node.dataset.defaultLabel) {
+      node.dataset.defaultLabel = node.textContent.trim() || "Ouvrir un compte";
+    }
+
+    node.setAttribute("href", accountState ? "kyc.html" : "open-account.html");
+    node.textContent = accountState ? "Continuer mon dossier" : node.dataset.defaultLabel;
+  });
+}
+
+function initHeader() {
+  if (!siteHeader) return;
+
+  const syncHeader = function() {
+    siteHeader.classList.toggle("header-scrolled", window.scrollY > 12);
+  };
+
+  syncHeader();
+  window.addEventListener("scroll", syncHeader, { passive: true });
+
+  if (navToggle && navbarCollapse) {
+    navToggle.addEventListener("click", function() {
+      navbarCollapse.classList.toggle("is-open");
+    });
+
+    window.addEventListener("click", function(event) {
+      if (!navbarCollapse.classList.contains("is-open")) return;
+      if (navbarCollapse.contains(event.target)) return;
+      if (navToggle.contains(event.target)) return;
+      navbarCollapse.classList.remove("is-open");
+    });
+  }
+}
+
 function scrollMessages() {
   if (messages) {
     messages.scrollTop = messages.scrollHeight;
+  }
+}
+
+function scrollToManualTarget() {
+  const target = document.querySelector("[data-chat-manual-target]");
+  if (target) {
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
 
@@ -203,12 +275,11 @@ function runAccountTimeline(timeline) {
 
   const events = Array.isArray(timeline && timeline.events) ? timeline.events : [];
   if (!events.length) {
-    setCrmStatus("En attente", "neutral");
     return;
   }
 
   if (crmEmpty) crmEmpty.hidden = true;
-  setCrmStatus("Mise a jour", "pending");
+  setCrmStatus("Mise à jour", "pending");
 
   events.forEach(function(event, index) {
     const timer = window.setTimeout(function() {
@@ -219,26 +290,14 @@ function runAccountTimeline(timeline) {
           timeline.statusTone || "success",
         );
       }
-    }, index * 360);
+    }, index * 320);
 
     timelineTimers.push(timer);
   });
 }
 
-function ensureUploadFeedback() {
-  let feedback = document.getElementById("uploadFeedback");
-  if (feedback || !uploadButton) return feedback;
-
-  feedback = document.createElement("div");
-  feedback.id = "uploadFeedback";
-  feedback.className = "upload-feedback";
-  feedback.hidden = true;
-  uploadButton.insertAdjacentElement("afterend", feedback);
-  return feedback;
-}
-
 function setUploadFeedback(message, tone) {
-  const feedback = ensureUploadFeedback();
+  const feedback = document.getElementById("uploadFeedback");
   if (!feedback) return;
 
   feedback.className = "upload-feedback";
@@ -321,7 +380,7 @@ function removeProcessing() {
 function setJourneyStage(stage) {
   const order = ["account", "upload", "review", "done"];
   const index = order.indexOf(stage);
-  currentStep = stage === "done" ? "confirm" : stage;
+  currentStep = stage;
 
   journeyItems.forEach(function(item, itemIndex) {
     item.classList.toggle("is-current", itemIndex === index);
@@ -330,6 +389,8 @@ function setJourneyStage(stage) {
 }
 
 function syncJourneyStage() {
+  if (!journeyItems.length) return;
+
   if (journeyFinished) {
     setJourneyStage("done");
     return;
@@ -355,13 +416,11 @@ function prefillAccountForm() {
   if (!accountState || !accountForm) return;
 
   const map = {
-    workspaceName: accountState.workspaceName,
+    accountFirstName: accountState.firstName,
+    accountLastName: accountState.lastName,
     accountEmail: accountState.contactEmail,
     accountPhone: accountState.phone,
     accountCountry: accountState.country,
-    accountFirstName: accountState.firstName,
-    accountLastName: accountState.lastName,
-    companyType: accountState.companyType,
   };
 
   Object.keys(map).forEach(function(key) {
@@ -391,18 +450,24 @@ function renderAccountState() {
   if (!accountStatus) return;
 
   if (!accountState) {
-    accountStatus.className = "account-status-card";
+    if (accountPill) {
+      accountPill.className = "status-badge neutral";
+      accountPill.textContent = "À créer";
+    }
+
     accountStatus.innerHTML =
-      '<div class="placeholder-title">Aucun compte cree</div>' +
-      "<p>Le dossier KYC sera disponible des que l'espace BayBank sera cree.</p>";
+      '<div class="placeholder-title">Aucun compte BayBank actif</div>' +
+      "<p>Commencez par créer votre espace client pour débloquer la page de vérification et le journal d'ouverture.</p>";
+
     if (kycGate) {
       kycGate.className = "gate-banner";
-      kycGate.textContent = "Creez d'abord votre compte BayBank pour debloquer le dossier KYC.";
+      kycGate.textContent =
+        "Créez d'abord votre compte BayBank depuis la page d'ouverture pour activer cette étape.";
     }
-    if (uploadButton) uploadButton.classList.add("is-disabled");
+
     if (fileInput) fileInput.disabled = true;
     if (submitBtn) submitBtn.disabled = true;
-    if (createAccountBtn) createAccountBtn.textContent = "Creer le compte";
+    if (createAccountBtn) createAccountBtn.textContent = "Créer mon espace BayBank";
     return;
   }
 
@@ -411,47 +476,61 @@ function renderAccountState() {
       ? "Compte actif"
       : accountState.kycStatus === "pending_review"
         ? "Revue en cours"
-        : "Compte cree";
+        : "Compte créé";
+  const statusTone =
+    accountState.kycStatus === "approved"
+      ? "success"
+      : accountState.kycStatus === "pending_review"
+        ? "pending"
+        : "neutral";
 
-  accountStatus.className = "account-status-card is-ready";
+  if (accountPill) {
+    accountPill.className = "status-badge " + statusTone;
+    accountPill.textContent = statusText;
+  }
+
   accountStatus.innerHTML =
     '<div class="summary-grid">' +
-    '<div class="summary-row"><span>Organisation</span><strong>' +
-    escapeHtml(accountState.workspaceName) +
+    '<div class="summary-row"><span>Titulaire</span><strong>' +
+    escapeHtml([accountState.firstName, accountState.lastName].filter(Boolean).join(" ")) +
     "</strong></div>" +
-    '<div class="summary-row"><span>Organisation ID</span><strong>' +
-    escapeHtml(accountState.workspaceId) +
+    '<div class="summary-row"><span>Adresse e-mail</span><strong>' +
+    escapeHtml(accountState.contactEmail) +
     "</strong></div>" +
-    '<div class="summary-row"><span>Client ID</span><strong>' +
-    escapeHtml(accountState.customerId) +
+    '<div class="summary-row"><span>Téléphone</span><strong>' +
+    escapeHtml(accountState.phone || "—") +
     "</strong></div>" +
-    '<div class="summary-row"><span>Responsable</span><strong>' +
+    '<div class="summary-row"><span>Pays de résidence</span><strong>' +
+    escapeHtml(accountState.country || "—") +
+    "</strong></div>" +
+    '<div class="summary-row"><span>Compte</span><strong>' +
+    escapeHtml(accountState.accountId) +
+    "</strong></div>" +
+    '<div class="summary-row"><span>Conseiller</span><strong>' +
     escapeHtml(accountState.owner) +
-    "</strong></div>" +
-    '<div class="summary-row"><span>Statut</span><strong>' +
-    escapeHtml(statusText) +
     "</strong></div>" +
     "</div>";
 
   if (kycGate) {
     kycGate.className = "gate-banner is-ready";
     kycGate.textContent =
-      "Compte cree. Vous pouvez maintenant televerser vos documents KYC et finaliser le dossier.";
+      "Votre compte est prêt. Vous pouvez maintenant envoyer vos documents et finaliser le dossier.";
   }
 
-  if (uploadButton) uploadButton.classList.remove("is-disabled");
   if (fileInput) fileInput.disabled = false;
   if (submitBtn) submitBtn.disabled = false;
-  if (createAccountBtn) createAccountBtn.textContent = "Mettre a jour le compte";
+  if (createAccountBtn) createAccountBtn.textContent = "Mettre à jour mon espace";
 }
 
 function updateFileChips(fileName) {
   if (!fileChips || !fileName) return;
 
   recentFiles = [fileName]
-    .concat(recentFiles.filter(function(name) {
-      return name !== fileName;
-    }))
+    .concat(
+      recentFiles.filter(function(name) {
+        return name !== fileName;
+      }),
+    )
     .slice(0, 3);
 
   fileChips.innerHTML = "";
@@ -463,19 +542,48 @@ function updateFileChips(fileName) {
   });
 }
 
+function renderDocumentState() {
+  const mapping = {
+    identity: {
+      statusNode: identityUploadStatus,
+      fileNode: identityUploadFile,
+      card: document.querySelector('[data-upload-card="identity"]'),
+    },
+    address: {
+      statusNode: addressUploadStatus,
+      fileNode: addressUploadFile,
+      card: document.querySelector('[data-upload-card="address"]'),
+    },
+  };
+
+  Object.keys(mapping).forEach(function(key) {
+    const config = mapping[key];
+    const received = uploadedDocuments.includes(key);
+    if (config.statusNode) {
+      config.statusNode.textContent = received ? "Reçu" : "En attente";
+    }
+    if (config.fileNode) {
+      config.fileNode.textContent = documentNames[key] || "Aucun fichier envoyé";
+    }
+    if (config.card) {
+      config.card.classList.toggle("is-complete", received);
+    }
+  });
+}
+
 function updateChecklist() {
   if (!checklist) return;
 
   const items = [
     {
       key: "identity",
-      label: "Piece d'identite",
-      sub: "Passeport, carte d'identite ou permis de conduire",
+      label: "Pièce d'identité",
+      sub: "Passeport, carte nationale d'identité ou permis de conduire",
     },
     {
       key: "address",
       label: "Justificatif de domicile",
-      sub: "Facture, releve bancaire, lettre d'assurance ou courrier officiel",
+      sub: "Facture, relevé bancaire, lettre d'assurance ou courrier officiel",
     },
   ];
 
@@ -488,7 +596,7 @@ function updateChecklist() {
     row.innerHTML =
       '<div class="check-row">' +
       '<span class="check-label">' +
-      item.label +
+      escapeHtml(item.label) +
       "</span>" +
       '<span class="check-state ' +
       (done ? "done" : "pending") +
@@ -497,7 +605,7 @@ function updateChecklist() {
       "</span>" +
       "</div>" +
       '<div class="check-sub">' +
-      item.sub +
+      escapeHtml(item.sub) +
       "</div>";
     list.appendChild(row);
   });
@@ -509,7 +617,7 @@ function updateChecklist() {
 function fillForm(extraction) {
   if (!profileForm || !extraction) return;
 
-  const address = extraction.address || "";
+  const address = extraction.address || extraction.serviceAddress || "";
   const addressParts = address.split(",");
   const map = {
     firstName: extraction.firstName,
@@ -527,14 +635,18 @@ function fillForm(extraction) {
     if (field && map[key]) field.value = map[key];
   });
 
-  if (extraction.documentNumber) {
-    document.getElementById("docNumber").textContent = extraction.documentNumber;
+  const docNumber = document.getElementById("docNumber");
+  const docExpiry = document.getElementById("docExpiry");
+  const nationality = document.getElementById("nationality");
+
+  if (docNumber && extraction.documentNumber) {
+    docNumber.textContent = extraction.documentNumber;
   }
-  if (extraction.dateOfExpiry) {
-    document.getElementById("docExpiry").textContent = extraction.dateOfExpiry;
+  if (docExpiry && extraction.dateOfExpiry) {
+    docExpiry.textContent = extraction.dateOfExpiry;
   }
-  if (extraction.nationality) {
-    document.getElementById("nationality").textContent = extraction.nationality;
+  if (nationality && extraction.nationality) {
+    nationality.textContent = extraction.nationality;
   }
 }
 
@@ -551,7 +663,7 @@ function showValidationBanner(errors, warnings) {
     "validation-banner " + (isError ? "banner-error" : "banner-warning");
 
   const title = document.createElement("strong");
-  title.textContent = isError ? "Points a corriger" : "Informations";
+  title.textContent = isError ? "Points à corriger" : "Points de vigilance";
   banner.appendChild(title);
 
   const list = document.createElement("ul");
@@ -583,21 +695,19 @@ async function initSession() {
   }
 }
 
-function focusAccountOnboarding() {
-  const section = document.getElementById("account");
-  if (section) {
-    section.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-}
-
 function ensureAccountBeforeKyc(message) {
   if (accountState) return false;
 
   const text =
-    message || "Creez d'abord votre compte BayBank avant de continuer le KYC.";
+    message || "Créez d'abord votre espace BayBank avant d'envoyer des documents.";
+
+  if (result && currentPage === "kyc") {
+    result.textContent = text;
+  }
+
   setInlineFeedback(text, "error");
   setUploadFeedback(text, "warning");
-  focusAccountOnboarding();
+  scrollToManualTarget();
   return true;
 }
 
@@ -638,15 +748,20 @@ function ensureChatWelcome() {
   if (chatHasWelcomed) return;
   chatHasWelcomed = true;
 
-  const welcome =
-    "Bonjour, je peux vous aider a ouvrir votre compte " +
-    BRAND +
-    ", verifier les documents acceptes et pre-remplir le KYC a partir d'un document valide.";
+  let welcome =
+    "Bonjour, je peux vous aider à ouvrir votre compte BayBank et à préparer les prochaines étapes.";
+
+  if (currentPage === "kyc") {
+    welcome =
+      "Bonjour, je peux vous aider à envoyer vos documents, vérifier les pièces acceptées et préremplir le formulaire KYC à partir d'un document valide.";
+  }
+
   say(welcome, "agent");
   chatHistory.push({ role: "assistant", content: welcome });
 }
 
 function openChat() {
+  if (!chatShell || !chatLauncher) return;
   chatIsOpen = true;
   chatIsMinimized = false;
   closeChatMenu();
@@ -670,8 +785,14 @@ function toggleChatMinimize() {
 function buildNextStepHint(french) {
   if (!accountState) {
     return french
-      ? "Commencez par creer votre compte BayBank."
-      : "Start by creating your BayBank account first.";
+      ? "Commencez par créer votre espace BayBank."
+      : "Start by creating your BayBank account.";
+  }
+
+  if (currentPage !== "kyc") {
+    return french
+      ? "Votre compte est prêt. Ouvrez maintenant la page de vérification pour envoyer vos documents."
+      : "Your account is ready. Open the verification page to upload your documents.";
   }
 
   const needsIdentity = !uploadedDocuments.includes("identity");
@@ -679,22 +800,22 @@ function buildNextStepHint(french) {
 
   if (needsIdentity && needsAddress) {
     return french
-      ? "Envoyez d'abord votre piece d'identite, puis votre justificatif de domicile."
+      ? "Envoyez d'abord votre pièce d'identité, puis votre justificatif de domicile."
       : "Please upload your identity document first, then your proof of address.";
   }
   if (needsIdentity) {
     return french
-      ? "Le document manquant est votre piece d'identite."
+      ? "La pièce manquante est votre pièce d'identité."
       : "The missing document is your identity document.";
   }
   if (needsAddress) {
     return french
-      ? "Le document manquant est votre justificatif de domicile."
+      ? "La pièce manquante est votre justificatif de domicile."
       : "The missing document is your proof of address.";
   }
   return french
-    ? "Les deux documents sont deja recus. Verifiez les donnees puis soumettez le dossier."
-    : "Both documents have already been received. Review the extracted data and submit the application.";
+    ? "Les deux documents sont reçus. Vérifiez les données puis terminez l'ouverture du compte."
+    : "Both documents have been received. Review the extracted data and finish opening the account.";
 }
 
 function buildLocalChatFallback(message) {
@@ -708,7 +829,6 @@ function buildLocalChatFallback(message) {
     "preuve",
     "compte",
     "statut",
-    "k y c",
     "kyc",
   ]);
   const nextStepHint = buildNextStepHint(french);
@@ -767,9 +887,9 @@ function buildLocalChatFallback(message) {
 
   if (wantsGreeting) {
     return french
-      ? "Bonjour, je peux vous aider a ouvrir votre compte, verifier les documents acceptes et pre-remplir le KYC. " +
+      ? "Bonjour, je peux vous aider sur l'ouverture de compte, les documents acceptés et le remplissage automatique du dossier. " +
           nextStepHint
-      : "Hello, I can help you open your account, explain accepted documents and auto-fill the KYC form. " +
+      : "Hello, I can help with account opening, accepted documents and auto-filling the verification form. " +
           nextStepHint;
   }
 
@@ -777,7 +897,9 @@ function buildLocalChatFallback(message) {
     if (french) {
       if (wantsAddress && !wantsIdentity) {
         return (
-          "Comme justificatif de domicile, nous acceptons une facture, un releve bancaire, une lettre d'assurance, un avis de taxe ou un courrier officiel recent avec l'adresse complete. Formats acceptes : " +
+          "Comme justificatif de domicile, nous acceptons " +
+          ADDRESS_DOCUMENTS +
+          ". Formats acceptés : " +
           ACCEPTED_CHAT_FORMATS +
           ". " +
           nextStepHint
@@ -785,14 +907,20 @@ function buildLocalChatFallback(message) {
       }
       if (wantsIdentity && !wantsAddress) {
         return (
-          "Pour l'identite, nous acceptons un passeport, une carte nationale d'identite ou un permis de conduire. Formats acceptes : " +
+          "Pour l'identité, nous acceptons " +
+          IDENTITY_DOCUMENTS +
+          ". Formats acceptés : " +
           ACCEPTED_CHAT_FORMATS +
           ". " +
           nextStepHint
         );
       }
       return (
-        "Nous acceptons comme piece d'identite un passeport, une carte nationale d'identite ou un permis de conduire, puis comme justificatif de domicile un document recent de moins de 90 jours avec l'adresse complete. Formats acceptes : " +
+        "Nous acceptons comme pièce d'identité " +
+        IDENTITY_DOCUMENTS +
+        ". Comme justificatif de domicile, nous acceptons " +
+        ADDRESS_DOCUMENTS +
+        ". Formats acceptés : " +
         ACCEPTED_CHAT_FORMATS +
         ". " +
         nextStepHint
@@ -811,7 +939,7 @@ function buildLocalChatFallback(message) {
     }
     if (wantsIdentity && !wantsAddress) {
       return (
-        "For identity, we accept a " +
+        "For identity, we accept " +
         IDENTITY_DOCUMENTS +
         ". Accepted upload formats: " +
         ACCEPTED_CHAT_FORMATS +
@@ -820,9 +948,9 @@ function buildLocalChatFallback(message) {
       );
     }
     return (
-      "We accept a " +
+      "We accept " +
       IDENTITY_DOCUMENTS +
-      " for identity, plus " +
+      " for identity and " +
       ADDRESS_DOCUMENTS +
       " for proof of address. Accepted upload formats: " +
       ACCEPTED_CHAT_FORMATS +
@@ -838,28 +966,23 @@ function buildLocalChatFallback(message) {
   if (wantsRejection) {
     if (french) {
       return (
-        "Le dernier document a ete refuse pour la raison suivante : " +
+        "Le dernier document a été refusé pour la raison suivante : " +
         validationErrors.join("; ") +
-        ". Merci de reteleverser un document plus clair ou conforme."
+        ". Merci d'envoyer un document plus clair ou plus récent."
       );
     }
     return (
       "The last document was rejected for this reason: " +
       validationErrors.join("; ") +
-      ". Please upload a clearer compliant document."
+      ". Please upload a clearer or more recent document."
     );
   }
 
-  if (french) {
-    return (
-      "Je peux vous aider sur l'ouverture de compte, les documents KYC acceptes et le statut du dossier. " +
-      nextStepHint
-    );
-  }
-  return (
-    "I can help with account opening, accepted KYC documents and application status. " +
-    nextStepHint
-  );
+  return french
+    ? "Je peux vous aider sur l'ouverture de compte, les documents acceptés et l'avancement du dossier. " +
+        nextStepHint
+    : "I can help with account opening, accepted documents and application status. " +
+        nextStepHint;
 }
 
 function publishAssistantReply(reply) {
@@ -874,7 +997,7 @@ async function sendMessage(text) {
   openChat();
   say(trimmedText, "user");
   chatHistory.push({ role: "user", content: trimmedText });
-  showProcessing("L'assistant redige sa reponse", "typing");
+  showProcessing("L'assistant rédige sa réponse", "typing");
 
   const fallbackReply = buildLocalChatFallback(trimmedText);
   const controller = new AbortController();
@@ -896,7 +1019,8 @@ async function sendMessage(text) {
         context: {
           step: currentStep,
           accountCreated: Boolean(accountState),
-          workspaceId: accountState && accountState.workspaceId,
+          accountId: accountState && accountState.accountId,
+          currentPage: currentPage,
           uploadedDocuments: uploadedDocuments,
           validationErrors: validationErrors,
           validationWarnings: validationWarnings,
@@ -935,7 +1059,7 @@ function guessCategory(fileName) {
 }
 
 function getCategoryLabel(category) {
-  if (category === "identity") return "piece d'identite";
+  if (category === "identity") return "pièce d'identité";
   if (category === "address") return "justificatif de domicile";
   return "document";
 }
@@ -992,160 +1116,118 @@ async function prepareImageForUpload(file) {
 }
 
 function createAccountPreview(formData) {
+  const existing = accountState || {};
+
   return {
-    workspaceName: formData.workspaceName,
+    firstName: formData.accountFirstName,
+    lastName: formData.accountLastName,
     contactEmail: formData.accountEmail,
     phone: formData.accountPhone,
     country: formData.accountCountry,
-    firstName: formData.accountFirstName,
-    lastName: formData.accountLastName,
-    companyType: formData.companyType,
-    workspaceId: generateId("org"),
-    customerId: generateId("client"),
-    owner: pickOwner(formData.accountCountry),
-    createdAt: new Date().toISOString(),
+    accountId: existing.accountId || generateId("acct"),
+    customerId: existing.customerId || generateId("client"),
+    owner: existing.owner || pickOwner(formData.accountCountry),
+    accountName:
+      [formData.accountFirstName, formData.accountLastName].filter(Boolean).join(" ") ||
+      "Compte BayBank",
+    planName: "BayBank Everyday",
+    createdAt: existing.createdAt || new Date().toISOString(),
+    kycStatus: existing.kycStatus || null,
   };
 }
 
-if (createAccountBtn && accountForm) {
-  createAccountBtn.addEventListener("click", async function() {
+function initAccountPage() {
+  if (!accountForm) return;
+
+  accountForm.addEventListener("submit", async function(event) {
+    event.preventDefault();
     await initSession();
 
     const formData = {
-      workspaceName: accountForm.elements.workspaceName.value.trim(),
+      accountFirstName: accountForm.elements.accountFirstName.value.trim(),
+      accountLastName: accountForm.elements.accountLastName.value.trim(),
       accountEmail: accountForm.elements.accountEmail.value.trim(),
       accountPhone: accountForm.elements.accountPhone.value.trim(),
       accountCountry: accountForm.elements.accountCountry.value.trim(),
-      accountFirstName: accountForm.elements.accountFirstName.value.trim(),
-      accountLastName: accountForm.elements.accountLastName.value.trim(),
-      companyType: accountForm.elements.companyType.value.trim(),
       accountPassword: accountForm.elements.accountPassword.value.trim(),
     };
 
     const missing = [];
-    if (!formData.workspaceName) missing.push("nom de l'organisation");
-    if (!formData.accountEmail) missing.push("email professionnel");
-    if (!formData.accountCountry) missing.push("pays de residence");
-    if (!formData.accountFirstName) missing.push("prenom administrateur");
-    if (!formData.accountLastName) missing.push("nom administrateur");
+    if (!formData.accountFirstName) missing.push("prénom");
+    if (!formData.accountLastName) missing.push("nom");
+    if (!formData.accountEmail) missing.push("adresse e-mail");
+    if (!formData.accountPhone) missing.push("téléphone");
+    if (!formData.accountCountry) missing.push("pays de résidence");
     if (!formData.accountPassword || formData.accountPassword.length < 8) {
-      missing.push("mot de passe (8 caracteres minimum)");
+      missing.push("mot de passe (8 caractères minimum)");
     }
 
     if (missing.length) {
-      setInlineFeedback("Merci de completer : " + missing.join(", ") + ".", "error");
+      setInlineFeedback("Merci de compléter : " + missing.join(", ") + ".", "error");
       return;
     }
 
     journeyFinished = false;
     accountState = createAccountPreview(formData);
     persistAccountState();
-    prefillProfileFromAccount();
+    updateAccountCtas();
     prefillAccountForm();
     renderAccountState();
-    syncJourneyStage();
-    setInlineFeedback("Compte cree. Le dossier KYC est maintenant disponible.", "success");
+    setInlineFeedback(
+      "Compte créé. Redirection vers la page de vérification BayBank…",
+      "success",
+    );
 
-    if (crmFeed) crmFeed.innerHTML = "";
-    if (crmEmpty) crmEmpty.hidden = false;
-    setCrmStatus("En attente", "neutral");
-
-    const section = document.getElementById("manual-kyc");
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    window.setTimeout(function() {
+      window.location.href = "kyc.html";
+    }, 500);
   });
 }
 
-if (chatLauncher) {
-  chatLauncher.addEventListener("click", openChat);
-}
+function openUploadPicker(intent) {
+  if (!fileInput) return;
 
-openChatButtons.forEach(function(button) {
-  button.addEventListener("click", openChat);
-});
-
-if (chatMenuBtn) {
-  chatMenuBtn.addEventListener("click", function(event) {
-    event.stopPropagation();
-    toggleChatMenu();
-  });
-}
-
-if (chatOpenManualBtn) {
-  chatOpenManualBtn.addEventListener("click", function() {
-    closeChatMenu();
-    const section = document.getElementById("manual-kyc");
-    if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-}
-
-if (chatCloseActionBtn) {
-  chatCloseActionBtn.addEventListener("click", function() {
-    closeChatMenu();
-    closeChat();
-  });
-}
-
-if (chatAttachBtn && fileInput) {
-  chatAttachBtn.addEventListener("click", function() {
+  if (currentPage !== "kyc") {
     openChat();
-    if (
-      ensureAccountBeforeKyc(
-        "Commencez par creer votre compte avant d'envoyer un document depuis le chat.",
-      )
-    ) {
-      say(
-        "Commencez par creer votre compte BayBank. Ensuite, je pourrai televerser le document et pre-remplir votre KYC.",
-        "agent",
-      );
-      return;
-    }
-    fileInput.click();
-  });
+    publishAssistantReply(
+      "Les documents s'envoient sur la page de vérification. Créez votre compte puis poursuivez sur l'étape KYC pour activer l'auto-remplissage.",
+    );
+    return;
+  }
+
+  if (
+    ensureAccountBeforeKyc(
+      "Créez votre compte BayBank avant d'envoyer un document depuis cette page.",
+    )
+  ) {
+    return;
+  }
+
+  pendingUploadIntent = intent || null;
+  fileInput.click();
 }
 
-window.addEventListener("click", function(event) {
-  if (!chatMenu || chatMenu.hidden) return;
-  if (chatMenu.contains(event.target)) return;
-  if (chatMenuBtn && chatMenuBtn.contains(event.target)) return;
-  closeChatMenu();
-});
+function initUploadFlow() {
+  if (uploadIdentityBtn) {
+    uploadIdentityBtn.addEventListener("click", function() {
+      openUploadPicker("identity");
+    });
+  }
 
-if (chatMinimizeBtn) {
-  chatMinimizeBtn.addEventListener("click", toggleChatMinimize);
-}
+  if (uploadAddressBtn) {
+    uploadAddressBtn.addEventListener("click", function() {
+      openUploadPicker("address");
+    });
+  }
 
-if (chatCloseBtn) {
-  chatCloseBtn.addEventListener("click", closeChat);
-}
+  if (!fileInput) return;
 
-if (sendBtn) {
-  sendBtn.addEventListener("click", function(event) {
-    event.preventDefault();
-    const value = input.value.trim();
-    if (!value) return;
-    input.value = "";
-    sendMessage(value);
-  });
-}
-
-if (input) {
-  input.addEventListener("keydown", function(event) {
-    if ((event.key === "Enter" || event.keyCode === 13) && !event.shiftKey) {
-      event.preventDefault();
-      const value = input.value.trim();
-      if (!value) return;
-      input.value = "";
-      sendMessage(value);
-    }
-  });
-}
-
-if (fileInput) {
   fileInput.addEventListener("change", async function(event) {
     const file = event.target.files && event.target.files[0];
     if (!file) return;
+
+    const requestedCategory = pendingUploadIntent;
+    pendingUploadIntent = null;
 
     if (ensureAccountBeforeKyc()) {
       event.target.value = "";
@@ -1174,8 +1256,8 @@ if (fileInput) {
       return;
     }
 
-    const documentCategory = guessCategory(file.name);
-    showProcessing("Verification de " + file.name + "...");
+    const documentCategory = requestedCategory || guessCategory(file.name);
+    showProcessing("Vérification de " + file.name + "…");
 
     try {
       const prepared = await prepareImageForUpload(file);
@@ -1186,7 +1268,7 @@ if (fileInput) {
       if (approxBytes > 4 * 1024 * 1024) {
         removeProcessing();
         const tooLargeMessage =
-          "Le document est trop volumineux. Merci d'utiliser un fichier plus leger.";
+          "Le document est trop volumineux. Merci d'utiliser un fichier plus léger.";
         setUploadFeedback(tooLargeMessage, "error");
         say(tooLargeMessage, "agent");
         event.target.value = "";
@@ -1211,7 +1293,7 @@ if (fileInput) {
           return {};
         });
         const message =
-          error.error || "La verification du document a echoue. Merci de reessayer.";
+          error.error || "La vérification du document a échoué. Merci de réessayer.";
         setUploadFeedback(message, "error");
         say(message, "agent");
         event.target.value = "";
@@ -1223,14 +1305,14 @@ if (fileInput) {
         const issues =
           checkResult.issues && checkResult.issues.length
             ? checkResult.issues.join(" ")
-            : "Le document ne peut pas etre accepte.";
+            : "Le document ne peut pas être accepté.";
         const rejectionMessage =
-          "Document refuse : " +
+          "Document refusé : " +
           issues +
-          " Merci d'envoyer un document clair et conforme.";
+          " Merci d'envoyer un document clair, complet et conforme.";
         validationErrors = checkResult.issues || [];
         setUploadFeedback(rejectionMessage, "error");
-        say("Document refuse :\n" + issues, "agent");
+        say("Document refusé :\n" + issues, "agent");
         event.target.value = "";
         return;
       }
@@ -1240,11 +1322,11 @@ if (fileInput) {
 
       if (checkResult.warnings && checkResult.warnings.length) {
         setUploadFeedback(
-          "Document accepte comme " + categoryLabel + " avec remarques.",
+          "Document accepté comme " + categoryLabel + " avec remarques.",
           "warning",
         );
         say(
-          "Document accepte comme " +
+          "Document accepté comme " +
             categoryLabel +
             ". Notes : " +
             checkResult.warnings.join("; ") +
@@ -1252,16 +1334,16 @@ if (fileInput) {
           "agent",
         );
       } else {
-        setUploadFeedback("Document accepte comme " + categoryLabel + ".", "success");
+        setUploadFeedback("Document accepté comme " + categoryLabel + ".", "success");
         say(
-          "Document accepte comme " +
+          "Document accepté comme " +
             categoryLabel +
             ". Extraction des informations en cours.",
           "agent",
         );
       }
 
-      showProcessing("Extraction des informations depuis " + file.name + "...");
+      showProcessing("Extraction des informations depuis " + file.name + "…");
 
       const uploadResponse = await fetch("/api/kyc/upload", {
         method: "POST",
@@ -1282,7 +1364,8 @@ if (fileInput) {
         const error = await uploadResponse.json().catch(function() {
           return {};
         });
-        const message = error.error || "Le televersement a echoue. Merci de reessayer.";
+        const message =
+          error.error || "Le téléversement a échoué. Merci de réessayer.";
         setUploadFeedback(message, "error");
         say(message, "agent");
         event.target.value = "";
@@ -1299,10 +1382,14 @@ if (fileInput) {
       }
       if (effectiveCategory === "identity") identityExtraction = extraction;
       if (effectiveCategory === "address") addressExtraction = extraction;
+      if (effectiveCategory === "identity" || effectiveCategory === "address") {
+        documentNames[effectiveCategory] = file.name;
+      }
 
       validationErrors = validation.errors || [];
       validationWarnings = validation.warnings || [];
 
+      renderDocumentState();
       updateChecklist();
       showValidationBanner(validationErrors, validationWarnings);
 
@@ -1315,21 +1402,21 @@ if (fileInput) {
 
       if (validation.passed) {
         setUploadFeedback(
-          "Informations extraites avec succes. Le formulaire a ete rempli automatiquement.",
+          "Informations extraites avec succès. Le formulaire a été rempli automatiquement.",
           "success",
         );
         say(
-          "Informations extraites avec succes. Le formulaire KYC a ete pre-rempli. Verifiez les champs puis soumettez le dossier.",
+          "Les informations ont été extraites avec succès. Le formulaire KYC a été prérempli. Vérifiez les champs puis terminez l'ouverture du compte.",
           "agent",
         );
       } else {
         const validationMessage =
-          "Le document a ete traite avec des points de vigilance : " +
+          "Le document a été traité avec des points de vigilance : " +
           validationErrors.join(" ") +
-          " Merci de corriger les informations ou de renvoyer un document valide.";
+          " Merci de corriger les informations ou d'envoyer un document plus précis.";
         setUploadFeedback(validationMessage, "warning");
         say(
-          "Le document a ete traite avec des points de vigilance :\n" +
+          "Le document a été traité avec des points de vigilance :\n" +
             validationErrors.join("\n"),
           "agent",
         );
@@ -1338,7 +1425,7 @@ if (fileInput) {
       removeProcessing();
       console.error("Upload error:", error);
       const message =
-        "Une erreur est survenue pendant le traitement du document. Merci de reessayer.";
+        "Une erreur est survenue pendant le traitement du document. Merci de réessayer.";
       setUploadFeedback(message, "error");
       say(message, "agent");
     } finally {
@@ -1347,7 +1434,9 @@ if (fileInput) {
   });
 }
 
-if (submitBtn) {
+function initSubmitFlow() {
+  if (!submitBtn) return;
+
   submitBtn.addEventListener("click", async function(event) {
     event.preventDefault();
     await initSession();
@@ -1356,7 +1445,7 @@ if (submitBtn) {
 
     const missingDocuments = [];
     if (!uploadedDocuments.includes("identity")) {
-      missingDocuments.push("piece d'identite");
+      missingDocuments.push("pièce d'identité");
     }
     if (!uploadedDocuments.includes("address")) {
       missingDocuments.push("justificatif de domicile");
@@ -1365,13 +1454,13 @@ if (submitBtn) {
     if (missingDocuments.length) {
       const message =
         "Merci d'ajouter encore : " + missingDocuments.join(" et ") + ".";
-      result.textContent = message;
+      if (result) result.textContent = message;
       setUploadFeedback(message, "warning");
       syncJourneyStage();
       return;
     }
 
-    showProcessing("Verification finale du dossier...");
+    showProcessing("Vérification finale du dossier…");
 
     const profileData = {};
     [
@@ -1410,8 +1499,8 @@ if (submitBtn) {
           return {};
         });
         const message =
-          "La soumission a echoue : " + (error.error || "merci de reessayer.");
-        result.textContent = message;
+          "La soumission a échoué : " + (error.error || "merci de réessayer.");
+        if (result) result.textContent = message;
         say(message, "agent");
         return;
       }
@@ -1423,25 +1512,36 @@ if (submitBtn) {
         kycStatus: submission.status,
         submissionId: submission.submissionId,
         submittedAt: submission.submittedAt,
+        accountId:
+          (submission.accountTimeline && submission.accountTimeline.accountId) ||
+          accountState.accountId,
+        customerId:
+          (submission.accountTimeline && submission.accountTimeline.customerId) ||
+          accountState.customerId,
       });
       persistAccountState();
+      updateAccountCtas();
       renderAccountState();
       syncJourneyStage();
 
-      const timeline = submission.accountTimeline || submission.crmSimulation || null;
+      const timeline = submission.accountTimeline || null;
 
       if (submission.status === "approved") {
-        result.textContent =
-          "Compte active. Votre dossier est valide et votre espace BayBank est pret.";
+        if (result) {
+          result.textContent =
+            "Compte activé. Votre dossier a été validé et votre espace BayBank est prêt.";
+        }
         say(
-          "Le KYC est valide. Votre compte BayBank est active et le dossier client a ete enregistre.",
+          "Le dossier est validé. Votre compte BayBank est activé et le profil client a bien été enregistré.",
           "agent",
         );
       } else {
-        result.textContent =
-          "Dossier soumis. Notre equipe poursuit la verification avant activation finale.";
+        if (result) {
+          result.textContent =
+            "Dossier transmis. L'ouverture de compte se poursuit pendant la revue du dossier.";
+        }
         say(
-          "Le dossier a bien ete soumis. Il est maintenant en cours de revue par l'equipe conformite.",
+          "Le dossier a bien été transmis. La revue est en cours et le journal d'ouverture continue à se mettre à jour.",
           "agent",
         );
       }
@@ -1454,7 +1554,7 @@ if (submitBtn) {
         submission.reconciliation.suspiciousSignals.length
       ) {
         say(
-          "Notes de revue :\n" +
+          "Points signalés pour la revue :\n" +
             submission.reconciliation.suspiciousSignals.join("\n"),
           "agent",
         );
@@ -1463,21 +1563,117 @@ if (submitBtn) {
       removeProcessing();
       console.error("Submit error:", error);
       const message =
-        "La soumission a echoue a cause d'une erreur reseau. Merci de reessayer.";
-      result.textContent = message;
+        "La soumission a échoué à cause d'une erreur réseau. Merci de réessayer.";
+      if (result) result.textContent = message;
       say(message, "agent");
     }
   });
 }
 
+function initChat() {
+  if (!chatShell || !chatLauncher) return;
+
+  if (chatAttachBtn && currentPage !== "kyc") {
+    chatAttachBtn.hidden = true;
+  }
+
+  chatLauncher.addEventListener("click", openChat);
+
+  openChatButtons.forEach(function(button) {
+    button.addEventListener("click", openChat);
+  });
+
+  if (chatMenuBtn) {
+    chatMenuBtn.addEventListener("click", function(event) {
+      event.stopPropagation();
+      toggleChatMenu();
+    });
+  }
+
+  if (chatOpenManualBtn) {
+    chatOpenManualBtn.addEventListener("click", function() {
+      closeChatMenu();
+      scrollToManualTarget();
+    });
+  }
+
+  if (chatCloseActionBtn) {
+    chatCloseActionBtn.addEventListener("click", function() {
+      closeChatMenu();
+      closeChat();
+    });
+  }
+
+  if (chatAttachBtn && fileInput) {
+    chatAttachBtn.addEventListener("click", function() {
+      openChat();
+      openUploadPicker(null);
+    });
+  }
+
+  window.addEventListener("click", function(event) {
+    if (!chatMenu || chatMenu.hidden) return;
+    if (chatMenu.contains(event.target)) return;
+    if (chatMenuBtn && chatMenuBtn.contains(event.target)) return;
+    closeChatMenu();
+  });
+
+  if (chatMinimizeBtn) {
+    chatMinimizeBtn.addEventListener("click", toggleChatMinimize);
+  }
+
+  if (chatCloseBtn) {
+    chatCloseBtn.addEventListener("click", closeChat);
+  }
+
+  if (sendBtn) {
+    sendBtn.addEventListener("click", function(event) {
+      event.preventDefault();
+      if (!input) return;
+      const value = input.value.trim();
+      if (!value) return;
+      input.value = "";
+      sendMessage(value);
+    });
+  }
+
+  if (input) {
+    input.addEventListener("keydown", function(event) {
+      if ((event.key === "Enter" || event.keyCode === 13) && !event.shiftKey) {
+        event.preventDefault();
+        const value = input.value.trim();
+        if (!value) return;
+        input.value = "";
+        sendMessage(value);
+      }
+    });
+  }
+}
+
 (async function init() {
-  ensureUploadFeedback();
+  updateBranding();
+  updateAccountCtas();
+  initHeader();
   prefillAccountForm();
   prefillProfileFromAccount();
-  updateChecklist();
   renderAccountState();
+  renderDocumentState();
+  updateChecklist();
   syncJourneyStage();
+  initAccountPage();
+  initUploadFlow();
+  initSubmitFlow();
+  initChat();
   updateChatShell();
-  setCrmStatus("En attente", "neutral");
+
+  if (accountState && accountState.kycStatus) {
+    setCrmStatus(
+      accountState.kycStatus === "approved" ? "Compte actif" : "Revue en cours",
+      accountState.kycStatus === "approved" ? "success" : "pending",
+    );
+  } else {
+    setCrmStatus("En attente", "neutral");
+  }
+
   await initSession();
 })();

@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BayBank | Services bancaires</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-page="services">
+  <header class="site-header" id="siteHeader">
+    <div class="container">
+      <div class="header-row">
+        <a href="index.html" class="brand" aria-label="Accueil BayBank">
+          <img src="logo.png" alt="Logo BayBank" class="brand-logo" />
+          <span class="brand-copy">
+            <strong data-brand>BayBank</strong>
+            <span data-service>Banque digitale nouvelle génération</span>
+          </span>
+        </a>
+
+        <button id="navToggle" class="nav-toggle" type="button" aria-label="Ouvrir le menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <div id="navbarCollapse" class="navbar-wrap">
+          <nav class="site-nav" aria-label="Navigation principale">
+            <a href="index.html">Accueil</a>
+            <a href="services.html" class="is-active">Services</a>
+            <a href="open-account.html">Ouvrir un compte</a>
+            <a href="kyc.html">Mon dossier</a>
+          </nav>
+
+          <div class="header-actions">
+            <a href="index.html" class="ghost-link">Retour à l'accueil</a>
+            <a href="open-account.html" class="button button-primary" data-account-cta>
+              Ouvrir un compte
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="inner-page">
+    <section class="page-hero">
+      <div class="container page-hero-grid">
+        <div class="page-hero-copy">
+          <span class="eyebrow">Services BayBank</span>
+          <h1>Une gamme de services bancaires claire, rapide et prête à évoluer avec vos usages.</h1>
+          <p>
+            BayBank rassemble l'essentiel d'une banque digitale moderne : compte courant, cartes,
+            paiements, transferts et parcours d'ouverture sécurisé.
+          </p>
+        </div>
+
+        <div class="page-hero-card">
+          <span class="mini-label">En pratique</span>
+          <strong>Un compte, plusieurs usages.</strong>
+          <p>
+            Utilisez BayBank pour vos dépenses du quotidien, vos voyages, vos paiements en ligne
+            et vos opérations internationales.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <div class="container">
+        <div class="section-heading">
+          <span class="eyebrow">Panorama</span>
+          <h2>Les piliers du produit BayBank.</h2>
+          <p>Chaque service est conçu pour rester simple à activer, lisible à utiliser et robuste dans le temps.</p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="info-card">
+            <span class="card-badge">Comptes</span>
+            <h3>Compte courant BayBank</h3>
+            <p>
+              Un espace bancaire quotidien avec IBAN, suivi des mouvements, opérations planifiées
+              et visibilité immédiate sur la trésorerie disponible.
+            </p>
+          </article>
+
+          <article class="info-card">
+            <span class="card-badge">Cartes</span>
+            <h3>Cartes physiques et virtuelles</h3>
+            <p>
+              Activez une carte, ajustez les paramètres de sécurité et suivez les paiements en
+              quelques secondes depuis votre espace client.
+            </p>
+          </article>
+
+          <article class="info-card">
+            <span class="card-badge">Paiements</span>
+            <h3>Virements fluides et instantanés</h3>
+            <p>
+              Gérez les virements SEPA, les bénéficiaires récurrents et les transferts urgents
+              depuis une interface pensée pour aller droit au but.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section alt-section">
+      <div class="container split-section">
+        <div class="split-copy">
+          <span class="eyebrow">Activation</span>
+          <h2>Un parcours d'ouverture clair, avec une vérification séparée au bon moment.</h2>
+          <p>
+            L'utilisateur découvre d'abord BayBank, crée ensuite son compte, puis accède à une
+            page dédiée pour envoyer sa pièce d'identité et son justificatif de domicile.
+          </p>
+          <a href="open-account.html" class="button button-primary" data-account-cta>Commencer maintenant</a>
+        </div>
+
+        <div class="service-stack">
+          <article class="service-card">
+            <strong>Création du compte</strong>
+            <span>Informations personnelles de base et activation de l'espace client.</span>
+          </article>
+          <article class="service-card">
+            <strong>Page KYC dédiée</strong>
+            <span>Envoi manuel des documents ou accompagnement via le chat BayBank.</span>
+          </article>
+          <article class="service-card">
+            <strong>Journal d'ouverture</strong>
+            <span>Le suivi du dossier s'affiche automatiquement tout au long de l'inscription.</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <div class="container">
+        <div class="section-heading">
+          <span class="eyebrow">Ce que l'utilisateur voit</span>
+          <h2>Une banque qui ressemble à un vrai produit, pas à une simple démonstration de KYC.</h2>
+        </div>
+
+        <div class="service-table">
+          <div class="service-row">
+            <strong>Ouverture de compte</strong>
+            <span>Création d'espace BayBank, données de contact, sécurité d'accès.</span>
+          </div>
+          <div class="service-row">
+            <strong>Vérification d'identité</strong>
+            <span>Pièce d'identité, justificatif de domicile, auto-remplissage des champs extraits.</span>
+          </div>
+          <div class="service-row">
+            <strong>Suivi client</strong>
+            <span>Historique du dossier, état d'avancement et journal d'ouverture associé au compte.</span>
+          </div>
+          <div class="service-row">
+            <strong>Assistance</strong>
+            <span>Chat BayBank disponible pour répondre aux questions et accompagner la collecte documentaire.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <div class="container cta-card">
+        <div>
+          <span class="eyebrow">Passer à l'action</span>
+          <h2>Créez votre compte BayBank et poursuivez ensuite votre vérification sur la page dédiée.</h2>
+        </div>
+        <div class="cta-actions">
+          <a href="open-account.html" class="button button-primary" data-account-cta>
+            Ouvrir un compte
+          </a>
+          <a href="kyc.html" class="button button-secondary">Voir la page KYC</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="brand footer-brand-link">
+          <img src="logo.png" alt="Logo BayBank" class="brand-logo" />
+          <span class="brand-copy">
+            <strong>BayBank</strong>
+            <span>Banque digitale nouvelle génération</span>
+          </span>
+        </a>
+        <p>BayBank rassemble les parcours de compte, de vérification et de suivi client dans une seule expérience cohérente.</p>
+      </div>
+
+      <div class="footer-column">
+        <h3>Produit</h3>
+        <a href="services.html">Services</a>
+        <a href="open-account.html">Ouverture</a>
+        <a href="kyc.html">Vérification</a>
+      </div>
+
+      <div class="footer-column">
+        <h3>Parcours</h3>
+        <a href="open-account.html">Créer un compte</a>
+        <a href="kyc.html">Compléter le dossier</a>
+        <a href="index.html">Accueil</a>
+      </div>
+
+      <div class="footer-column">
+        <h3>BayBank</h3>
+        <a href="index.html">Présentation</a>
+        <a href="services.html">Catalogue</a>
+        <a href="open-account.html">Devenir client</a>
+      </div>
+    </div>
+
+    <div class="container footer-meta">
+      <span>© 2026 BayBank. Tous droits réservés.</span>
+      <span>Ouverture de compte, contrôle documentaire et suivi du dossier dans un seul produit.</span>
+    </div>
+  </footer>
+
+  <script src="lib/branding.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

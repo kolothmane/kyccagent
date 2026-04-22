@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BayBank | Vérification d'identité</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-page="kyc">
+  <header class="site-header" id="siteHeader">
+    <div class="container">
+      <div class="header-row">
+        <a href="index.html" class="brand" aria-label="Accueil BayBank">
+          <img src="logo.png" alt="Logo BayBank" class="brand-logo" />
+          <span class="brand-copy">
+            <strong data-brand>BayBank</strong>
+            <span data-service>Banque digitale nouvelle génération</span>
+          </span>
+        </a>
+
+        <button id="navToggle" class="nav-toggle" type="button" aria-label="Ouvrir le menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <div id="navbarCollapse" class="navbar-wrap">
+          <nav class="site-nav" aria-label="Navigation principale">
+            <a href="index.html">Accueil</a>
+            <a href="services.html">Services</a>
+            <a href="open-account.html">Ouvrir un compte</a>
+            <a href="kyc.html" class="is-active">Mon dossier</a>
+          </nav>
+
+          <div class="header-actions">
+            <a href="open-account.html" class="ghost-link">Retour à l'ouverture</a>
+            <button type="button" class="button button-secondary" data-open-chat>
+              Ouvrir l'assistant
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="inner-page">
+    <section class="page-hero page-hero-compact">
+      <div class="container page-hero-grid">
+        <div class="page-hero-copy">
+          <span class="eyebrow">Étape 2 · Vérification</span>
+          <h1>Finalisez votre ouverture de compte BayBank.</h1>
+          <p>
+            Envoyez votre pièce d'identité et votre justificatif de domicile, ou laissez
+            l'assistant BayBank préremplir automatiquement les champs concernés à partir des
+            documents acceptés.
+          </p>
+        </div>
+
+        <div class="page-hero-card">
+          <span class="mini-label">Deux options</span>
+          <strong>Un parcours manuel ou assisté.</strong>
+          <p>
+            Vous pouvez compléter le formulaire à la main et téléverser vos documents, ou ouvrir
+            le chat pour vous faire accompagner étape par étape.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="kyc-workspace" id="manualKyc" data-chat-manual-target>
+      <div class="container kyc-grid">
+        <div class="kyc-main">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="section-kicker">Compte BayBank</span>
+                <h2>Votre dossier client</h2>
+              </div>
+              <span id="accountPill" class="status-badge neutral">À préparer</span>
+            </div>
+
+            <div id="accountStatus" class="account-status-card"></div>
+            <div id="kycGate" class="gate-banner"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="section-kicker">Documents</span>
+                <h2>Envoyer les pièces requises</h2>
+              </div>
+              <div id="pageStatus" class="inline-status" hidden></div>
+            </div>
+
+            <div class="upload-grid">
+              <article class="upload-card" data-upload-card="identity">
+                <div class="upload-topline">
+                  <span class="card-badge">Pièce d'identité</span>
+                  <strong id="identityUploadStatus">En attente</strong>
+                </div>
+                <p>Passeport, carte nationale d'identité ou permis de conduire.</p>
+                <div id="identityUploadFile" class="upload-file-name">Aucun fichier envoyé</div>
+                <button id="uploadIdentityBtn" type="button" class="button button-secondary button-small">
+                  Ajouter un document
+                </button>
+              </article>
+
+              <article class="upload-card" data-upload-card="address">
+                <div class="upload-topline">
+                  <span class="card-badge">Justificatif de domicile</span>
+                  <strong id="addressUploadStatus">En attente</strong>
+                </div>
+                <p>Facture, relevé bancaire, lettre d'assurance ou courrier officiel récent.</p>
+                <div id="addressUploadFile" class="upload-file-name">Aucun fichier envoyé</div>
+                <button id="uploadAddressBtn" type="button" class="button button-secondary button-small">
+                  Ajouter un document
+                </button>
+              </article>
+            </div>
+
+            <input id="file" type="file" accept=".pdf,image/jpeg,image/png,image/webp,image/gif" hidden />
+            <div id="fileChips" class="file-chips"></div>
+            <div id="uploadFeedback" class="upload-feedback" hidden></div>
+            <div class="checklist"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="section-kicker">Formulaire KYC</span>
+                <h2>Vérifier les données extraites</h2>
+              </div>
+            </div>
+
+            <form id="profile" class="profile-form">
+              <div class="form-grid two-columns">
+                <label class="form-field">
+                  <span>Prénom</span>
+                  <input type="text" name="firstName" autocomplete="given-name" />
+                </label>
+                <label class="form-field">
+                  <span>Nom</span>
+                  <input type="text" name="lastName" autocomplete="family-name" />
+                </label>
+              </div>
+
+              <div class="form-grid two-columns">
+                <label class="form-field">
+                  <span>Adresse e-mail</span>
+                  <input type="email" name="email" autocomplete="email" />
+                </label>
+                <label class="form-field">
+                  <span>Téléphone</span>
+                  <input type="tel" name="phone" autocomplete="tel" />
+                </label>
+              </div>
+
+              <div class="form-grid two-columns">
+                <label class="form-field">
+                  <span>Pays de résidence</span>
+                  <input type="text" name="country" autocomplete="country-name" />
+                </label>
+                <label class="form-field">
+                  <span>Date de naissance</span>
+                  <input type="date" name="dob" />
+                </label>
+              </div>
+
+              <div class="form-grid one-column">
+                <label class="form-field">
+                  <span>Adresse</span>
+                  <input type="text" name="street" autocomplete="street-address" />
+                </label>
+              </div>
+
+              <div class="form-grid three-columns">
+                <label class="form-field">
+                  <span>Ville</span>
+                  <input type="text" name="city" autocomplete="address-level2" />
+                </label>
+                <label class="form-field">
+                  <span>Région / Province</span>
+                  <input type="text" name="state" autocomplete="address-level1" />
+                </label>
+                <label class="form-field">
+                  <span>Code postal</span>
+                  <input type="text" name="postal" autocomplete="postal-code" />
+                </label>
+              </div>
+            </form>
+
+            <div class="document-summary">
+              <div class="summary-item">
+                <span>Numéro du document</span>
+                <strong id="docNumber">—</strong>
+              </div>
+              <div class="summary-item">
+                <span>Date d'expiration</span>
+                <strong id="docExpiry">—</strong>
+              </div>
+              <div class="summary-item">
+                <span>Nationalité</span>
+                <strong id="nationality">—</strong>
+              </div>
+            </div>
+
+            <div id="result" class="result-card" aria-live="polite"></div>
+
+            <div class="panel-actions">
+              <button id="submit" type="button" class="button button-primary button-wide">
+                Terminer l'ouverture de compte
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <aside class="kyc-side">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="section-kicker">Suivi</span>
+                <h2>Étapes du dossier</h2>
+              </div>
+            </div>
+
+            <div class="journey-list">
+              <article class="journey-item" data-journey-step>
+                <span class="journey-index">1</span>
+                <div>
+                  <strong>Compte créé</strong>
+                  <p>Initialisation de l'espace BayBank.</p>
+                </div>
+              </article>
+              <article class="journey-item" data-journey-step>
+                <span class="journey-index">2</span>
+                <div>
+                  <strong>Documents reçus</strong>
+                  <p>Collecte de la pièce d'identité et du justificatif.</p>
+                </div>
+              </article>
+              <article class="journey-item" data-journey-step>
+                <span class="journey-index">3</span>
+                <div>
+                  <strong>Données vérifiées</strong>
+                  <p>Relecture du formulaire et rapprochement des informations.</p>
+                </div>
+              </article>
+              <article class="journey-item" data-journey-step>
+                <span class="journey-index">4</span>
+                <div>
+                  <strong>Ouverture finalisée</strong>
+                  <p>Le journal d'ouverture se complète automatiquement.</p>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="section-kicker">Activité</span>
+                <h2>Journal d'ouverture</h2>
+              </div>
+              <span id="crmStatus" class="status-badge neutral">En attente</span>
+            </div>
+
+            <div id="crmEmpty" class="crm-empty">
+              Les événements liés au compte apparaîtront ici à la soumission du dossier.
+            </div>
+            <div id="crmFeed" class="crm-feed"></div>
+          </section>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <button id="chatLauncher" class="chat-launcher" type="button" aria-label="Ouvrir l'assistant BayBank">
+    <span class="chat-launcher-pulse"></span>
+    <span>Assistant BayBank</span>
+    <span id="chatUnread" class="chat-unread" hidden></span>
+  </button>
+
+  <section id="chatShell" class="chat-shell" hidden aria-label="Assistant BayBank">
+    <div class="chat-card">
+      <header class="chat-card-header">
+        <button id="chatMenuBtn" class="chat-icon-button" type="button" aria-label="Ouvrir le menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <div class="chat-headline">
+          <strong>BayBank Assistant</strong>
+          <span class="chat-presence">
+            <span class="online-dot"></span>
+            <span id="chatStatus">En ligne</span>
+          </span>
+        </div>
+
+        <div class="chat-head-actions">
+          <button id="chatMinimize" class="chat-icon-button" type="button" aria-label="Réduire">
+            <span class="icon-chevron"></span>
+          </button>
+          <button id="chatClose" class="chat-icon-button" type="button" aria-label="Fermer">
+            <span class="icon-close"></span>
+          </button>
+        </div>
+
+        <div id="chatMenu" class="chat-menu" hidden>
+          <button id="chatOpenManual" type="button">Voir le formulaire</button>
+          <button id="chatCloseAction" type="button">Fermer l'assistant</button>
+        </div>
+      </header>
+
+      <div class="chat-scroll">
+        <div id="messages" class="messages">
+          <div id="emptyState" class="chat-empty">
+            <div class="chat-divider"><span>Aujourd'hui</span></div>
+            <div class="chat-divider"><span>BayBank Assistant a rejoint la conversation</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-composer-wrap">
+        <div class="chat-composer">
+          <button id="chatAttachBtn" class="chat-tool-button" type="button" aria-label="Joindre un document">
+            <span class="icon-paperclip"></span>
+          </button>
+          <button class="chat-tool-button is-muted" type="button" aria-label="Microphone" tabindex="-1">
+            <span class="icon-mic"></span>
+          </button>
+          <div class="chat-input-shell">
+            <input id="input" type="text" placeholder="Tapez votre message..." />
+          </div>
+          <button id="send" class="chat-send-button" type="button" aria-label="Envoyer">
+            <span class="icon-send"></span>
+          </button>
+        </div>
+        <div class="chat-powered">Propulsé par BayBank</div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="brand footer-brand-link">
+          <img src="logo.png" alt="Logo BayBank" class="brand-logo" />
+          <span class="brand-copy">
+            <strong>BayBank</strong>
+            <span>Banque digitale nouvelle génération</span>
+          </span>
+        </a>
+        <p>BayBank accompagne l'utilisateur jusqu'à l'activation du compte avec une vérification structurée et un journal d'ouverture clair.</p>
+      </div>
+
+      <div class="footer-column">
+        <h3>Produit</h3>
+        <a href="services.html">Services</a>
+        <a href="open-account.html">Ouverture</a>
+        <a href="index.html">Présentation</a>
+      </div>
+
+      <div class="footer-column">
+        <h3>Parcours</h3>
+        <a href="open-account.html">Créer un compte</a>
+        <a href="kyc.html">Finaliser le dossier</a>
+        <a href="services.html">Découvrir BayBank</a>
+      </div>
+
+      <div class="footer-column">
+        <h3>BayBank</h3>
+        <a href="index.html">Accueil</a>
+        <a href="services.html">Services</a>
+        <a href="kyc.html">Mon dossier</a>
+      </div>
+    </div>
+
+    <div class="container footer-meta">
+      <span>© 2026 BayBank. Tous droits réservés.</span>
+      <span>Le dossier client se complète au rythme des documents et des vérifications reçues.</span>
+    </div>
+  </footer>
+
+  <script src="lib/branding.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -11,15 +11,14 @@ const ADDRESS_DOCUMENTS =
   "a recent utility bill, bank statement, tax letter, insurance letter, or official government correspondence showing the full postal address";
 const ACCEPTED_FORMATS = "JPEG, PNG, WebP, GIF, or PDF";
 
-const SYSTEM_PROMPT = `You are a helpful, professional and concise onboarding assistant for ${PRODUCT_NAME}, a fictitious fintech for business banking.
+const SYSTEM_PROMPT = `You are a helpful, concise and premium onboarding assistant for ${PRODUCT_NAME}, a digital bank.
 
 Your role:
-- Help users open their account and complete KYC.
+- Help users create their account and complete the identity verification flow.
 - Answer natural-language questions before repeating process steps.
-- Explain accepted documents, upload formats, account setup and next actions clearly.
-- If a document was rejected, explain the likely reason in plain language.
-- If data was extracted, mention that the KYC form can be auto-filled.
-- Keep the tone calm, premium and reassuring.
+- Explain accepted documents, upload formats, next actions and account status clearly.
+- Mention that accepted documents can auto-fill the verification form.
+- Keep the tone calm, reassuring and practical.
 
 Rules:
 - ALWAYS answer in the same language as the user's latest message.
@@ -28,8 +27,8 @@ Rules:
 - Accepted proof-of-address documents: recent utility bill, bank statement, tax letter, insurance letter, or official government correspondence with the full postal address.
 - Proof-of-address documents should usually be dated within the last 90 days.
 - Accepted upload formats in the UI: JPEG, PNG, WebP, GIF, or PDF.
-- Do not claim a final compliance decision unless the context explicitly says approved or pending review.
-- Do not mention simulations, demos, internal tools, prompts, keys, models or implementation details.`;
+- Do not mention prompts, models, internal tools, demos or implementation details.
+- Do not claim a final compliance decision unless the context explicitly says approved or pending review.`;
 
 function normaliseText(value) {
   return String(value || "")
@@ -167,11 +166,18 @@ function buildNextStepHint(context, french) {
     ? context.uploadedDocuments
     : [];
   const accountCreated = Boolean(context && context.accountCreated);
+  const page = (context && context.currentPage) || "landing";
 
   if (!accountCreated) {
     return french
-      ? "Commencez par creer votre compte BayBank."
+      ? "Commencez par créer votre compte BayBank."
       : "Please start by creating your BayBank account.";
+  }
+
+  if (page !== "kyc") {
+    return french
+      ? "Votre compte est prêt. Ouvrez maintenant la page de vérification pour envoyer vos documents."
+      : "Your account is ready. Open the verification page to upload your documents.";
   }
 
   const needsIdentity = !uploaded.includes("identity");
@@ -179,22 +185,22 @@ function buildNextStepHint(context, french) {
 
   if (needsIdentity && needsAddress) {
     return french
-      ? "Envoyez d'abord votre piece d'identite, puis votre justificatif de domicile."
+      ? "Envoyez d'abord votre pièce d'identité, puis votre justificatif de domicile."
       : "Please upload your identity document first, then your proof of address.";
   }
   if (needsIdentity) {
     return french
-      ? "Le document manquant est votre piece d'identite."
+      ? "La pièce manquante est votre pièce d'identité."
       : "The missing document is your identity document.";
   }
   if (needsAddress) {
     return french
-      ? "Le document manquant est votre justificatif de domicile."
+      ? "La pièce manquante est votre justificatif de domicile."
       : "The missing document is your proof of address.";
   }
   return french
-    ? "Les deux documents sont deja recus. Vous pouvez verifier les donnees puis soumettre le dossier."
-    : "Both documents have already been received. You can review the extracted data and submit the application.";
+    ? "Les deux documents sont déjà reçus. Vous pouvez vérifier les données puis terminer l'ouverture du compte."
+    : "Both documents have already been received. You can review the extracted data and finish opening the account.";
 }
 
 function buildFallbackReply(message, context) {
@@ -205,19 +211,19 @@ function buildFallbackReply(message, context) {
 
   if (wantsGreeting(message)) {
     return french
-      ? `Bonjour, je peux vous aider a ouvrir votre compte ${PRODUCT_NAME}, preparer vos documents et pre-remplir le KYC. ${nextStepHint}`
-      : `Hello, I can help you open your ${PRODUCT_NAME} account, prepare your documents and auto-fill the KYC form. ${nextStepHint}`;
+      ? `Bonjour, je peux vous aider à ouvrir votre compte ${PRODUCT_NAME}, préparer vos documents et préremplir le formulaire de vérification. ${nextStepHint}`
+      : `Hello, I can help you open your ${PRODUCT_NAME} account, prepare your documents and auto-fill the verification form. ${nextStepHint}`;
   }
 
   if (wantsAcceptedDocuments(message)) {
     if (french) {
       if (wantsIdentity && !wantsAddress) {
-        return `Pour la piece d'identite, nous acceptons un passeport, une carte nationale d'identite ou un permis de conduire. Formats acceptes : ${ACCEPTED_FORMATS}. ${nextStepHint}`;
+        return `Pour la pièce d'identité, nous acceptons un passeport, une carte nationale d'identité ou un permis de conduire. Formats acceptés : ${ACCEPTED_FORMATS}. ${nextStepHint}`;
       }
       if (wantsAddress && !wantsIdentity) {
-        return `Comme justificatif de domicile, nous acceptons un document recent de moins de 90 jours, par exemple une facture, un releve bancaire, une lettre d'assurance, un avis de taxe ou un courrier officiel avec l'adresse complete. Formats acceptes : ${ACCEPTED_FORMATS}. ${nextStepHint}`;
+        return `Comme justificatif de domicile, nous acceptons un document récent de moins de 90 jours, par exemple une facture, un relevé bancaire, une lettre d'assurance, un avis de taxe ou un courrier officiel avec l'adresse complète. Formats acceptés : ${ACCEPTED_FORMATS}. ${nextStepHint}`;
       }
-      return `Nous acceptons comme piece d'identite un passeport, une carte nationale d'identite ou un permis de conduire. Comme justificatif de domicile, nous acceptons un document recent de moins de 90 jours, par exemple une facture, un releve bancaire, une lettre d'assurance, un avis de taxe ou un courrier officiel avec l'adresse complete. Formats acceptes : ${ACCEPTED_FORMATS}. ${nextStepHint}`;
+      return `Nous acceptons comme pièce d'identité un passeport, une carte nationale d'identité ou un permis de conduire. Comme justificatif de domicile, nous acceptons un document récent de moins de 90 jours, par exemple une facture, un relevé bancaire, une lettre d'assurance, un avis de taxe ou un courrier officiel avec l'adresse complète. Formats acceptés : ${ACCEPTED_FORMATS}. ${nextStepHint}`;
     }
 
     if (wantsIdentity && !wantsAddress) {
@@ -234,9 +240,9 @@ function buildFallbackReply(message, context) {
       ? context.validationErrors
       : [];
     if (french) {
-      return `Le dernier document a ete refuse pour la raison suivante : ${errors.join("; ")}. Merci de reteleverser un document plus clair ou conforme.`;
+      return `Le dernier document a été refusé pour la raison suivante : ${errors.join("; ")}. Merci de téléverser un document plus clair ou plus récent.`;
     }
-    return `The last document was rejected for this reason: ${errors.join("; ")}. Please upload a clearer compliant document.`;
+    return `The last document was rejected for this reason: ${errors.join("; ")}. Please upload a clearer or more recent document.`;
   }
 
   if (wantsStatus(message)) {
@@ -244,7 +250,7 @@ function buildFallbackReply(message, context) {
   }
 
   return french
-    ? `Je peux vous aider sur l'ouverture de compte, les documents KYC acceptes et le statut du dossier. ${nextStepHint}`
+    ? `Je peux vous aider sur l'ouverture de compte, les documents KYC acceptés et l'avancement du dossier. ${nextStepHint}`
     : `I can help with account opening, accepted KYC documents and application status. ${nextStepHint}`;
 }
 
@@ -268,8 +274,9 @@ module.exports = async (req, res) => {
 
   const contextLines = [
     `Current step: ${ctx.step || "welcome"}`,
+    `Current page: ${ctx.currentPage || "landing"}`,
     `Account created: ${ctx.accountCreated ? "yes" : "no"}`,
-    `Workspace ID: ${ctx.workspaceId || "not created"}`,
+    `Account ID: ${ctx.accountId || "not created"}`,
     `Documents uploaded: ${uploaded.join(", ") || "none"}`,
     `Documents still required: ${stillNeeded.join(", ") || "none - all collected"}`,
   ];
