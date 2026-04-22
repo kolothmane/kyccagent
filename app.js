@@ -4,6 +4,7 @@ const SERVICE_LINE =
 const ACCOUNT_STORAGE_KEY = "baybankAccountState";
 const ADMIN_ESCALATIONS_STORAGE_KEY = "baybankAdminEscalations";
 const ADMIN_DOCUMENT_PREVIEWS_KEY = "baybankAdminDocumentPreviews";
+const ADMIN_DELETED_ESCALATIONS_KEY = "baybankDeletedEscalations";
 const CHAT_REQUEST_TIMEOUT_MS = 12000;
 const CRM_BLOCK_READ_MS = 2600;
 const CRM_LOADING_MS = 1000;
@@ -259,6 +260,22 @@ function writeAdminEscalations(items) {
   localStorage.setItem(ADMIN_ESCALATIONS_STORAGE_KEY, JSON.stringify(items || []));
 }
 
+function readDeletedAdminEscalations() {
+  return readStoredJson(localStorage.getItem(ADMIN_DELETED_ESCALATIONS_KEY)) || [];
+}
+
+function isDeletedAdminEscalation(ref) {
+  const deletedItems = readDeletedAdminEscalations();
+  if (!Array.isArray(deletedItems) || !deletedItems.length) return false;
+
+  return deletedItems.some(function(item) {
+    return Boolean(
+      (ref.escalationId && item.escalationId === ref.escalationId) ||
+        (ref.submissionId && item.submissionId === ref.submissionId),
+    );
+  });
+}
+
 function readAdminDocumentPreviews() {
   return readStoredJson(localStorage.getItem(ADMIN_DOCUMENT_PREVIEWS_KEY)) || {};
 }
@@ -326,6 +343,13 @@ function escapeHtml(value) {
 
 function persistAdminHumanReviewCase(submission, profileData) {
   if (!submission || !submission.humanReview || !submission.humanReview.required) return;
+
+  const ref = {
+    escalationId: submission.escalationId || "",
+    submissionId: submission.submissionId || "",
+  };
+
+  if (isDeletedAdminEscalation(ref)) return;
 
   upsertAdminEscalation({
     escalationId: submission.escalationId || "esc_" + generateId("local"),

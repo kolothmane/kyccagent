@@ -2,6 +2,7 @@
 
 const ADMIN_ESCALATIONS_STORAGE_KEY = "baybankAdminEscalations";
 const ADMIN_DOCUMENT_PREVIEWS_KEY = "baybankAdminDocumentPreviews";
+const ADMIN_DELETED_ESCALATIONS_KEY = "baybankDeletedEscalations";
 
 const siteHeader = document.getElementById("siteHeader");
 const navToggle = document.getElementById("navToggle");
@@ -58,6 +59,14 @@ function writeLocalEscalations(items) {
 
 function readLocalEscalations() {
   return readStoredJson(localStorage.getItem(ADMIN_ESCALATIONS_STORAGE_KEY));
+}
+
+function readDeletedEscalations() {
+  return readStoredJson(localStorage.getItem(ADMIN_DELETED_ESCALATIONS_KEY));
+}
+
+function writeDeletedEscalations(items) {
+  localStorage.setItem(ADMIN_DELETED_ESCALATIONS_KEY, JSON.stringify(items || []));
 }
 
 function readDocumentPreviews() {
@@ -120,6 +129,49 @@ function matchesEscalation(item, ref) {
   );
 }
 
+function isEscalationDeleted(item) {
+  const deletedRefs = readDeletedEscalations();
+  if (!Array.isArray(deletedRefs) || !deletedRefs.length) return false;
+
+  return deletedRefs.some(function(ref) {
+    return Boolean(
+      (ref.escalationId && item.escalationId === ref.escalationId) ||
+        (ref.submissionId && item.submissionId === ref.submissionId),
+    );
+  });
+}
+
+function markEscalationDeleted(ref) {
+  if (!ref || (!ref.escalationId && !ref.submissionId)) return;
+
+  const deletedRefs = readDeletedEscalations().filter(function(entry) {
+    return !(
+      (ref.escalationId && entry.escalationId === ref.escalationId) ||
+      (ref.submissionId && entry.submissionId === ref.submissionId)
+    );
+  });
+
+  deletedRefs.unshift({
+    escalationId: ref.escalationId || "",
+    submissionId: ref.submissionId || "",
+  });
+
+  writeDeletedEscalations(deletedRefs.slice(0, 100));
+}
+
+function unmarkEscalationDeleted(ref) {
+  if (!ref || (!ref.escalationId && !ref.submissionId)) return;
+
+  const deletedRefs = readDeletedEscalations().filter(function(entry) {
+    return !(
+      (ref.escalationId && entry.escalationId === ref.escalationId) ||
+      (ref.submissionId && entry.submissionId === ref.submissionId)
+    );
+  });
+
+  writeDeletedEscalations(deletedRefs);
+}
+
 function isPendingStatus(status) {
   return [
     "pending",
@@ -179,7 +231,9 @@ function mergeEscalations(primaryItems, secondaryItems) {
     map.set(key, merged);
   });
 
-  return Array.from(map.values()).sort(function(a, b) {
+  return Array.from(map.values()).filter(function(item) {
+    return !isEscalationDeleted(item);
+  }).sort(function(a, b) {
     const weight = {
       pending: 0,
       pending_review: 0,
@@ -245,6 +299,7 @@ function applyLocalDecision(record, action) {
 }
 
 function updateStoredEscalation(item) {
+  unmarkEscalationDeleted(buildEscalationRef(item));
   const merged = mergeEscalations([item], readLocalEscalations());
   writeLocalEscalations(merged);
   return merged;
@@ -641,6 +696,8 @@ async function deleteSelectedEscalation() {
     decisionNoteNode.className = "result-card is-warning";
     decisionNoteNode.textContent = "Suppression de la demande en cours...";
   }
+
+  markEscalationDeleted(selectedEscalationRef);
 
   try {
     const response = await fetch("/api/admin/escalations", {
