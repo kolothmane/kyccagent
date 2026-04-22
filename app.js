@@ -186,6 +186,11 @@ const documentNames = {
   address: "",
 };
 
+const documentAssets = {
+  identity: null,
+  address: null,
+};
+
 function readStoredJson(raw) {
   if (!raw) return null;
 
@@ -326,12 +331,14 @@ function persistAdminHumanReviewCase(submission, profileData) {
         label: "Pièce d'identité",
         fileName: documentNames.identity || "Document d'identité",
         extraction: identityExtraction || {},
+        previewUrl: documentAssets.identity && documentAssets.identity.previewUrl,
       },
       {
         category: "address",
         label: "Justificatif de domicile",
         fileName: documentNames.address || "Justificatif de domicile",
         extraction: addressExtraction || {},
+        previewUrl: documentAssets.address && documentAssets.address.previewUrl,
       },
     ],
     crmLogs: null,
@@ -1802,6 +1809,11 @@ function initUploadFlow() {
       if (effectiveCategory === "address") addressExtraction = extraction;
       if (effectiveCategory === "identity" || effectiveCategory === "address") {
         documentNames[effectiveCategory] = file.name;
+        documentAssets[effectiveCategory] = {
+          fileName: file.name,
+          previewUrl: "data:image/jpeg;base64," + base64,
+          mimeType: mimeType,
+        };
       }
 
       validationErrors = validation.errors || [];
@@ -1910,6 +1922,10 @@ function initSubmitFlow() {
           documentFiles: {
             identity: documentNames.identity,
             address: documentNames.address,
+          },
+          documentAssets: {
+            identity: documentAssets.identity,
+            address: documentAssets.address,
           },
         }),
       });

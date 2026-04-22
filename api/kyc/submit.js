@@ -223,6 +223,7 @@ module.exports = async (req, res) => {
     addressExtraction,
     accountData,
     documentFiles,
+    documentAssets,
   } = req.body || {};
 
   if (!sessionId || typeof sessionId !== "string") {
@@ -296,6 +297,10 @@ module.exports = async (req, res) => {
           label: "Pièce d'identité",
           fileName:
             (documentFiles && documentFiles.identity) || "Document d'identité",
+          previewUrl:
+            documentAssets &&
+            documentAssets.identity &&
+            documentAssets.identity.previewUrl,
           extraction: identityExtraction || {},
         },
         {
@@ -303,6 +308,10 @@ module.exports = async (req, res) => {
           label: "Justificatif de domicile",
           fileName:
             (documentFiles && documentFiles.address) || "Justificatif de domicile",
+          previewUrl:
+            documentAssets &&
+            documentAssets.address &&
+            documentAssets.address.previewUrl,
           extraction: addressExtraction || {},
         },
       ],

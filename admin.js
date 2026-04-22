@@ -29,6 +29,7 @@ const clientInfoNode = document.getElementById("adminClientInfo");
 const escalationMessageNode = document.getElementById("adminEscalationMessage");
 const signalsNode = document.getElementById("adminSignals");
 const documentsNode = document.getElementById("adminDocuments");
+const documentsEmptyNode = document.getElementById("adminDocumentsEmpty");
 const crmEmptyNode = document.getElementById("adminCrmEmpty");
 const crmLogsNode = document.getElementById("adminCrmLogs");
 
@@ -106,7 +107,18 @@ function mergeEscalations(primaryItems, secondaryItems) {
     const key = keyFor(item);
     if (!key) return;
     const current = map.get(key);
-    map.set(key, Object.assign({}, current || {}, item));
+    const merged = Object.assign({}, current || {}, item);
+
+    if (current && Array.isArray(current.documents) && Array.isArray(item.documents)) {
+      merged.documents = item.documents.map(function(document, index) {
+        const localDocument = current.documents[index] || {};
+        return Object.assign({}, localDocument, document, {
+          previewUrl: document.previewUrl || localDocument.previewUrl || "",
+        });
+      });
+    }
+
+    map.set(key, merged);
   });
 
   return Array.from(map.values()).sort(function(a, b) {
@@ -291,6 +303,13 @@ function renderDocuments(record) {
   documentsNode.innerHTML = "";
 
   const documents = Array.isArray(record.documents) ? record.documents : [];
+  if (documentsEmptyNode) {
+    documentsEmptyNode.hidden = documents.length > 0;
+  }
+
+  if (!documents.length) {
+    return;
+  }
 
   documents.forEach(function(document) {
     const card = document.createElement("article");
@@ -302,6 +321,16 @@ function renderDocuments(record) {
       '<span class="card-badge">' + escapeHtml(document.label || document.category || "Document") + "</span>" +
       "</div>" +
       '<strong class="admin-doc-name">' + escapeHtml(document.fileName || "Fichier joint") + "</strong>" +
+      (document.previewUrl
+        ? '<a class="button button-secondary button-small admin-doc-link" href="' +
+            escapeHtml(document.previewUrl) +
+            '" target="_blank" rel="noreferrer">Ouvrir le document</a>' +
+          '<div class="admin-doc-preview"><img src="' +
+            escapeHtml(document.previewUrl) +
+            '" alt="' +
+            escapeHtml(document.label || "Document") +
+            '" /></div>'
+        : "") +
       '<div class="admin-doc-summary">' +
       summary.map(function(item) {
         return (
