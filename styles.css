@@ -998,6 +998,28 @@ img {
 .upload-topline strong {
   font-family: "Manrope", sans-serif;
   font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  line-height: 1;
+}
+
+.upload-grid .upload-card::after {
+  display: none;
+}
+
+.upload-topline strong::after {
+  content: "";
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--playful-foreground);
+  border-radius: 999px;
+  background: var(--playful-tertiary);
+  flex: 0 0 auto;
+}
+
+.upload-grid .upload-card:nth-child(2) .upload-topline strong::after {
+  background: var(--playful-secondary);
 }
 
 .upload-file-name {
