@@ -2993,7 +2993,7 @@ input:focus-visible {
 
 .chat-composer {
   display: grid;
-  grid-template-columns: 28px 28px minmax(0, 1fr) 44px;
+  grid-template-columns: auto minmax(0, 1fr) 44px;
   align-items: center;
   gap: 14px;
 }
@@ -3008,8 +3008,27 @@ input:focus-visible {
   cursor: pointer;
 }
 
-.chat-tool-button.is-muted {
-  cursor: default;
+.chat-attach-button {
+  width: auto;
+  min-height: 46px;
+  padding: 0 16px;
+  gap: 10px;
+  border: 2px solid rgba(13, 97, 211, 0.18);
+  border-radius: 16px;
+  background: rgba(13, 97, 211, 0.08);
+  color: var(--brand-blue);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.chat-attach-button:hover {
+  background: rgba(13, 97, 211, 0.12);
+}
+
+.chat-tool-label {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
 }
 
 .chat-input-shell {
@@ -3370,7 +3389,7 @@ input:focus-visible {
 
   .chat-composer {
     gap: 10px;
-    grid-template-columns: 24px 24px minmax(0, 1fr) 40px;
+    grid-template-columns: auto minmax(0, 1fr) 40px;
   }
 
   .chat-input-shell {
