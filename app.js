@@ -272,6 +272,7 @@ function isDeletedAdminEscalation(ref) {
     return Boolean(
       (ref.escalationId && item.escalationId === ref.escalationId) ||
         (ref.submissionId && item.submissionId === ref.submissionId) ||
+        (ref.sessionId && item.sessionId === ref.sessionId) ||
         (ref.fingerprint && item.fingerprint === ref.fingerprint),
     );
   });
@@ -1628,7 +1629,27 @@ async function prepareImageForUpload(file) {
   if (bitmap.close) bitmap.close();
 
   const base64 = canvas.toDataURL("image/jpeg", 0.85).split(",")[1];
-  return { base64: base64, mimeType: "image/jpeg" };
+  return {
+    base64: base64,
+    mimeType: "image/jpeg",
+    previewUrl: createDocumentPreviewUrl(canvas),
+  };
+}
+
+function createDocumentPreviewUrl(sourceCanvas) {
+  const maxDimension = 900;
+  const ratio = Math.min(
+    1,
+    maxDimension / sourceCanvas.width,
+    maxDimension / sourceCanvas.height,
+  );
+  const width = Math.max(1, Math.round(sourceCanvas.width * ratio));
+  const height = Math.max(1, Math.round(sourceCanvas.height * ratio));
+  const previewCanvas = document.createElement("canvas");
+  previewCanvas.width = width;
+  previewCanvas.height = height;
+  previewCanvas.getContext("2d").drawImage(sourceCanvas, 0, 0, width, height);
+  return previewCanvas.toDataURL("image/jpeg", 0.7);
 }
 
 function createAccountPreview(formData) {
@@ -1777,6 +1798,7 @@ function initUploadFlow() {
       const prepared = await prepareImageForUpload(file);
       const base64 = prepared.base64;
       const mimeType = prepared.mimeType;
+      const previewUrl = prepared.previewUrl || "data:image/jpeg;base64," + base64;
       const approxBytes = Math.ceil((base64.length * 3) / 4);
 
       if (approxBytes > 4 * 1024 * 1024) {
@@ -1900,7 +1922,7 @@ function initUploadFlow() {
         documentNames[effectiveCategory] = file.name;
         documentAssets[effectiveCategory] = {
           fileName: file.name,
-          previewUrl: "data:image/jpeg;base64," + base64,
+          previewUrl: previewUrl,
           mimeType: mimeType,
         };
         persistDocumentPreview(effectiveCategory, documentAssets[effectiveCategory]);

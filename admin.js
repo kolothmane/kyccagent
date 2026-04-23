@@ -44,13 +44,12 @@ let selectedEscalationId = null;
 let selectedEscalationRef = null;
 let adminBusy = false;
 
-function readStoredJson(raw) {
-  if (!raw) return [];
+function readStoredJson(raw, fallback) {
+  if (!raw) return fallback;
   try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    return JSON.parse(raw);
   } catch (error) {
-    return [];
+    return fallback;
   }
 }
 
@@ -59,11 +58,13 @@ function writeLocalEscalations(items) {
 }
 
 function readLocalEscalations() {
-  return readStoredJson(localStorage.getItem(ADMIN_ESCALATIONS_STORAGE_KEY));
+  const parsed = readStoredJson(localStorage.getItem(ADMIN_ESCALATIONS_STORAGE_KEY), []);
+  return Array.isArray(parsed) ? parsed : [];
 }
 
 function readDeletedEscalations() {
-  return readStoredJson(localStorage.getItem(ADMIN_DELETED_ESCALATIONS_KEY));
+  const parsed = readStoredJson(localStorage.getItem(ADMIN_DELETED_ESCALATIONS_KEY), []);
+  return Array.isArray(parsed) ? parsed : [];
 }
 
 function writeDeletedEscalations(items) {
@@ -100,8 +101,8 @@ function clearLocalAdminState() {
 }
 
 function readDocumentPreviews() {
-  const parsed = readStoredJson(localStorage.getItem(ADMIN_DOCUMENT_PREVIEWS_KEY));
-  return parsed && typeof parsed === "object" ? parsed : {};
+  const parsed = readStoredJson(localStorage.getItem(ADMIN_DOCUMENT_PREVIEWS_KEY), {});
+  return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
 }
 
 function escapeHtml(value) {
@@ -181,32 +182,37 @@ function matchesEscalation(item, ref) {
   );
 }
 
+function matchesDeletedRef(entry, ref) {
+  if (!entry || !ref) return false;
+
+  return Boolean(
+    (ref.escalationId && entry.escalationId === ref.escalationId) ||
+      (ref.submissionId && entry.submissionId === ref.submissionId) ||
+      (ref.sessionId && entry.sessionId === ref.sessionId) ||
+      (ref.fingerprint && entry.fingerprint === ref.fingerprint),
+  );
+}
+
 function isEscalationDeleted(item) {
   const deletedRefs = readDeletedEscalations();
   if (!Array.isArray(deletedRefs) || !deletedRefs.length) return false;
 
   return deletedRefs.some(function(ref) {
-    return Boolean(
-      (ref.escalationId && item.escalationId === ref.escalationId) ||
-        (ref.submissionId && item.submissionId === ref.submissionId) ||
-        (ref.fingerprint && buildEscalationFingerprint(item) === ref.fingerprint),
-    );
+    return matchesDeletedRef(ref, buildEscalationRef(item));
   });
 }
 
 function markEscalationDeleted(ref) {
-  if (!ref || (!ref.escalationId && !ref.submissionId)) return;
+  if (!ref || (!ref.escalationId && !ref.submissionId && !ref.sessionId && !ref.fingerprint)) return;
 
   const deletedRefs = readDeletedEscalations().filter(function(entry) {
-    return !(
-      (ref.escalationId && entry.escalationId === ref.escalationId) ||
-      (ref.submissionId && entry.submissionId === ref.submissionId)
-    );
+    return !matchesDeletedRef(entry, ref);
   });
 
   deletedRefs.unshift({
     escalationId: ref.escalationId || "",
     submissionId: ref.submissionId || "",
+    sessionId: ref.sessionId || "",
     fingerprint: ref.fingerprint || "",
   });
 
@@ -214,13 +220,10 @@ function markEscalationDeleted(ref) {
 }
 
 function unmarkEscalationDeleted(ref) {
-  if (!ref || (!ref.escalationId && !ref.submissionId)) return;
+  if (!ref || (!ref.escalationId && !ref.submissionId && !ref.sessionId && !ref.fingerprint)) return;
 
   const deletedRefs = readDeletedEscalations().filter(function(entry) {
-    return !(
-      (ref.escalationId && entry.escalationId === ref.escalationId) ||
-      (ref.submissionId && entry.submissionId === ref.submissionId)
-    );
+    return !matchesDeletedRef(entry, ref);
   });
 
   writeDeletedEscalations(deletedRefs);
@@ -495,24 +498,24 @@ function renderDocuments(record) {
     return;
   }
 
-  documents.forEach(function(document) {
+  documents.forEach(function(doc) {
     const card = document.createElement("article");
     card.className = "admin-doc-card";
 
-    const summary = buildDocumentSummary(document);
+    const summary = buildDocumentSummary(doc);
     card.innerHTML =
       '<div class="admin-doc-topline">' +
-      '<span class="card-badge">' + escapeHtml(document.label || document.category || "Document") + "</span>" +
+      '<span class="card-badge">' + escapeHtml(doc.label || doc.category || "Document") + "</span>" +
       "</div>" +
-      '<strong class="admin-doc-name">' + escapeHtml(document.fileName || "Fichier joint") + "</strong>" +
-      (document.previewUrl
+      '<strong class="admin-doc-name">' + escapeHtml(doc.fileName || "Fichier joint") + "</strong>" +
+      (doc.previewUrl
         ? '<a class="button button-secondary button-small admin-doc-link" href="' +
-            escapeHtml(document.previewUrl) +
+            escapeHtml(doc.previewUrl) +
             '" target="_blank" rel="noreferrer">Ouvrir le document</a>' +
           '<div class="admin-doc-preview"><img src="' +
-            escapeHtml(document.previewUrl) +
+            escapeHtml(doc.previewUrl) +
             '" alt="' +
-            escapeHtml(document.label || "Document") +
+            escapeHtml(doc.label || "Document") +
             '" /></div>'
         : "") +
       '<div class="admin-doc-summary">' +
@@ -708,6 +711,8 @@ async function submitDecision(action) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         escalationId: selected.escalationId,
+        submissionId: selected.submissionId,
+        sessionId: selected.sessionId,
         action: action,
         agentName: "Agent conformité BayBank",
       }),
@@ -769,6 +774,8 @@ async function deleteSelectedEscalation() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         escalationId: selected.escalationId,
+        submissionId: selected.submissionId,
+        sessionId: selected.sessionId,
         action: "delete",
         agentName: "Agent conformité BayBank",
       }),

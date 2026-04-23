@@ -169,6 +169,7 @@ img {
   flex: 1 1 auto;
   justify-content: flex-start;
   min-width: 0;
+  overflow: hidden;
   padding-left: clamp(12px, 1.6vw, 28px);
   gap: clamp(18px, 2vw, 28px);
 }
@@ -211,6 +212,10 @@ img {
   justify-content: flex-end;
   flex: 0 0 auto;
   gap: 14px;
+}
+
+.header-actions .ghost-link {
+  display: none;
 }
 
 .header-actions .button {
@@ -1815,6 +1820,7 @@ input:focus-visible {
 }
 
 .site-nav a {
+  flex: 0 1 auto;
   padding: 10px 16px;
   border: 2px solid transparent;
   border-radius: var(--playful-radius-full);
@@ -3015,7 +3021,7 @@ input:focus-visible {
 
 .chat-composer {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) 44px;
+  grid-template-columns: 46px minmax(0, 1fr) 44px;
   align-items: center;
   gap: 14px;
 }
@@ -3031,26 +3037,25 @@ input:focus-visible {
 }
 
 .chat-attach-button {
-  width: auto;
+  width: 46px;
+  height: 46px;
   min-height: 46px;
-  padding: 0 16px;
-  gap: 10px;
+  padding: 0;
   border: 2px solid rgba(13, 97, 211, 0.18);
-  border-radius: 16px;
+  border-radius: 50%;
   background: rgba(13, 97, 211, 0.08);
   color: var(--brand-blue);
   font-weight: 700;
-  white-space: nowrap;
+  box-shadow: 0 8px 18px rgba(198, 208, 233, 0.38);
 }
 
 .chat-attach-button:hover {
   background: rgba(13, 97, 211, 0.12);
+  transform: translateY(-1px);
 }
 
 .chat-tool-label {
-  display: inline-flex;
-  align-items: center;
-  line-height: 1;
+  display: none;
 }
 
 .chat-input-shell {
@@ -3424,7 +3429,13 @@ input:focus-visible {
 
   .chat-composer {
     gap: 10px;
-    grid-template-columns: auto minmax(0, 1fr) 40px;
+    grid-template-columns: 42px minmax(0, 1fr) 40px;
+  }
+
+  .chat-attach-button {
+    width: 42px;
+    height: 42px;
+    min-height: 42px;
   }
 
   .chat-input-shell {

@@ -14,10 +14,11 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === "POST") {
-    const { escalationId, action, agentName } = req.body || {};
+    const { escalationId, submissionId, sessionId, action, agentName } = req.body || {};
+    const escalationRef = { escalationId, submissionId, sessionId };
 
-    if (!escalationId || typeof escalationId !== "string") {
-      return res.status(400).json({ error: "escalationId is required" });
+    if (!escalationId && !submissionId && !sessionId) {
+      return res.status(400).json({ error: "escalation reference is required" });
     }
 
     if (!["approve", "reject", "delete"].includes(action)) {
@@ -25,7 +26,7 @@ module.exports = async (req, res) => {
     }
 
     if (action === "delete") {
-      const removed = deleteEscalation(escalationId);
+      const removed = deleteEscalation(escalationRef);
 
       if (!removed) {
         return res.status(404).json({ error: "Escalated request not found" });
@@ -38,7 +39,7 @@ module.exports = async (req, res) => {
       });
     }
 
-    const updated = decideEscalation(escalationId, action, agentName);
+    const updated = decideEscalation(escalationRef, action, agentName);
 
     if (!updated) {
       return res.status(404).json({ error: "Escalated request not found" });
