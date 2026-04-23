@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BayBank | Console agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200,0,0&family=Outfit:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="baybank-ui.css?v=20260423-8" />
+</head>
+<body data-page="admin">
+  <header class="site-header" id="siteHeader">
+    <div class="container">
+      <div class="header-row">
+        <a href="index.html" class="brand" aria-label="Accueil BayBank">
+          <img src="logo.png" alt="Logo BayBank" class="brand-logo" />
+          <span class="brand-copy">
+            <strong data-brand>BayBank</strong>
+            <span data-service>Banque digitale nouvelle génération</span>
+          </span>
+        </a>
+
+        <button id="navToggle" class="nav-toggle" type="button" aria-label="Ouvrir le menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <div id="navbarCollapse" class="navbar-wrap">
+          <nav class="site-nav" aria-label="Navigation principale">
+            <a href="index.html">Accueil</a>
+            <a href="services.html">Services</a>
+            <a href="open-account.html">Ouvrir un compte</a>
+            <a href="kyc.html">Mon dossier</a>
+            <a href="admin" class="is-active">Console agent</a>
+          </nav>
+
+          <div class="header-actions">
+            <a href="kyc.html" class="ghost-link" data-icon="west">Retour au dossier</a>
+            <button id="adminRefresh" type="button" class="button button-secondary" data-icon="refresh">Actualiser</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="inner-page">
+    <section class="page-hero page-hero-compact">
+      <div class="container page-hero-grid">
+        <div class="page-hero-copy">
+          <span class="eyebrow" data-icon="support_agent">Console BayBank</span>
+          <h1>Traiter les demandes remontées à un agent humain.</h1>
+          <p>
+            La console agent centralise les dossiers escaladés, les informations du client,
+            les pièces reçues, la raison de l'escalade et la décision finale de validation.
+          </p>
+        </div>
+
+        <div class="page-hero-card">
+          <span class="mini-label" data-icon="manage_accounts">Vue agent</span>
+          <strong>Décidez rapidement, avec le contexte complet.</strong>
+          <p>
+            Chaque dossier affiche le profil client, les documents reçus, les signaux détectés
+            et les opérations déclenchées après validation.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section admin-shell">
+      <div class="container admin-stats">
+        <article class="metric-card">
+          <strong id="adminPendingCount">0</strong>
+          <span>Dossiers à traiter</span>
+        </article>
+        <article class="metric-card">
+          <strong id="adminApprovedCount">0</strong>
+          <span>Dossiers validés</span>
+        </article>
+        <article class="metric-card">
+          <strong id="adminRejectedCount">0</strong>
+          <span>Dossiers refusés</span>
+        </article>
+      </div>
+
+      <div class="container admin-grid">
+        <aside class="panel admin-list-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="section-kicker" data-icon="warning">Escalades</span>
+              <h2>Demandes en revue</h2>
+            </div>
+            <span id="adminListCount" class="status-badge neutral">0 dossier</span>
+          </div>
+
+          <div id="adminListEmpty" class="crm-empty">
+            Aucun dossier escaladé n'est actuellement en attente.
+          </div>
+          <div id="adminCaseList" class="admin-case-list"></div>
+        </aside>
+
+        <section class="panel admin-detail-panel">
+          <div id="adminDetailEmpty" class="crm-empty">
+            Sélectionnez un dossier pour afficher les informations du client, la raison de
+            l'escalade et la décision agent.
+          </div>
+
+          <div id="adminDetail" hidden>
+            <div class="panel-heading admin-detail-heading">
+              <div>
+                <span class="section-kicker" data-icon="folder_managed">Dossier sélectionné</span>
+                <h2 id="adminClientName">—</h2>
+              </div>
+              <div class="admin-detail-actions">
+                <button id="adminBackToList" type="button" class="button button-secondary button-small" data-icon="arrow_back">
+                  Retour aux escalades
+                </button>
+                <span id="adminDecisionStatus" class="status-badge neutral">En attente</span>
+              </div>
+            </div>
+
+            <div class="admin-detail-meta">
+              <div class="summary-row">
+                <span>Compte</span>
+                <strong id="adminAccountId">—</strong>
+              </div>
+              <div class="summary-row">
+                <span>Client</span>
+                <strong id="adminCustomerId">—</strong>
+              </div>
+              <div class="summary-row">
+                <span>Soumis le</span>
+                <strong id="adminSubmittedAt">—</strong>
+              </div>
+              <div class="summary-row">
+                <span>Assigné à</span>
+                <strong id="adminOwner">—</strong>
+              </div>
+            </div>
+
+            <div class="admin-action-row">
+              <button id="adminApproveBtn" type="button" class="button button-primary" data-icon="task_alt">
+                Valider la demande
+              </button>
+              <button id="adminRejectBtn" type="button" class="button button-secondary" data-icon="block">
+                Refuser la demande
+              </button>
+              <button id="adminDeleteBtn" type="button" class="button button-danger" data-icon="delete">
+                Supprimer la demande
+              </button>
+            </div>
+
+            <div id="adminDecisionNote" class="result-card"></div>
+
+            <section class="admin-section-card admin-documents-section">
+              <span class="card-badge" data-icon="attach_file">Pièces jointes</span>
+              <h3>Documents reçus</h3>
+              <div id="adminDocumentsEmpty" class="crm-empty">
+                Aucune pièce jointe n'est disponible pour ce dossier.
+              </div>
+              <div id="adminDocuments" class="admin-doc-grid"></div>
+            </section>
+
+            <div class="admin-section-grid">
+              <section class="admin-section-card">
+                <span class="card-badge" data-icon="badge">Client</span>
+                <h3>Informations du client</h3>
+                <div id="adminClientInfo" class="admin-data-grid"></div>
+              </section>
+
+              <section class="admin-section-card">
+                <span class="card-badge" data-icon="warning">Escalade</span>
+                <h3>Raison de l'escalade</h3>
+                <div id="adminEscalationMessage" class="admin-reason-card"></div>
+                <div id="adminSignals" class="admin-signal-list"></div>
+              </section>
+            </div>
+
+            <section class="admin-section-card">
+              <span class="card-badge" data-icon="receipt_long">Journal CRM</span>
+              <h3>Opérations post-validation</h3>
+              <div id="adminCrmEmpty" class="crm-empty">
+                Les opérations CRM apparaîtront ici après validation du dossier.
+              </div>
+              <div id="adminCrmLogs" class="admin-log-feed"></div>
+            </section>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="brand footer-brand-link">
+          <img src="logo.png" alt="Logo BayBank" class="brand-logo" />
+          <span class="brand-copy">
+            <strong>BayBank</strong>
+            <span>Banque digitale nouvelle génération</span>
+          </span>
+        </a>
+        <p>Console de traitement des dossiers clients nécessitant une revue humaine.</p>
+      </div>
+
+      <div class="footer-column">
+        <h3>Agent</h3>
+        <a href="admin">Console</a>
+        <a href="kyc.html">Parcours KYC</a>
+        <a href="open-account.html">Ouverture</a>
+      </div>
+
+      <div class="footer-column">
+        <h3>Produit</h3>
+        <a href="services.html">Services</a>
+        <a href="index.html">Présentation</a>
+        <a href="kyc.html">Dossier client</a>
+      </div>
+
+      <div class="footer-column">
+        <h3>BayBank</h3>
+        <a href="index.html">Accueil</a>
+        <a href="services.html">Catalogue</a>
+        <a href="admin">Console agent</a>
+      </div>
+    </div>
+
+    <div class="container footer-meta">
+      <span>© 2026 BayBank. Tous droits réservés.</span>
+      <span>Traitement des dossiers clients et décision agent dans une seule interface.</span>
+    </div>
+  </footer>
+
+  <script src="lib/branding.js"></script>
+  <script src="admin.js?v=20260423-8"></script>
+</body>
+</html>
