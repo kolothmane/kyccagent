@@ -452,7 +452,7 @@ img {
 .info-panel,
 .service-row {
   border-radius: 24px;
-  padding: 24px;
+  padding: 30px;
 }
 
 .metric-card strong {
@@ -476,7 +476,7 @@ img {
 
 .hero-panel-card {
   border-radius: 28px;
-  padding: 28px;
+  padding: 34px;
 }
 
 .panel-dark {
@@ -501,7 +501,7 @@ img {
 }
 
 .stacked-card {
-  padding: 18px 0;
+  padding: 22px 0;
 }
 
 .stacked-card + .stacked-card {
@@ -520,11 +520,11 @@ img {
 }
 
 .feature-list {
-  margin: 18px 0 0;
+  margin: 22px 0 0;
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
 .feature-list li {
@@ -625,10 +625,10 @@ img {
 .page-hero-card strong,
 .info-panel h2,
 .service-card strong {
-  margin: 14px 0 0;
+  margin: 18px 0 0;
   font-family: "Manrope", sans-serif;
   font-size: 1.25rem;
-  line-height: 1.2;
+  line-height: 1.24;
   letter-spacing: -0.03em;
   color: var(--ink-strong);
 }
@@ -636,7 +636,7 @@ img {
 .info-card p,
 .page-hero-card p,
 .service-card span {
-  margin: 12px 0 0;
+  margin: 16px 0 0;
 }
 
 .service-stack {
@@ -746,7 +746,10 @@ img {
 }
 
 .page-hero-card {
-  max-width: 420px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  max-width: 460px;
   justify-self: end;
 }
 
@@ -768,7 +771,7 @@ img {
 .form-panel,
 .panel {
   border-radius: 28px;
-  padding: 30px;
+  padding: 34px;
 }
 
 .panel-heading {
@@ -776,7 +779,7 @@ img {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 30px;
 }
 
 .panel-heading h2 {
