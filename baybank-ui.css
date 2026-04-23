@@ -3139,23 +3139,36 @@ input:focus-visible {
   }
 }
 
-@media (max-width: 1440px) {
+@media (max-width: 1560px) {
   .brand-copy span {
     display: none;
   }
+
+  .site-nav {
+    gap: 16px;
+    padding-left: 10px;
+  }
+
+  .site-nav a {
+    padding: 9px 14px;
+  }
+
+  .header-actions .button {
+    padding-inline: 18px;
+  }
 }
 
-@media (max-width: 1320px) {
+@media (max-width: 1480px) {
   .ghost-link {
     display: none;
   }
 
   .site-nav {
-    gap: 18px;
+    gap: 14px;
   }
 }
 
-@media (max-width: 1240px) {
+@media (max-width: 1380px) {
   .nav-toggle {
     display: inline-flex;
     margin-left: auto;
