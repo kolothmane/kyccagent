@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instagram Session Bridge</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <p class="eyebrow">Extension Chrome</p>
+      <h1>Connecter mon compte Instagram</h1>
+      <p class="lead">
+        Ouvre Instagram dans Chrome, puis clique sur le bouton ci-dessous pour envoyer la session
+        active au backend local.
+      </p>
+
+      <button id="connect-button" class="primary">Connecter mon compte Instagram</button>
+      <p id="status" class="status">Prêt à récupérer la session active.</p>
+
+      <p class="hint">Le backend attendu est <strong>http://localhost:3000/api/session</strong>.</p>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

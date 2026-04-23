@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Instagram Session Bridge",
+  "version": "1.0.0",
+  "description": "Send the active Instagram session cookies to the local Next.js backend.",
+  "permissions": ["cookies"],
+  "host_permissions": [
+    "https://*.instagram.com/*",
+    "http://localhost:3000/*",
+    "http://127.0.0.1:3000/*"
+  ],
+  "action": {
+    "default_title": "Connect Instagram",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
