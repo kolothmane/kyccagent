@@ -158,13 +158,18 @@ img {
   align-items: center;
   justify-content: space-between;
   gap: 28px;
+  flex: 1 1 auto;
+  min-width: 0;
   width: 100%;
 }
 
 .site-nav {
   display: flex;
   align-items: center;
-  gap: 28px;
+  flex: 1 1 auto;
+  justify-content: center;
+  min-width: 0;
+  gap: clamp(18px, 2vw, 28px);
 }
 
 .site-nav a {
@@ -203,12 +208,14 @@ img {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  flex: 0 0 auto;
   gap: 14px;
   margin-left: auto;
 }
 
 .header-actions .button {
   flex: 0 0 auto;
+  padding-inline: clamp(18px, 1.8vw, 28px);
   white-space: nowrap;
 }
 
@@ -3110,7 +3117,23 @@ input:focus-visible {
   }
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1440px) {
+  .brand-copy span {
+    display: none;
+  }
+}
+
+@media (max-width: 1320px) {
+  .ghost-link {
+    display: none;
+  }
+
+  .site-nav {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 1240px) {
   .nav-toggle {
     display: inline-flex;
     margin-left: auto;
