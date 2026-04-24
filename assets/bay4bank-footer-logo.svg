@@ -1,9 +1,10 @@
-<svg width="1400" height="760" viewBox="0 0 1400 760" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M831 299C801.59 330.4 759.76 350 713.35 350C624.45 350 552.38 277.93 552.38 189.03C552.38 100.13 624.45 28.06 713.35 28.06C802.25 28.06 874.32 100.13 874.32 189.03C874.32 214.16 868.56 237.95 858.28 259.15" stroke="#1765F5" stroke-width="16" stroke-linecap="round"/>
-  <text x="667" y="243" fill="#09164E" font-family="Arial Black, Arial, sans-serif" font-size="206">B</text>
-  <text x="718" y="305" fill="#1765F5" font-family="Arial Black, Arial, sans-serif" font-size="182">4</text>
-  <text x="700" y="430" text-anchor="middle" fill="#09164E" font-family="Arial Black, Arial, sans-serif" font-size="104" letter-spacing="18">BAY<tspan fill="#1765F5">4</tspan>BANK</text>
-  <rect x="592" y="476" width="216" height="7" rx="3.5" fill="#1765F5"/>
-  <text x="700" y="566" text-anchor="middle" fill="#09164E" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="56" font-weight="700">Moins d’attente. Plus d’action.</text>
-  <text x="700" y="640" text-anchor="middle" fill="#1765F5" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="54" font-weight="700">Bienvenue chez Bay4Bank.</text>
+<svg width="1320" height="840" viewBox="0 0 1320 840" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1320" height="840" fill="white"/>
+  <path d="M824.108 399.801C792.601 426.117 751.173 442 706.037 442C607.111 442 526.916 361.805 526.916 262.879C526.916 163.953 607.111 83.7578 706.037 83.7578C804.963 83.7578 885.158 163.953 885.158 262.879C885.158 280.61 882.581 297.739 877.773 313.896" stroke="#2C63F4" stroke-width="15" stroke-linecap="round"/>
+  <text x="600" y="323" fill="#09164E" font-family="Arial Black, Arial, sans-serif" font-size="190">B</text>
+  <text x="658" y="383" fill="#3B67FF" font-family="Arial Black, Arial, sans-serif" font-size="170">4</text>
+  <text x="660" y="516" text-anchor="middle" fill="#09164E" font-family="Arial, Helvetica, sans-serif" font-size="122" letter-spacing="22">BAY<tspan fill="#3B67FF">4</tspan>BANK</text>
+  <rect x="574" y="563" width="172" height="6" rx="3" fill="#3B67FF"/>
+  <text x="660" y="653" text-anchor="middle" fill="#09164E" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="700">Moins d’attente. Plus d’action.</text>
+  <text x="660" y="731" text-anchor="middle" fill="#3B67FF" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="700">Bienvenue chez Bay4Bank.</text>
 </svg>
