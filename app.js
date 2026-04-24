@@ -1450,11 +1450,6 @@ function initAccountPage() {
   accountForm.addEventListener("submit", async function(event) {
     event.preventDefault();
     await initSession();
-<<<<<<< HEAD
-    setStep("upload");
-    updateFileChips(f.name);
-    showUploadError(null);
-=======
 
     const formData = {
       accountEmail: getFormFieldValue(accountForm, "accountEmail"),
@@ -1550,7 +1545,6 @@ function initUploadFlow() {
     await initSession();
     syncJourneyStage();
     updateFileChips(file.name);
->>>>>>> c0e78641bd8450b3618b2d21bff93c40a58b41a0
 
     const allowed = [
       "image/jpeg",
@@ -1560,23 +1554,12 @@ function initUploadFlow() {
       "application/pdf",
     ];
 
-<<<<<<< HEAD
-    if (!allowed.includes(f.type)) {
-      const msg = "Format non pris en charge. Merci d'envoyer un document JPEG, PNG, WebP ou PDF.";
-      say(
-        msg,
-        "agent",
-        { mirrorActivity: true, tone: "error" },
-      );
-      showUploadError(msg);
-=======
     if (!allowed.includes(file.type)) {
       const formatMessage =
         "Format non pris en charge. Merci d'envoyer un document JPEG, PNG, WebP ou PDF.";
       setUploadFeedback(formatMessage, "error");
       say(formatMessage, "agent");
       event.target.value = "";
->>>>>>> c0e78641bd8450b3618b2d21bff93c40a58b41a0
       return;
     }
 
@@ -1592,21 +1575,11 @@ function initUploadFlow() {
 
       if (approxBytes > 4 * 1024 * 1024) {
         removeProcessing();
-<<<<<<< HEAD
-        const msg = "Le document est trop volumineux. Merci d'utiliser un fichier plus leger ou une image moins lourde.";
-        say(
-          msg,
-          "agent",
-          { mirrorActivity: true, tone: "error" },
-        );
-        showUploadError(msg);
-=======
         const tooLargeMessage =
           "Le document est trop volumineux. Merci d'utiliser un fichier plus léger.";
         setUploadFeedback(tooLargeMessage, "error");
         say(tooLargeMessage, "agent");
         event.target.value = "";
->>>>>>> c0e78641bd8450b3618b2d21bff93c40a58b41a0
         return;
       }
 
@@ -1627,21 +1600,11 @@ function initUploadFlow() {
         const error = await checkResponse.json().catch(function() {
           return {};
         });
-<<<<<<< HEAD
-        const msg = err.error || "La verification du document a echoue. Merci de reessayer.";
-        say(
-          msg,
-          "agent",
-          { mirrorActivity: true, tone: "error" },
-        );
-        showUploadError(msg);
-=======
         const message =
           error.error || "La vérification du document a échoué. Merci de réessayer.";
         setUploadFeedback(message, "error");
         say(message, "agent");
         event.target.value = "";
->>>>>>> c0e78641bd8450b3618b2d21bff93c40a58b41a0
         return;
       }
 
@@ -1649,18 +1612,6 @@ function initUploadFlow() {
       if (!checkResult.valid) {
         const issues =
           checkResult.issues && checkResult.issues.length
-<<<<<<< HEAD
-            ? checkResult.issues.join("\n")
-            : "The document could not be accepted.";
-
-        const msg = "Document refuse : " + issueList;
-        say(
-          msg + "\nMerci d'envoyer un document clair et conforme.",
-          "agent",
-          { mirrorActivity: true, tone: "error" },
-        );
-        showUploadError(msg);
-=======
             ? checkResult.issues.join(" ")
             : "Le document ne peut pas être accepté.";
         const rejectionMessage =
@@ -1671,7 +1622,6 @@ function initUploadFlow() {
         setUploadFeedback(rejectionMessage, "error");
         say("Document refusé :\n" + issues, "agent");
         event.target.value = "";
->>>>>>> c0e78641bd8450b3618b2d21bff93c40a58b41a0
         return;
       }
 
@@ -1722,20 +1672,11 @@ function initUploadFlow() {
         const error = await uploadResponse.json().catch(function() {
           return {};
         });
-<<<<<<< HEAD
-        const msg = err.error || "Le televersement a echoue. Merci de reessayer.";
-        say(msg, "agent", {
-          mirrorActivity: true,
-          tone: "error",
-        });
-        showUploadError(msg);
-=======
         const message =
           error.error || "Le téléversement a échoué. Merci de réessayer.";
         setUploadFeedback(message, "error");
         say(message, "agent");
         event.target.value = "";
->>>>>>> c0e78641bd8450b3618b2d21bff93c40a58b41a0
         return;
       }
 
@@ -1796,16 +1737,6 @@ function initUploadFlow() {
       }
     } catch (error) {
       removeProcessing();
-<<<<<<< HEAD
-      console.error("Upload error:", err);
-      const msg = "Une erreur est survenue pendant le traitement du document. Merci de reessayer.";
-      say(
-        msg,
-        "agent",
-        { mirrorActivity: true, tone: "error" },
-      );
-      showUploadError(msg);
-=======
       console.error("Upload error:", error);
       const message =
         "Une erreur est survenue pendant le traitement du document. Merci de réessayer.";
@@ -1813,7 +1744,6 @@ function initUploadFlow() {
       say(message, "agent");
     } finally {
       event.target.value = "";
->>>>>>> c0e78641bd8450b3618b2d21bff93c40a58b41a0
     }
   });
 }
