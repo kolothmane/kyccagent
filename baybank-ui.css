@@ -710,7 +710,17 @@ img {
 }
 
 .footer-brand-link {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0;
   margin-bottom: 18px;
+}
+
+.footer-logo-mark {
+  display: block;
+  width: min(100%, 320px);
+  height: auto;
+  object-fit: contain;
 }
 
 .footer-column {
