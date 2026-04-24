@@ -216,117 +216,122 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const {
-    sessionId,
-    profileData,
-    identityExtraction,
-    addressExtraction,
-    accountData,
-    documentFiles,
-    documentAssets,
-  } = req.body || {};
-
-  if (!sessionId || typeof sessionId !== "string") {
-    return res.status(400).json({ error: "sessionId is required" });
-  }
-
-  const reconciliation = reconcile(identityExtraction || null, addressExtraction || null);
-  const humanReview = buildHumanReview(reconciliation);
-
-  const submissionId = randomUUID();
-  const submittedAt = new Date().toISOString();
-
-  const statusMap = {
-    AUTO_APPROVE: "approved",
-    APPROVE_WITH_NOTE: "approved",
-    MANUAL_REVIEW: "pending_review",
-  };
-  const status = statusMap[reconciliation.recommendedAction] || "pending_review";
-
-  const accountTimeline = buildAccountTimeline({
-    status,
-    submittedAt,
-    sessionId,
-    profileData: profileData || {},
-    accountData: accountData || {},
-    reconciliation,
-    humanReview,
-  });
-
-  let escalationRecord = null;
-
-  if (humanReview.required) {
-    escalationRecord = upsertEscalation({
+  try {
+    const {
       sessionId,
-      submissionId,
-      submittedAt,
-      updatedAt: submittedAt,
-      status: "pending",
-      humanReview,
-      reconciliation,
-      account: {
-        accountId: accountTimeline.accountId,
-        customerId: accountTimeline.customerId,
-        owner: accountTimeline.owner,
-        accountName:
-          (accountData && accountData.accountName) ||
-          [
-            profileData && profileData.firstName,
-            profileData && profileData.lastName,
-          ]
-            .filter(Boolean)
-            .join(" ")
-            .trim() ||
-          "Compte BayBank",
-      },
-      client: {
-        firstName: profileData && profileData.firstName,
-        lastName: profileData && profileData.lastName,
-        email: profileData && profileData.email,
-        phone: profileData && profileData.phone,
-        country: profileData && profileData.country,
-        dob: profileData && profileData.dob,
-        street: profileData && profileData.street,
-        city: profileData && profileData.city,
-        state: profileData && profileData.state,
-        postal: profileData && profileData.postal,
-      },
-      documents: [
-        {
-          category: "identity",
-          label: "Pièce d'identité",
-          fileName:
-            (documentFiles && documentFiles.identity) || "Document d'identité",
-          previewUrl:
-            documentAssets &&
-            documentAssets.identity &&
-            documentAssets.identity.previewUrl,
-          extraction: identityExtraction || {},
-        },
-        {
-          category: "address",
-          label: "Justificatif de domicile",
-          fileName:
-            (documentFiles && documentFiles.address) || "Justificatif de domicile",
-          previewUrl:
-            documentAssets &&
-            documentAssets.address &&
-            documentAssets.address.previewUrl,
-          extraction: addressExtraction || {},
-        },
-      ],
-    });
-  }
+      profileData,
+      identityExtraction,
+      addressExtraction,
+      accountData,
+      documentFiles,
+      documentAssets,
+    } = req.body || {};
 
-  return res.status(200).json({
-    success: true,
-    submissionId,
-    sessionId,
-    submittedAt,
-    status,
-    reconciliation,
-    humanReview,
-    accountTimeline,
-    escalationId: escalationRecord && escalationRecord.escalationId,
-  });
+    if (!sessionId || typeof sessionId !== "string") {
+      return res.status(400).json({ error: "sessionId is required" });
+    }
+
+    const reconciliation = reconcile(identityExtraction || null, addressExtraction || null);
+    const humanReview = buildHumanReview(reconciliation);
+
+    const submissionId = randomUUID();
+    const submittedAt = new Date().toISOString();
+
+    const statusMap = {
+      AUTO_APPROVE: "approved",
+      APPROVE_WITH_NOTE: "approved",
+      MANUAL_REVIEW: "pending_review",
+    };
+    const status = statusMap[reconciliation.recommendedAction] || "pending_review";
+
+    const accountTimeline = buildAccountTimeline({
+      status,
+      submittedAt,
+      sessionId,
+      profileData: profileData || {},
+      accountData: accountData || {},
+      reconciliation,
+      humanReview,
+    });
+
+    let escalationRecord = null;
+
+    if (humanReview.required) {
+      escalationRecord = await upsertEscalation({
+        sessionId,
+        submissionId,
+        submittedAt,
+        updatedAt: submittedAt,
+        status: "pending",
+        humanReview,
+        reconciliation,
+        account: {
+          accountId: accountTimeline.accountId,
+          customerId: accountTimeline.customerId,
+          owner: accountTimeline.owner,
+          accountName:
+            (accountData && accountData.accountName) ||
+            [
+              profileData && profileData.firstName,
+              profileData && profileData.lastName,
+            ]
+              .filter(Boolean)
+              .join(" ")
+              .trim() ||
+            "Compte BayBank",
+        },
+        client: {
+          firstName: profileData && profileData.firstName,
+          lastName: profileData && profileData.lastName,
+          email: profileData && profileData.email,
+          phone: profileData && profileData.phone,
+          country: profileData && profileData.country,
+          dob: profileData && profileData.dob,
+          street: profileData && profileData.street,
+          city: profileData && profileData.city,
+          state: profileData && profileData.state,
+          postal: profileData && profileData.postal,
+        },
+        documents: [
+          {
+            category: "identity",
+            label: "Pièce d'identité",
+            fileName:
+              (documentFiles && documentFiles.identity) || "Document d'identité",
+            previewUrl:
+              documentAssets &&
+              documentAssets.identity &&
+              documentAssets.identity.previewUrl,
+            extraction: identityExtraction || {},
+          },
+          {
+            category: "address",
+            label: "Justificatif de domicile",
+            fileName:
+              (documentFiles && documentFiles.address) || "Justificatif de domicile",
+            previewUrl:
+              documentAssets &&
+              documentAssets.address &&
+              documentAssets.address.previewUrl,
+            extraction: addressExtraction || {},
+          },
+        ],
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      submissionId,
+      sessionId,
+      submittedAt,
+      status,
+      reconciliation,
+      humanReview,
+      accountTimeline,
+      escalationId: escalationRecord && escalationRecord.escalationId,
+    });
+  } catch (error) {
+    console.error("KYC submission storage error:", error);
+    return res.status(500).json({ error: "Unable to persist KYC submission" });
+  }
 };
