@@ -718,7 +718,7 @@ img {
 
 .footer-logo-mark {
   display: block;
-  width: min(100%, 320px);
+  width: min(100%, 380px);
   height: auto;
   object-fit: contain;
 }
