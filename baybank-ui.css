@@ -1837,6 +1837,12 @@ input:focus-visible {
   border-radius: var(--playful-radius-full);
 }
 
+/* Keep the account tab from collapsing in the desktop header. */
+body[data-page="account"] .site-nav a[href="open-account.html"] {
+  flex-shrink: 0;
+  min-width: max-content;
+}
+
 .site-nav a::after {
   display: none;
 }
@@ -1906,6 +1912,16 @@ input:focus-visible {
 
 .button-primary:hover {
   background: #0b58c2;
+}
+
+@media (min-width: 1381px) {
+  body[data-page="account"] .navbar-wrap {
+    gap: clamp(18px, 2vw, 30px);
+  }
+
+  body[data-page="account"] .site-nav {
+    gap: clamp(14px, 1.5vw, 22px);
+  }
 }
 
 .button-secondary {
