@@ -203,6 +203,238 @@ function readStoredJson(raw) {
   }
 }
 
+function looksLikeEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
+}
+
+function looksLikePhone(value) {
+  const normalized = String(value || "").replace(/[^\d+]/g, "");
+  const digits = normalized.replace(/\D/g, "");
+  return digits.length >= 8 && /^[+]?[\d]+$/.test(normalized);
+}
+
+function cleanText(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function getFormFieldValue(form, name) {
+  if (!form || !form.elements || !form.elements[name]) return "";
+  return String(form.elements[name].value || "").trim();
+}
+
+function sanitizeAccountState(state) {
+  if (!state || typeof state !== "object") return null;
+
+  const next = Object.assign({}, state);
+
+  if (next.country && (looksLikeEmail(next.country) || next.country === next.contactEmail)) {
+    next.country = "";
+  }
+  if (next.phone && looksLikeEmail(next.phone)) {
+    next.phone = "";
+  }
+  if (next.firstName && looksLikeEmail(next.firstName)) {
+    next.firstName = "";
+  }
+  if (next.lastName && looksLikeEmail(next.lastName)) {
+    next.lastName = "";
+  }
+
+  return next;
+}
+
+function persistAccountState() {
+  if (accountState) {
+    accountState = sanitizeAccountState(accountState);
+    sessionStorage.setItem(ACCOUNT_STORAGE_KEY, JSON.stringify(accountState));
+  } else {
+    sessionStorage.removeItem(ACCOUNT_STORAGE_KEY);
+  }
+}
+
+function readAdminEscalations() {
+  return readStoredJson(localStorage.getItem(ADMIN_ESCALATIONS_STORAGE_KEY)) || [];
+}
+
+function writeAdminEscalations(items) {
+  localStorage.setItem(ADMIN_ESCALATIONS_STORAGE_KEY, JSON.stringify(items || []));
+}
+
+function readDeletedAdminEscalations() {
+  return readStoredJson(localStorage.getItem(ADMIN_DELETED_ESCALATIONS_KEY)) || [];
+}
+
+function isDeletedAdminEscalation(ref) {
+  const deletedItems = readDeletedAdminEscalations();
+  if (!Array.isArray(deletedItems) || !deletedItems.length) return false;
+
+  return deletedItems.some(function(item) {
+    return Boolean(
+      (ref.escalationId && item.escalationId === ref.escalationId) ||
+        (ref.submissionId && item.submissionId === ref.submissionId) ||
+        (ref.sessionId && item.sessionId === ref.sessionId) ||
+        (ref.fingerprint && item.fingerprint === ref.fingerprint),
+    );
+  });
+}
+
+function buildAdminEscalationFingerprint(submission, profileData) {
+  const fullName = [profileData && profileData.firstName, profileData && profileData.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  const reason =
+    (submission &&
+      submission.humanReview &&
+      (submission.humanReview.message ||
+        ((submission.humanReview.reasons || []).join(" | ")))) ||
+    "";
+  const accountId =
+    (submission &&
+      submission.accountTimeline &&
+      submission.accountTimeline.accountId) ||
+    (accountState && accountState.accountId) ||
+    "";
+  const submittedAt = (submission && submission.submittedAt) || "";
+
+  return [accountId, submittedAt, fullName, reason].join("::");
+}
+
+function readAdminDocumentPreviews() {
+  return readStoredJson(localStorage.getItem(ADMIN_DOCUMENT_PREVIEWS_KEY)) || {};
+}
+
+function writeAdminDocumentPreviews(previews) {
+  try {
+    localStorage.setItem(ADMIN_DOCUMENT_PREVIEWS_KEY, JSON.stringify(previews || {}));
+  } catch (error) {
+    console.error("Document preview storage error:", error);
+  }
+}
+
+function persistDocumentPreview(category, asset) {
+  if (!sessionId || !category || !asset || !asset.previewUrl) return;
+
+  const previews = readAdminDocumentPreviews();
+  const current = previews[sessionId] || {};
+  current[category] = {
+    fileName: asset.fileName || "",
+    previewUrl: asset.previewUrl,
+    mimeType: asset.mimeType || "image/jpeg",
+  };
+  previews[sessionId] = current;
+  writeAdminDocumentPreviews(previews);
+}
+
+function getStoredDocumentPreview(category) {
+  if (!sessionId || !category) return null;
+  const previews = readAdminDocumentPreviews();
+  return previews[sessionId] && previews[sessionId][category]
+    ? previews[sessionId][category]
+    : null;
+}
+
+function upsertAdminEscalation(item) {
+  const items = readAdminEscalations();
+  const index = items.findIndex(function(existing) {
+    return (
+      (item.escalationId && existing.escalationId === item.escalationId) ||
+      (item.submissionId && existing.submissionId === item.submissionId) ||
+      (item.sessionId && existing.sessionId === item.sessionId)
+    );
+  });
+
+  if (index >= 0) {
+    items[index] = Object.assign({}, items[index], item);
+  } else {
+    items.unshift(item);
+  }
+
+  writeAdminEscalations(items);
+}
+
+function escapeHtml(value) {
+  return String(value || "").replace(/[&<>"']/g, function(match) {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    }[match];
+  });
+}
+
+function persistAdminHumanReviewCase(submission, profileData) {
+  if (!submission || !submission.humanReview || !submission.humanReview.required) return;
+
+  const ref = {
+    escalationId: submission.escalationId || "",
+    submissionId: submission.submissionId || "",
+    fingerprint: buildAdminEscalationFingerprint(submission, profileData),
+  };
+
+  if (isDeletedAdminEscalation(ref)) return;
+
+  upsertAdminEscalation({
+    escalationId: submission.escalationId || "esc_" + generateId("local"),
+    sessionId: sessionId,
+    submissionId: submission.submissionId,
+    submittedAt: submission.submittedAt,
+    updatedAt: submission.submittedAt,
+    status: "pending",
+    humanReview: submission.humanReview,
+    reconciliation: submission.reconciliation || {},
+    account: {
+      accountId:
+        (submission.accountTimeline && submission.accountTimeline.accountId) ||
+        (accountState && accountState.accountId),
+      customerId:
+        (submission.accountTimeline && submission.accountTimeline.customerId) ||
+        (accountState && accountState.customerId),
+      owner:
+        (submission.accountTimeline && submission.accountTimeline.owner) ||
+        (accountState && accountState.owner),
+      accountName: accountState && accountState.accountName,
+    },
+    client: {
+      firstName: profileData.firstName,
+      lastName: profileData.lastName,
+      email: profileData.email,
+      phone: profileData.phone,
+      country: profileData.country,
+      dob: profileData.dob,
+      street: profileData.street,
+      city: profileData.city,
+      state: profileData.state,
+      postal: profileData.postal,
+    },
+    documents: [
+      {
+        category: "identity",
+        label: "Pièce d'identité",
+        fileName: documentNames.identity || "Document d'identité",
+        extraction: identityExtraction || {},
+        previewUrl:
+          (documentAssets.identity && documentAssets.identity.previewUrl) ||
+          (getStoredDocumentPreview("identity") &&
+            getStoredDocumentPreview("identity").previewUrl),
+      },
+      {
+        category: "address",
+        label: "Justificatif de domicile",
+        fileName: documentNames.address || "Justificatif de domicile",
+        extraction: addressExtraction || {},
+        previewUrl:
+          (documentAssets.address && documentAssets.address.previewUrl) ||
+          (getStoredDocumentPreview("address") &&
+            getStoredDocumentPreview("address").previewUrl),
+      },
+    ],
+    crmLogs: null,
+  });
+}
+
 function scrollMessages() {
   if (messages) messages.scrollTop = messages.scrollHeight;
 }
