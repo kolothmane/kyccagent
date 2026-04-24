@@ -3692,9 +3692,53 @@ input:focus-visible {
   transition: opacity 240ms ease, transform 240ms ease;
 }
 
+.chat-empty [data-chat-intro].is-loading {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .chat-empty [data-chat-intro].is-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+.chat-ellipsis-loader {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 22px;
+}
+
+.chat-ellipsis-loader span {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #98a7ff;
+  opacity: 0.28;
+  animation: chat-ellipsis-pulse 1.05s infinite ease-in-out;
+}
+
+.chat-ellipsis-loader span:nth-child(2) {
+  animation-delay: 0.14s;
+}
+
+.chat-ellipsis-loader span:nth-child(3) {
+  animation-delay: 0.28s;
+}
+
+@keyframes chat-ellipsis-pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.28;
+    transform: scale(0.82);
+  }
+
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .chat-system-note {

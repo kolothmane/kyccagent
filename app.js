@@ -846,6 +846,43 @@ function clearChatIntroTimers() {
   chatIntroTimers = [];
 }
 
+function createChatIntroLoader() {
+  const loader = document.createElement("span");
+  loader.className = "chat-ellipsis-loader";
+  loader.setAttribute("aria-hidden", "true");
+
+  for (let index = 0; index < 3; index += 1) {
+    const dot = document.createElement("span");
+    loader.appendChild(dot);
+  }
+
+  return loader;
+}
+
+function showChatIntroLoader(item) {
+  if (!item) return;
+
+  if (!item.dataset.chatIntroHtml) {
+    item.dataset.chatIntroHtml = item.innerHTML;
+  }
+
+  item.classList.remove("is-visible");
+  item.classList.add("is-loading");
+  item.innerHTML = "";
+  item.appendChild(createChatIntroLoader());
+}
+
+function revealChatIntroItem(item) {
+  if (!item) return;
+
+  if (item.dataset.chatIntroHtml) {
+    item.innerHTML = item.dataset.chatIntroHtml;
+  }
+
+  item.classList.remove("is-loading");
+  item.classList.add("is-visible");
+}
+
 function revealChatIntro() {
   const emptyState = document.getElementById("emptyState");
   if (!emptyState) return;
@@ -863,15 +900,18 @@ function revealChatIntro() {
   }
 
   introItems.forEach(function(item) {
-    item.classList.remove("is-visible");
+    item.classList.remove("is-visible", "is-loading");
   });
 
-  const delays = [220, 760, 1120];
+  showChatIntroLoader(introItems[0]);
+  showChatIntroLoader(introItems[1]);
+
+  const delays = [760, 1460, 1740];
   introItems.forEach(function(item, index) {
     const delay = delays[index] || 220 + index * 320;
     const timer = window.setTimeout(function() {
       if (!document.body.contains(item)) return;
-      item.classList.add("is-visible");
+      revealChatIntroItem(item);
       scrollMessages();
     }, delay);
     chatIntroTimers.push(timer);
