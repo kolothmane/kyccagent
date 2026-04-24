@@ -1,4 +1,4 @@
-const BRAND = (window.BRANDING && window.BRANDING.name) || "BayBank";
+const BRAND = (window.BRANDING && window.BRANDING.name) || "Bay4Bank";
 const SERVICE_LINE =
   (window.BRANDING && window.BRANDING.serviceLine) || "Banque digitale nouvelle génération";
 const ACCOUNT_STORAGE_KEY = "baybankAccountState";
@@ -956,18 +956,18 @@ function renderAccountState() {
     }
 
     accountStatus.innerHTML =
-      '<div class="placeholder-title">Aucun compte BayBank actif</div>' +
+      '<div class="placeholder-title">Aucun compte Bay4Bank actif</div>' +
       "<p>Commencez par créer votre espace client pour débloquer la page de vérification et le journal d'ouverture.</p>";
 
     if (kycGate) {
       kycGate.className = "gate-banner";
       kycGate.textContent =
-        "Créez d'abord votre compte BayBank depuis la page d'ouverture pour activer cette étape.";
+        "Créez d'abord votre compte Bay4Bank depuis la page d'ouverture pour activer cette étape.";
     }
 
     if (fileInput) fileInput.disabled = true;
     if (submitBtn) submitBtn.disabled = true;
-    if (createAccountBtn) createAccountBtn.textContent = "Créer mon espace BayBank";
+    if (createAccountBtn) createAccountBtn.textContent = "Créer mon espace Bay4Bank";
     return;
   }
 
@@ -1222,7 +1222,7 @@ function ensureAccountBeforeKyc(message) {
   if (accountState) return false;
 
   const text =
-    message || "Créez d'abord votre espace BayBank avant d'envoyer des documents.";
+    message || "Créez d'abord votre espace Bay4Bank avant d'envoyer des documents.";
 
   if (currentPage === "kyc") setResultMessage(text, "error");
 
@@ -1270,7 +1270,7 @@ function ensureChatWelcome() {
   chatHasWelcomed = true;
 
   let welcome =
-    "Bonjour, je peux vous aider à ouvrir votre compte BayBank et à préparer les prochaines étapes.";
+    "Bonjour, je peux vous aider à ouvrir votre compte Bay4Bank et à préparer les prochaines étapes.";
 
   if (currentPage === "kyc") {
     welcome =
@@ -1306,8 +1306,8 @@ function toggleChatMinimize() {
 function buildNextStepHint(french) {
   if (!accountState) {
     return french
-      ? "Commencez par créer votre espace BayBank."
-      : "Start by creating your BayBank account.";
+      ? "Commencez par créer votre espace Bay4Bank."
+      : "Start by creating your Bay4Bank account.";
   }
 
   if (currentPage !== "kyc") {
@@ -1670,7 +1670,7 @@ function createAccountPreview(formData) {
     customerId: existing.customerId || generateId("client"),
     owner: existing.owner || pickOwner(existing.country || ""),
     accountName: existing.accountName || "Compte " + emailHandle,
-    planName: "BayBank Everyday",
+    planName: "Bay4Bank Everyday",
     createdAt: existing.createdAt || new Date().toISOString(),
     kycStatus: existing.kycStatus || null,
   };
@@ -1713,7 +1713,7 @@ function initAccountPage() {
     prefillAccountForm();
     renderAccountState();
     setInlineFeedback(
-      "Compte créé. Redirection vers la page de vérification BayBank…",
+      "Compte créé. Redirection vers la page de vérification Bay4Bank…",
       "success",
     );
 
@@ -1736,7 +1736,7 @@ function openUploadPicker(intent) {
 
   if (
     ensureAccountBeforeKyc(
-      "Créez votre compte BayBank avant d'envoyer un document depuis cette page.",
+      "Créez votre compte Bay4Bank avant d'envoyer un document depuis cette page.",
     )
   ) {
     return;
@@ -2090,11 +2090,11 @@ function initSubmitFlow() {
 
       if (submission.status === "approved") {
         setResultMessage(
-          "Compte activé. Votre dossier a été validé et votre espace BayBank est prêt.",
+          "Compte activé. Votre dossier a été validé et votre espace Bay4Bank est prêt.",
           "success",
         );
         say(
-          "Le dossier est validé. Votre compte BayBank est activé et le profil client a bien été enregistré.",
+          "Le dossier est validé. Votre compte Bay4Bank est activé et le profil client a bien été enregistré.",
           "agent",
         );
       } else if (humanReview.required) {

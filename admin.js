@@ -309,7 +309,7 @@ function mergeEscalations(primaryItems, secondaryItems) {
 
 function buildFallbackCrmLogs(record, agentName) {
   const reviewedAt = new Date().toISOString();
-  const reviewer = agentName || "Agent conformité BayBank";
+  const reviewer = agentName || "Agent conformité Bay4Bank";
   const fullName = [record.client?.firstName, record.client?.lastName].filter(Boolean).join(" ").trim() || "Titulaire principal";
 
   return {
@@ -324,7 +324,7 @@ function buildFallbackCrmLogs(record, agentName) {
       {
         system: "CRM",
         label: "Fiche client confirmée",
-        detail: fullName + " a été confirmé dans le référentiel client BayBank.",
+        detail: fullName + " a été confirmé dans le référentiel client Bay4Bank.",
         timestamp: new Date(new Date(reviewedAt).getTime() + 60000).toISOString(),
       },
       {
@@ -338,7 +338,7 @@ function buildFallbackCrmLogs(record, agentName) {
 }
 
 function applyLocalDecision(record, action) {
-  const reviewer = "Agent conformité BayBank";
+  const reviewer = "Agent conformité Bay4Bank";
   const reviewedAt = new Date().toISOString();
   const next = Object.assign({}, record, {
     status: action === "approve" ? "approved" : "rejected",
@@ -714,7 +714,7 @@ async function submitDecision(action) {
         submissionId: selected.submissionId,
         sessionId: selected.sessionId,
         action: action,
-        agentName: "Agent conformité BayBank",
+        agentName: "Agent conformité Bay4Bank",
       }),
     });
 
@@ -777,7 +777,7 @@ async function deleteSelectedEscalation() {
         submissionId: selected.submissionId,
         sessionId: selected.sessionId,
         action: "delete",
-        agentName: "Agent conformité BayBank",
+        agentName: "Agent conformité Bay4Bank",
       }),
     });
 

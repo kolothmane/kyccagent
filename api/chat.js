@@ -4,7 +4,7 @@ const { getClient } = require("../lib/openai-client");
 
 const MODEL = "gpt-5.4";
 const MAX_HISTORY = 20;
-const PRODUCT_NAME = "BayBank";
+const PRODUCT_NAME = "Bay4Bank";
 
 const IDENTITY_DOCUMENTS = "passport, national ID card, or driving licence";
 const ADDRESS_DOCUMENTS =
@@ -170,8 +170,8 @@ function buildNextStepHint(context, french) {
 
   if (!accountCreated) {
     return french
-      ? "Commencez par créer votre compte BayBank."
-      : "Please start by creating your BayBank account.";
+      ? "Commencez par créer votre compte Bay4Bank."
+      : "Please start by creating your Bay4Bank account.";
   }
 
   if (page !== "kyc") {

@@ -120,7 +120,7 @@ function buildAccountTimeline({
       .filter(Boolean)
       .join(" ")
       .trim() ||
-    "Compte BayBank";
+    "Compte Bay4Bank";
   const owner = (accountData && accountData.owner) || "Relationship Team";
   const contactName =
     [
@@ -190,7 +190,7 @@ function buildAccountTimeline({
     label: humanReview && humanReview.required ? "Agent assigné" : "Conseiller assigné",
     detail:
       (humanReview && humanReview.required
-        ? "Un agent humain BayBank a été assigné pour reprendre la revue du dossier."
+        ? "Un agent humain Bay4Bank a été assigné pour reprendre la revue du dossier."
         : owner + " prend en charge le suivi du compte."),
   });
 
@@ -278,7 +278,7 @@ module.exports = async (req, res) => {
               .filter(Boolean)
               .join(" ")
               .trim() ||
-            "Compte BayBank",
+            "Compte Bay4Bank",
         },
         client: {
           firstName: profileData && profileData.firstName,
