@@ -10,7 +10,7 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200,0,0&family=Outfit:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="baybank-ui.css?v=20260424-7" />
+  <link rel="stylesheet" href="baybank-ui.css?v=20260424-8" />
 </head>
 <body data-page="account">
   <header class="site-header" id="siteHeader">
@@ -142,8 +142,15 @@
   </main>
 
   <button id="chatLauncher" class="chat-launcher" type="button" aria-label="Ouvrir l'assistant Bay4Bank">
-    <span class="chat-launcher-pulse"></span>
-    <span>Assistant Bay4Bank</span>
+    <span class="chat-launcher-icon" aria-hidden="true">
+      <span class="chat-agent-mark">
+        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+          <path d="M19.3786 16.9969H19.3909C18.8863 17.04 18.437 17.1262 18.0493 17.2492C18.0493 17.2492 17.4832 17.4277 16.6155 17.5508C16.4124 17.5816 16.154 17.5816 16.0124 17.5816H15.9078C15.7663 17.5816 15.5017 17.5692 15.3047 17.5385C14.437 17.3969 13.877 17.2 13.877 17.2C13.4893 17.0769 13.0401 16.9846 12.5355 16.9292C9.77243 16.6462 8.57858 17.6985 8.51089 17.8954C8.4432 18.0923 8.74473 20.6523 8.96627 21.0585C9.18166 21.4585 9.51396 21.6923 9.8155 21.8216C10.1232 21.9508 12.6524 22.2031 13.4955 22.0862C14.3386 21.9692 14.4678 21.6862 14.6955 21.2554C14.8555 20.9477 15.2678 19.5569 15.4955 18.7385C15.5509 18.5785 15.557 18.2585 15.9447 18.2339C16.3324 18.2646 16.3386 18.5908 16.3878 18.7508C16.6093 19.5692 16.997 20.9723 17.1509 21.28C17.3663 21.7169 17.4955 22 18.3386 22.1354C19.1755 22.2646 21.7109 22.0616 22.0186 21.9385C22.3263 21.8154 22.6586 21.5877 22.8801 21.1877C23.1017 20.7877 23.4463 18.2339 23.3847 18.0369C23.3232 17.8339 22.1478 16.7631 19.3786 16.9969Z"></path>
+          <path d="M28.0124 8.95386H28.0186C27.2494 7.9754 26.3386 7.10771 25.3294 6.36309C26.3755 6.17848 27.1694 5.26771 27.1694 4.17232C27.1694 2.94155 26.1724 1.93848 24.9355 1.93848C23.6986 1.93848 22.7017 2.9354 22.7017 4.17232C22.7017 4.41848 22.7509 4.65232 22.8247 4.87386C21.237 4.12309 19.5017 3.63078 17.6863 3.44002C14.6463 3.12002 11.7109 3.66155 9.18166 4.8554C9.24935 4.64001 9.29858 4.41232 9.29858 4.17232C9.29858 2.94155 8.30166 1.93848 7.06473 1.93848C5.82781 1.93848 4.83089 2.9354 4.83089 4.17232C4.83089 5.26771 5.61858 6.17232 6.65243 6.36309C3.78473 8.48001 1.78473 11.5631 1.32935 15.1385C0.904735 18.4431 1.84627 21.7539 3.98781 24.4616C6.41243 27.5262 10.1786 29.5385 14.314 29.9754C14.8924 30.0369 15.4647 30.0677 16.0309 30.0677C23.4094 30.0677 29.797 25.0585 30.6709 18.2769C31.0955 14.9723 30.154 11.6616 28.0124 8.95386ZM16.0124 26.2523H16.0063C10.4555 26.2462 5.93858 22.5416 5.93858 17.9877C5.93858 16.6154 6.35704 15.2985 7.11397 14.1292C7.18166 14.5477 7.30473 14.9108 7.44012 15.1816C7.62473 15.5508 7.99397 15.7662 8.38166 15.7662C8.5355 15.7662 8.6955 15.7354 8.8432 15.6616C9.36627 15.4092 9.58166 14.7816 9.34166 14.2585C9.21243 13.9816 8.88012 13.0646 9.68627 12.3631C10.4678 13.0708 11.5878 13.9016 12.8493 14.3077C15.2001 15.0523 16.9786 14.6154 17.0524 14.5969C17.4093 14.5046 17.6863 14.24 17.797 13.8892C17.9078 13.5385 17.8278 13.1569 17.5878 12.8862C16.4001 11.52 15.834 10.5231 15.5878 9.92002C20.4001 10.5723 21.3232 14.4062 21.3601 14.5785C21.4647 15.0708 21.9017 15.4092 22.3878 15.4092C22.4617 15.4092 22.5294 15.4031 22.6032 15.3846C23.1755 15.2677 23.5386 14.7077 23.4217 14.1354C23.274 13.4216 22.8863 12.4554 22.197 11.4892C24.554 13.0031 26.0801 15.3539 26.0801 17.9939C26.0801 22.5477 21.5632 26.2523 16.0124 26.2523Z"></path>
+        </svg>
+      </span>
+    </span>
+    <span>Demander à Bay4Bank</span>
     <span id="chatUnread" class="chat-unread" hidden></span>
   </button>
 
@@ -154,7 +161,13 @@
           <div class="chat-title-row">
             <strong>Bay4Bank Assistant</strong>
             <button id="chatInfoBtn" class="chat-icon-button chat-info-button" type="button" aria-label="Informations sur l'assistant">
-              <span class="symbol-icon" aria-hidden="true">info</span>
+              <span class="chat-toolbar-icon" aria-hidden="true">
+                <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
+                  <path fill="currentColor" d="M26,2C12.7,2,2,12.7,2,26s10.7,24,24,24s24-10.7,24-24S39.3,2,26,2z M26,44C16,44,8,36,8,26S16,8,26,8 s18,8,18,18S36,44,26,44z"></path>
+                  <path fill="currentColor" d="M26,14.1c1.7,0,3,1.3,3,3s-1.3,3-3,3s-3-1.3-3-3S24.3,14.1,26,14.1z"></path>
+                  <path fill="currentColor" d="M31,35.1c0,0.5-0.4,0.9-1,0.9h-8c-0.5,0-1-0.3-1-0.9v-2c0-0.5,0.4-1.1,1-1.1c0.5,0,1-0.3,1-0.9v-4 c0-0.5-0.4-1.1-1-1.1c-0.5,0-1-0.3-1-0.9v-2c0-0.5,0.4-1.1,1-1.1h6c0.5,0,1,0.5,1,1.1v8c0,0.5,0.4,0.9,1,0.9c0.5,0,1,0.5,1,1.1V35.1 z"></path>
+                </svg>
+              </span>
             </button>
           </div>
           <span class="chat-presence">
@@ -165,13 +178,25 @@
 
         <div class="chat-head-actions">
           <button id="chatMenuBtn" class="chat-icon-button" type="button" aria-label="Ouvrir le menu">
-            <span class="symbol-icon" aria-hidden="true">more_vert</span>
+            <span class="chat-toolbar-icon" aria-hidden="true">
+              <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+                <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M6.92285 15.2308C6.92285 14.0885 7.85747 13.1539 8.99977 13.1539C10.1421 13.1539 11.0767 14.0885 11.0767 15.2308C11.0767 16.3732 10.1421 17.3078 8.99977 17.3078C7.85747 17.3078 6.92285 16.3732 6.92285 15.2308ZM6.92285 9.00008C6.92285 7.85777 7.85747 6.92315 8.99977 6.92315C10.1421 6.92315 11.0767 7.85777 11.0767 9.00008C11.0767 10.1424 10.1421 11.077 8.99977 11.077C7.85747 11.077 6.92285 10.1424 6.92285 9.00008ZM6.92285 2.76931C6.92285 1.627 7.85747 0.692383 8.99977 0.692383C10.1421 0.692383 11.0767 1.627 11.0767 2.76931C11.0767 3.91161 10.1421 4.84623 8.99977 4.84623C7.85747 4.84623 6.92285 3.91161 6.92285 2.76931Z"></path>
+              </svg>
+            </span>
           </button>
           <button id="chatExpand" class="chat-icon-button" type="button" aria-label="Agrandir">
-            <span class="symbol-icon" aria-hidden="true">open_in_full</span>
+            <span class="chat-toolbar-icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M30.0308 1.23071H20.4923C19.8769 1.23071 19.6923 1.78455 20.1846 2.27686L23.2 5.29222L17.6615 10.8306C17.3538 11.1383 17.3538 11.6306 17.6615 11.9999L19.9384 14.2768C20.2461 14.5845 20.7384 14.5845 21.1077 14.2768L26.7077 8.67681L29.7231 11.6922C30.2154 12.1845 30.7692 11.9999 30.7692 11.3845V1.90763C30.7692 1.5384 30.4 1.23071 30.0308 1.23071ZM2.15379 30.7692H11.6307C12.2461 30.7692 12.4307 30.0923 11.9384 29.6L8.92303 26.5231L14.4615 20.9231C14.7692 20.6154 14.7692 20.0616 14.4615 19.7539L12.1846 17.477C11.8769 17.1693 11.3846 17.1693 11.0153 17.477L5.47687 23.0154L2.39995 20C1.8461 19.5077 1.23071 19.6923 1.23071 20.3077V29.7846C1.23071 30.2153 1.72302 30.7692 2.15379 30.7692Z"></path>
+              </svg>
+            </span>
           </button>
           <button id="chatMinimize" class="chat-icon-button" type="button" aria-label="Réduire">
-            <span class="symbol-icon" aria-hidden="true">remove</span>
+            <span class="chat-toolbar-icon" aria-hidden="true">
+              <svg viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+                <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M25 24.25C25 24.65 24.65 25 24.25 25H1.75C1.35 25 1 24.65 1 24.25V22.75C1 22.35 1.35 22 1.75 22H24.25C24.65 22 25 22.35 25 22.75V24.25Z"></path>
+              </svg>
+            </span>
           </button>
         </div>
 
@@ -189,17 +214,31 @@
             <div class="chat-divider chat-divider-joined"><span>Bay4Bank Assistant a rejoint la conversation</span></div>
             <div class="chat-message-row agent chat-message-row-static">
               <div class="chat-avatar" aria-hidden="true">
-                <span class="symbol-icon">smart_toy</span>
+                <span class="chat-agent-mark">
+                  <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19.3786 16.9969H19.3909C18.8863 17.04 18.437 17.1262 18.0493 17.2492C18.0493 17.2492 17.4832 17.4277 16.6155 17.5508C16.4124 17.5816 16.154 17.5816 16.0124 17.5816H15.9078C15.7663 17.5816 15.5017 17.5692 15.3047 17.5385C14.437 17.3969 13.877 17.2 13.877 17.2C13.4893 17.0769 13.0401 16.9846 12.5355 16.9292C9.77243 16.6462 8.57858 17.6985 8.51089 17.8954C8.4432 18.0923 8.74473 20.6523 8.96627 21.0585C9.18166 21.4585 9.51396 21.6923 9.8155 21.8216C10.1232 21.9508 12.6524 22.2031 13.4955 22.0862C14.3386 21.9692 14.4678 21.6862 14.6955 21.2554C14.8555 20.9477 15.2678 19.5569 15.4955 18.7385C15.5509 18.5785 15.557 18.2585 15.9447 18.2339C16.3324 18.2646 16.3386 18.5908 16.3878 18.7508C16.6093 19.5692 16.997 20.9723 17.1509 21.28C17.3663 21.7169 17.4955 22 18.3386 22.1354C19.1755 22.2646 21.7109 22.0616 22.0186 21.9385C22.3263 21.8154 22.6586 21.5877 22.8801 21.1877C23.1017 20.7877 23.4463 18.2339 23.3847 18.0369C23.3232 17.8339 22.1478 16.7631 19.3786 16.9969Z"></path>
+                    <path d="M28.0124 8.95386H28.0186C27.2494 7.9754 26.3386 7.10771 25.3294 6.36309C26.3755 6.17848 27.1694 5.26771 27.1694 4.17232C27.1694 2.94155 26.1724 1.93848 24.9355 1.93848C23.6986 1.93848 22.7017 2.9354 22.7017 4.17232C22.7017 4.41848 22.7509 4.65232 22.8247 4.87386C21.237 4.12309 19.5017 3.63078 17.6863 3.44002C14.6463 3.12002 11.7109 3.66155 9.18166 4.8554C9.24935 4.64001 9.29858 4.41232 9.29858 4.17232C9.29858 2.94155 8.30166 1.93848 7.06473 1.93848C5.82781 1.93848 4.83089 2.9354 4.83089 4.17232C4.83089 5.26771 5.61858 6.17232 6.65243 6.36309C3.78473 8.48001 1.78473 11.5631 1.32935 15.1385C0.904735 18.4431 1.84627 21.7539 3.98781 24.4616C6.41243 27.5262 10.1786 29.5385 14.314 29.9754C14.8924 30.0369 15.4647 30.0677 16.0309 30.0677C23.4094 30.0677 29.797 25.0585 30.6709 18.2769C31.0955 14.9723 30.154 11.6616 28.0124 8.95386ZM16.0124 26.2523H16.0063C10.4555 26.2462 5.93858 22.5416 5.93858 17.9877C5.93858 16.6154 6.35704 15.2985 7.11397 14.1292C7.18166 14.5477 7.30473 14.9108 7.44012 15.1816C7.62473 15.5508 7.99397 15.7662 8.38166 15.7662C8.5355 15.7662 8.6955 15.7354 8.8432 15.6616C9.36627 15.4092 9.58166 14.7816 9.34166 14.2585C9.21243 13.9816 8.88012 13.0646 9.68627 12.3631C10.4678 13.0708 11.5878 13.9016 12.8493 14.3077C15.2001 15.0523 16.9786 14.6154 17.0524 14.5969C17.4093 14.5046 17.6863 14.24 17.797 13.8892C17.9078 13.5385 17.8278 13.1569 17.5878 12.8862C16.4001 11.52 15.834 10.5231 15.5878 9.92002C20.4001 10.5723 21.3232 14.4062 21.3601 14.5785C21.4647 15.0708 21.9017 15.4092 22.3878 15.4092C22.4617 15.4092 22.5294 15.4031 22.6032 15.3846C23.1755 15.2677 23.5386 14.7077 23.4217 14.1354C23.274 13.4216 22.8863 12.4554 22.197 11.4892C24.554 13.0031 26.0801 15.3539 26.0801 17.9939C26.0801 22.5477 21.5632 26.2523 16.0124 26.2523Z"></path>
+                  </svg>
+                </span>
               </div>
               <div class="chat-agent-card">
                 <p>Salut, je suis Bay4Bank Assistant. Je peux vous aider à ouvrir votre compte, expliquer les étapes et préparer votre dossier.</p>
-                <div class="chat-quick-actions">
+                <div class="chat-quick-stack">
+                  <div class="chat-quick-actions">
                   <button class="chat-quick-action" type="button" data-chat-message="Comment ouvrir mon compte Bay4Bank ?">
                     Ouvrir mon compte
                   </button>
                   <button class="chat-quick-action" type="button" data-chat-message="Quels documents seront requis pour la vérification ?">
                     Documents requis
                   </button>
+                  </div>
+                  <div class="chat-quick-stack-arrow" aria-hidden="true">
+                    <span class="chat-toolbar-icon chat-stack-arrow-icon">
+                      <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 7.5L10 12.5L15 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </svg>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -210,11 +249,22 @@
       <div class="chat-composer-wrap">
         <div class="chat-composer">
           <div class="chat-input-shell">
+            <button id="chatAttachBtn" class="chat-input-attach" type="button" aria-label="Joindre un document" title="Joindre un document">
+              <span class="chat-toolbar-icon chat-attach-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8.5 12.5L14.9 6.1C16.4 4.6 18.8 4.6 20.3 6.1C21.8 7.6 21.8 10 20.3 11.5L11.4 20.4C8.9 22.9 4.8 22.9 2.3 20.4C-0.2 17.9 -0.2 13.8 2.3 11.3L10.5 3.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </span>
+            </button>
             <input id="input" type="text" placeholder="Envoyer un message à Bay4Bank" />
+            <button id="send" class="chat-send-button" type="button" aria-label="Envoyer">
+              <span class="chat-toolbar-icon chat-send-icon" aria-hidden="true">
+                <svg viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg">
+                  <path fill="currentColor" d="m21 445 44-163h186c5 0 10-5 10-10v-20c0-5-5-10-10-10H65L22 82l-2-8c0-7 7-14 15-13l5 1 450 185c6 2 10 8 10 14s-4 11-9 13L40 464l-6 1c-8-1-14-7-14-15z"></path>
+                </svg>
+              </span>
+            </button>
           </div>
-          <button id="send" class="chat-send-button" type="button" aria-label="Envoyer">
-            <span class="symbol-icon" aria-hidden="true">send</span>
-          </button>
         </div>
         <div class="chat-powered">Propulsé par Bay4Bank</div>
       </div>
@@ -259,6 +309,6 @@
   </footer>
 
   <script src="lib/branding.js?v=20260424-3"></script>
-  <script src="app.js?v=20260424-4"></script>
+  <script src="app.js?v=20260424-5"></script>
 </body>
 </html>
