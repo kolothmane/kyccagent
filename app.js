@@ -187,6 +187,8 @@ let chatIsOpen = false;
 let chatIsMinimized = false;
 let chatIsExpanded = false;
 let chatHasWelcomed = false;
+let chatIntroPlayed = false;
+let chatIntroTimers = [];
 let timelineTimers = [];
 let pendingUploadIntent = null;
 
@@ -836,6 +838,48 @@ function syncChatComposerState() {
   sendBtn.disabled = !input.value.trim();
 }
 
+function clearChatIntroTimers() {
+  if (!chatIntroTimers.length) return;
+  chatIntroTimers.forEach(function(timer) {
+    window.clearTimeout(timer);
+  });
+  chatIntroTimers = [];
+}
+
+function revealChatIntro() {
+  const emptyState = document.getElementById("emptyState");
+  if (!emptyState) return;
+
+  const introItems = emptyState.querySelectorAll("[data-chat-intro]");
+  if (!introItems.length) return;
+
+  clearChatIntroTimers();
+
+  if (chatIntroPlayed) {
+    introItems.forEach(function(item) {
+      item.classList.add("is-visible");
+    });
+    return;
+  }
+
+  introItems.forEach(function(item) {
+    item.classList.remove("is-visible");
+  });
+
+  const delays = [220, 760, 1120];
+  introItems.forEach(function(item, index) {
+    const delay = delays[index] || 220 + index * 320;
+    const timer = window.setTimeout(function() {
+      if (!document.body.contains(item)) return;
+      item.classList.add("is-visible");
+      scrollMessages();
+    }, delay);
+    chatIntroTimers.push(timer);
+  });
+
+  chatIntroPlayed = true;
+}
+
 function appendChatRow(who, bubble) {
   if (!messages || !bubble) return null;
 
@@ -850,7 +894,10 @@ function appendChatRow(who, bubble) {
   messages.appendChild(row);
 
   const emptyState = document.getElementById("emptyState");
-  if (emptyState) emptyState.remove();
+  if (emptyState) {
+    clearChatIntroTimers();
+    emptyState.remove();
+  }
 
   scrollMessages();
 
@@ -1333,6 +1380,7 @@ function openChat() {
   closeChatMenu();
   updateChatShell();
   ensureChatWelcome();
+  revealChatIntro();
   syncChatComposerState();
 }
 
