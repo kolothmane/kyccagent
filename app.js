@@ -155,13 +155,17 @@ const chatLauncher = document.getElementById("chatLauncher");
 const chatUnread = document.getElementById("chatUnread");
 const chatShell = document.getElementById("chatShell");
 const chatStatus = document.getElementById("chatStatus");
+const chatInfoBtn = document.getElementById("chatInfoBtn");
 const chatMenuBtn = document.getElementById("chatMenuBtn");
 const chatMenu = document.getElementById("chatMenu");
+const chatAttachActionBtn = document.getElementById("chatAttachAction");
 const chatOpenManualBtn = document.getElementById("chatOpenManual");
 const chatCloseActionBtn = document.getElementById("chatCloseAction");
 const chatAttachBtn = document.getElementById("chatAttachBtn");
+const chatExpandBtn = document.getElementById("chatExpand");
 const chatMinimizeBtn = document.getElementById("chatMinimize");
 const chatCloseBtn = document.getElementById("chatClose");
+const chatQuickActionButtons = document.querySelectorAll(".chat-quick-action");
 const openChatButtons = document.querySelectorAll("[data-open-chat]");
 
 let sessionId = sessionStorage.getItem("kycSessionId") || null;
@@ -179,6 +183,7 @@ let recentFiles = [];
 let currentStep = currentPage === "kyc" ? "upload" : "account";
 let chatIsOpen = false;
 let chatIsMinimized = false;
+let chatIsExpanded = false;
 let chatHasWelcomed = false;
 let timelineTimers = [];
 let pendingUploadIntent = null;
@@ -816,13 +821,30 @@ function clearUploadFeedback() {
   setUploadFeedback("", "");
 }
 
-function say(text, who) {
-  if (!messages) return;
+function createAgentAvatar() {
+  const avatar = document.createElement("div");
+  avatar.className = "chat-avatar";
+  avatar.setAttribute("aria-hidden", "true");
 
-  const bubble = document.createElement("div");
-  bubble.className = "msg " + (who || "agent");
-  bubble.textContent = text;
-  messages.appendChild(bubble);
+  const icon = document.createElement("span");
+  icon.className = "symbol-icon";
+  icon.textContent = "smart_toy";
+  avatar.appendChild(icon);
+  return avatar;
+}
+
+function appendChatRow(who, bubble) {
+  if (!messages || !bubble) return null;
+
+  const row = document.createElement("div");
+  row.className = "chat-message-row " + (who === "user" ? "user" : "agent");
+
+  if (who !== "user") {
+    row.appendChild(createAgentAvatar());
+  }
+
+  row.appendChild(bubble);
+  messages.appendChild(row);
 
   const emptyState = document.getElementById("emptyState");
   if (emptyState) emptyState.remove();
@@ -832,6 +854,17 @@ function say(text, who) {
   if (who !== "user" && !chatIsOpen && chatUnread) {
     chatUnread.hidden = false;
   }
+
+  return row;
+}
+
+function say(text, who) {
+  if (!messages) return;
+
+  const bubble = document.createElement("div");
+  bubble.className = "msg " + (who || "agent");
+  bubble.textContent = text;
+  appendChatRow(who || "agent", bubble);
 }
 
 function showProcessing(label, variant) {
@@ -863,14 +896,28 @@ function showProcessing(label, variant) {
     setPageStatus(label);
   }
 
-  messages.appendChild(bubble);
-  scrollMessages();
+  const row = appendChatRow("agent", bubble);
+  if (row) row.id = "processingMsgRow";
   return bubble;
 }
 
 function removeProcessing() {
+  const row = document.getElementById("processingMsgRow");
+  if (row) {
+    row.remove();
+    setPageStatus("");
+    return;
+  }
+
   const element = document.getElementById("processingMsg");
-  if (element) element.remove();
+  if (element) {
+    const rowParent =
+      element.parentElement && element.parentElement.classList.contains("chat-message-row")
+        ? element.parentElement
+        : null;
+    if (rowParent) rowParent.remove();
+    else element.remove();
+  }
   setPageStatus("");
 }
 
@@ -1238,6 +1285,7 @@ function updateChatShell() {
   if (!chatIsOpen) {
     chatShell.hidden = true;
     chatShell.classList.remove("is-minimized");
+    chatShell.classList.remove("is-expanded");
     chatLauncher.hidden = false;
     if (chatMenu) chatMenu.hidden = true;
     return;
@@ -1246,6 +1294,7 @@ function updateChatShell() {
   chatShell.hidden = false;
   chatLauncher.hidden = true;
   chatShell.classList.toggle("is-minimized", chatIsMinimized);
+  chatShell.classList.toggle("is-expanded", chatIsExpanded);
   if (chatUnread) chatUnread.hidden = true;
   if (chatStatus) chatStatus.textContent = "En ligne";
 
@@ -1268,17 +1317,14 @@ function toggleChatMenu() {
 function ensureChatWelcome() {
   if (chatHasWelcomed) return;
   chatHasWelcomed = true;
+  if (document.getElementById("emptyState")) return;
 
-  let welcome =
-    "Bonjour, je peux vous aider à ouvrir votre compte Bay4Bank et à préparer les prochaines étapes.";
-
-  if (currentPage === "kyc") {
-    welcome =
-      "Bonjour, je peux vous aider à envoyer vos documents, vérifier les pièces acceptées et préremplir le formulaire KYC à partir d'un document valide.";
-  }
+  const welcome =
+    currentPage === "kyc"
+      ? "Bonjour, je peux vous aider à envoyer vos documents, vérifier les pièces acceptées et préremplir le formulaire KYC."
+      : "Bonjour, je peux vous aider à ouvrir votre compte Bay4Bank et à préparer les prochaines étapes.";
 
   say(welcome, "agent");
-  chatHistory.push({ role: "assistant", content: welcome });
 }
 
 function openChat() {
@@ -1293,14 +1339,20 @@ function openChat() {
 function closeChat() {
   chatIsOpen = false;
   chatIsMinimized = false;
+  chatIsExpanded = false;
   closeChatMenu();
   updateChatShell();
 }
 
 function toggleChatMinimize() {
-  chatIsMinimized = !chatIsMinimized;
+  closeChat();
+}
+
+function toggleChatExpand() {
+  chatIsExpanded = !chatIsExpanded;
   closeChatMenu();
   updateChatShell();
+  scrollMessages();
 }
 
 function buildNextStepHint(french) {
@@ -2150,6 +2202,9 @@ function initChat() {
   if (chatAttachBtn && currentPage !== "kyc") {
     chatAttachBtn.hidden = true;
   }
+  if (chatAttachActionBtn) {
+    chatAttachActionBtn.hidden = currentPage !== "kyc" || !fileInput;
+  }
 
   chatLauncher.addEventListener("click", openChat);
 
@@ -2161,6 +2216,18 @@ function initChat() {
     chatMenuBtn.addEventListener("click", function(event) {
       event.stopPropagation();
       toggleChatMenu();
+    });
+  }
+
+  if (chatInfoBtn) {
+    chatInfoBtn.addEventListener("click", function() {
+      openChat();
+      say(
+        currentPage === "kyc"
+          ? "Je peux vous guider sur les documents acceptés, lancer l'envoi d'une pièce et suivre l'avancement du dossier."
+          : "Je peux vous aider à ouvrir votre compte, expliquer les étapes et préparer votre passage sur la page de vérification.",
+        "agent",
+      );
     });
   }
 
@@ -2185,6 +2252,31 @@ function initChat() {
     });
   }
 
+  if (chatAttachActionBtn && fileInput) {
+    chatAttachActionBtn.addEventListener("click", function() {
+      closeChatMenu();
+      openChat();
+      openUploadPicker(null);
+    });
+  }
+
+  chatQuickActionButtons.forEach(function(button) {
+    button.addEventListener("click", function() {
+      const quickMessage = button.dataset.chatMessage;
+      const wantsUpload = button.dataset.chatUpload === "true";
+      openChat();
+
+      if (wantsUpload && fileInput) {
+        openUploadPicker(null);
+        return;
+      }
+
+      if (quickMessage) {
+        sendMessage(quickMessage);
+      }
+    });
+  });
+
   window.addEventListener("click", function(event) {
     if (!chatMenu || chatMenu.hidden) return;
     if (chatMenu.contains(event.target)) return;
@@ -2194,6 +2286,10 @@ function initChat() {
 
   if (chatMinimizeBtn) {
     chatMinimizeBtn.addEventListener("click", toggleChatMinimize);
+  }
+
+  if (chatExpandBtn) {
+    chatExpandBtn.addEventListener("click", toggleChatExpand);
   }
 
   if (chatCloseBtn) {
