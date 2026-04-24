@@ -869,6 +869,64 @@ img {
   color: var(--warning);
 }
 
+.auth-divider {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 10px 0 2px;
+}
+
+.auth-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  border-top: 1px solid rgba(16, 38, 77, 0.1);
+}
+
+.auth-divider span {
+  position: relative;
+  z-index: 1;
+  padding: 0 14px;
+  background: #ffffff;
+  color: var(--ink-soft);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.76rem;
+}
+
+.auth-subsection {
+  display: grid;
+  gap: 18px;
+}
+
+.subsection-heading {
+  display: grid;
+  gap: 8px;
+}
+
+.subsection-heading h3 {
+  margin: 0;
+  font-size: 1.22rem;
+}
+
+.auth-login-form,
+.account-session-actions {
+  display: grid;
+  gap: 18px;
+}
+
+.account-session-actions[hidden] {
+  display: none;
+}
+
+.form-field input:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
 .account-status-card {
   min-height: 120px;
   padding: 22px;

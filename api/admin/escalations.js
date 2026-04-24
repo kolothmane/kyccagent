@@ -5,6 +5,7 @@ const {
   decideEscalation,
   deleteEscalation,
 } = require("../../lib/admin-store");
+const { applyAccountReviewDecision } = require("../../lib/account-store");
 
 module.exports = async (req, res) => {
   try {
@@ -47,6 +48,22 @@ module.exports = async (req, res) => {
       if (!updated) {
         return res.status(404).json({ error: "Escalated request not found" });
       }
+
+      await applyAccountReviewDecision({
+        accountId: updated.account && updated.account.accountId,
+        contactEmail: updated.client && updated.client.email,
+        kycStatus: action === "approve" ? "approved" : "rejected",
+        humanReviewReason:
+          action === "reject"
+            ? updated.decisionNote ||
+              (updated.humanReview && updated.humanReview.message) ||
+              "Le dossier a été refusé après revue humaine."
+            : "",
+        decisionAt: updated.reviewedAt,
+        decisionBy: updated.reviewedBy,
+        crmLogs: action === "approve" ? updated.crmLogs : null,
+        activity: updated.activity,
+      });
 
       return res.status(200).json({
         success: true,

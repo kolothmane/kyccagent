@@ -3,6 +3,10 @@
 const { randomUUID } = require("crypto");
 const { reconcile } = require("../../lib/reconciliation");
 const { upsertEscalation } = require("../../lib/admin-store");
+const {
+  getAccountBySessionToken,
+  syncAccountKyc,
+} = require("../../lib/account-store");
 
 function plusMinutes(isoDate, minutes) {
   return new Date(new Date(isoDate).getTime() + minutes * 60000).toISOString();
@@ -223,6 +227,7 @@ module.exports = async (req, res) => {
       identityExtraction,
       addressExtraction,
       accountData,
+      authToken,
       documentFiles,
       documentAssets,
     } = req.body || {};
@@ -230,6 +235,20 @@ module.exports = async (req, res) => {
     if (!sessionId || typeof sessionId !== "string") {
       return res.status(400).json({ error: "sessionId is required" });
     }
+
+    const authenticatedAccount = authToken
+      ? await getAccountBySessionToken(authToken)
+      : null;
+
+    if (authToken && !authenticatedAccount) {
+      return res.status(401).json({ error: "Session compte invalide ou expirée" });
+    }
+
+    const resolvedAccountData = Object.assign(
+      {},
+      accountData || {},
+      authenticatedAccount || {},
+    );
 
     const reconciliation = reconcile(identityExtraction || null, addressExtraction || null);
     const humanReview = buildHumanReview(reconciliation);
@@ -249,7 +268,7 @@ module.exports = async (req, res) => {
       submittedAt,
       sessionId,
       profileData: profileData || {},
-      accountData: accountData || {},
+      accountData: resolvedAccountData,
       reconciliation,
       humanReview,
     });
@@ -270,7 +289,7 @@ module.exports = async (req, res) => {
           customerId: accountTimeline.customerId,
           owner: accountTimeline.owner,
           accountName:
-            (accountData && accountData.accountName) ||
+            (resolvedAccountData && resolvedAccountData.accountName) ||
             [
               profileData && profileData.firstName,
               profileData && profileData.lastName,
@@ -318,6 +337,53 @@ module.exports = async (req, res) => {
         ],
       });
     }
+
+    await syncAccountKyc({
+      accountId: accountTimeline.accountId,
+      customerId: accountTimeline.customerId,
+      accountName:
+        (resolvedAccountData && resolvedAccountData.accountName) ||
+        [
+          profileData && profileData.firstName,
+          profileData && profileData.lastName,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .trim() ||
+        "Compte Bay4Bank",
+      owner: accountTimeline.owner,
+      contactEmail:
+        (profileData && profileData.email) ||
+        (resolvedAccountData && resolvedAccountData.contactEmail) ||
+        (resolvedAccountData && resolvedAccountData.email),
+      phone:
+        (profileData && profileData.phone) ||
+        (resolvedAccountData && resolvedAccountData.phone),
+      firstName:
+        (profileData && profileData.firstName) ||
+        (resolvedAccountData && resolvedAccountData.firstName),
+      lastName:
+        (profileData && profileData.lastName) ||
+        (resolvedAccountData && resolvedAccountData.lastName),
+      country:
+        (profileData && profileData.country) ||
+        (resolvedAccountData && resolvedAccountData.country),
+      dob: profileData && profileData.dob,
+      street: profileData && profileData.street,
+      city: profileData && profileData.city,
+      state: profileData && profileData.state,
+      postal: profileData && profileData.postal,
+      documentNumber: identityExtraction && identityExtraction.documentNumber,
+      documentExpiry: identityExtraction && identityExtraction.dateOfExpiry,
+      nationality: identityExtraction && identityExtraction.nationality,
+      sessionId,
+      submissionId,
+      submittedAt,
+      kycStatus: status,
+      humanReviewRequired: Boolean(humanReview.required),
+      humanReviewReason: humanReview.message || "",
+      activity: accountTimeline.events,
+    });
 
     return res.status(200).json({
       success: true,

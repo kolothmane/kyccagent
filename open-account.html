@@ -10,7 +10,7 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200,0,0&family=Outfit:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="baybank-ui.css?v=20260424-11" />
+  <link rel="stylesheet" href="baybank-ui.css?v=20260424-12" />
 </head>
 <body data-page="account">
   <header class="site-header" id="siteHeader">
@@ -136,6 +136,48 @@
               Créer mon espace Bay4Bank
             </button>
           </form>
+
+          <div class="auth-divider" aria-hidden="true">
+            <span>ou</span>
+          </div>
+
+          <div class="auth-subsection">
+            <div class="subsection-heading">
+              <span class="section-kicker" data-icon="login">Déjà client</span>
+              <h3>Se connecter à son espace</h3>
+            </div>
+
+            <form id="loginForm" class="account-form auth-login-form">
+              <div class="form-grid one-column">
+                <label class="form-field">
+                  <span>Adresse e-mail</span>
+                  <input type="email" name="loginEmail" autocomplete="username" />
+                </label>
+              </div>
+
+              <div class="form-grid one-column">
+                <label class="form-field">
+                  <span>Mot de passe</span>
+                  <input type="password" name="loginPassword" autocomplete="current-password" />
+                </label>
+              </div>
+
+              <div id="loginFormMessage" class="inline-feedback" aria-live="polite"></div>
+
+              <button id="loginBtn" type="submit" class="button button-secondary button-wide" data-icon="login">
+                Se connecter
+              </button>
+            </form>
+
+            <div id="accountSessionActions" class="account-session-actions" hidden>
+              <p class="form-note">
+                Une session Bay4Bank est déjà active sur ce navigateur. Vous pouvez reprendre votre dossier ou vous déconnecter.
+              </p>
+              <button id="logoutBtn" type="button" class="button button-secondary button-wide" data-icon="logout">
+                Se déconnecter
+              </button>
+            </div>
+          </div>
         </section>
       </div>
     </section>
@@ -309,6 +351,6 @@
   </footer>
 
   <script src="lib/branding.js?v=20260424-3"></script>
-  <script src="app.js?v=20260424-7"></script>
+  <script src="app.js?v=20260424-8"></script>
 </body>
 </html>

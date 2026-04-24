@@ -2,6 +2,7 @@ const BRAND = (window.BRANDING && window.BRANDING.name) || "Bay4Bank";
 const SERVICE_LINE =
   (window.BRANDING && window.BRANDING.serviceLine) || "Banque digitale nouvelle génération";
 const ACCOUNT_STORAGE_KEY = "baybankAccountState";
+const AUTH_TOKEN_STORAGE_KEY = "baybankAuthToken";
 const ADMIN_ESCALATIONS_STORAGE_KEY = "baybankAdminEscalations";
 const ADMIN_DOCUMENT_PREVIEWS_KEY = "baybankAdminDocumentPreviews";
 const ADMIN_DELETED_ESCALATIONS_KEY = "baybankDeletedEscalations";
@@ -137,6 +138,11 @@ const accountPill = document.getElementById("accountPill");
 const accountForm = document.getElementById("accountForm");
 const createAccountBtn = document.getElementById("createAccountBtn");
 const accountFormMessage = document.getElementById("accountFormMessage");
+const loginForm = document.getElementById("loginForm");
+const loginBtn = document.getElementById("loginBtn");
+const loginFormMessage = document.getElementById("loginFormMessage");
+const logoutBtn = document.getElementById("logoutBtn");
+const accountSessionActions = document.getElementById("accountSessionActions");
 const accountStatus = document.getElementById("accountStatus");
 
 const uploadIdentityBtn = document.getElementById("uploadIdentityBtn");
@@ -171,6 +177,7 @@ const CHAT_AGENT_ICON_SVG =
   '<span class="chat-agent-mark"><svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M19.3786 16.9969H19.3909C18.8863 17.04 18.437 17.1262 18.0493 17.2492C18.0493 17.2492 17.4832 17.4277 16.6155 17.5508C16.4124 17.5816 16.154 17.5816 16.0124 17.5816H15.9078C15.7663 17.5816 15.5017 17.5692 15.3047 17.5385C14.437 17.3969 13.877 17.2 13.877 17.2C13.4893 17.0769 13.0401 16.9846 12.5355 16.9292C9.77243 16.6462 8.57858 17.6985 8.51089 17.8954C8.4432 18.0923 8.74473 20.6523 8.96627 21.0585C9.18166 21.4585 9.51396 21.6923 9.8155 21.8216C10.1232 21.9508 12.6524 22.2031 13.4955 22.0862C14.3386 21.9692 14.4678 21.6862 14.6955 21.2554C14.8555 20.9477 15.2678 19.5569 15.4955 18.7385C15.5509 18.5785 15.557 18.2585 15.9447 18.2339C16.3324 18.2646 16.3386 18.5908 16.3878 18.7508C16.6093 19.5692 16.997 20.9723 17.1509 21.28C17.3663 21.7169 17.4955 22 18.3386 22.1354C19.1755 22.2646 21.7109 22.0616 22.0186 21.9385C22.3263 21.8154 22.6586 21.5877 22.8801 21.1877C23.1017 20.7877 23.4463 18.2339 23.3847 18.0369C23.3232 17.8339 22.1478 16.7631 19.3786 16.9969Z"></path><path d="M28.0124 8.95386H28.0186C27.2494 7.9754 26.3386 7.10771 25.3294 6.36309C26.3755 6.17848 27.1694 5.26771 27.1694 4.17232C27.1694 2.94155 26.1724 1.93848 24.9355 1.93848C23.6986 1.93848 22.7017 2.9354 22.7017 4.17232C22.7017 4.41848 22.7509 4.65232 22.8247 4.87386C21.237 4.12309 19.5017 3.63078 17.6863 3.44002C14.6463 3.12002 11.7109 3.66155 9.18166 4.8554C9.24935 4.64001 9.29858 4.41232 9.29858 4.17232C9.29858 2.94155 8.30166 1.93848 7.06473 1.93848C5.82781 1.93848 4.83089 2.9354 4.83089 4.17232C4.83089 5.26771 5.61858 6.17232 6.65243 6.36309C3.78473 8.48001 1.78473 11.5631 1.32935 15.1385C0.904735 18.4431 1.84627 21.7539 3.98781 24.4616C6.41243 27.5262 10.1786 29.5385 14.314 29.9754C14.8924 30.0369 15.4647 30.0677 16.0309 30.0677C23.4094 30.0677 29.797 25.0585 30.6709 18.2769C31.0955 14.9723 30.154 11.6616 28.0124 8.95386ZM16.0124 26.2523H16.0063C10.4555 26.2462 5.93858 22.5416 5.93858 17.9877C5.93858 16.6154 6.35704 15.2985 7.11397 14.1292C7.18166 14.5477 7.30473 14.9108 7.44012 15.1816C7.62473 15.5508 7.99397 15.7662 8.38166 15.7662C8.5355 15.7662 8.6955 15.7354 8.8432 15.6616C9.36627 15.4092 9.58166 14.7816 9.34166 14.2585C9.21243 13.9816 8.88012 13.0646 9.68627 12.3631C10.4678 13.0708 11.5878 13.9016 12.8493 14.3077C15.2001 15.0523 16.9786 14.6154 17.0524 14.5969C17.4093 14.5046 17.6863 14.24 17.797 13.8892C17.9078 13.5385 17.8278 13.1569 17.5878 12.8862C16.4001 11.52 15.834 10.5231 15.5878 9.92002C20.4001 10.5723 21.3232 14.4062 21.3601 14.5785C21.4647 15.0708 21.9017 15.4092 22.3878 15.4092C22.4617 15.4092 22.5294 15.4031 22.6032 15.3846C23.1755 15.2677 23.5386 14.7077 23.4217 14.1354C23.274 13.4216 22.8863 12.4554 22.197 11.4892C24.554 13.0031 26.0801 15.3539 26.0801 17.9939C26.0801 22.5477 21.5632 26.2523 16.0124 26.2523Z"></path></svg></span>';
 
 let sessionId = sessionStorage.getItem("kycSessionId") || null;
+let authSessionToken = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || "";
 let accountState = sanitizeAccountState(
   readStoredJson(sessionStorage.getItem(ACCOUNT_STORAGE_KEY)),
 );
@@ -212,6 +219,20 @@ function readStoredJson(raw) {
   }
 }
 
+function readAuthToken() {
+  return String(localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || "").trim();
+}
+
+function persistAuthToken(token) {
+  authSessionToken = String(token || "").trim();
+
+  if (authSessionToken) {
+    localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, authSessionToken);
+  } else {
+    localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+  }
+}
+
 function looksLikeEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
 }
@@ -236,6 +257,13 @@ function sanitizeAccountState(state) {
 
   const next = Object.assign({}, state);
 
+  if (!next.contactEmail && next.email) {
+    next.contactEmail = cleanText(next.email).toLowerCase();
+  }
+  if (!next.email && next.contactEmail) {
+    next.email = next.contactEmail;
+  }
+
   if (next.country && (looksLikeEmail(next.country) || next.country === next.contactEmail)) {
     next.country = "";
   }
@@ -250,6 +278,28 @@ function sanitizeAccountState(state) {
   }
 
   return next;
+}
+
+function applyAccountState(nextState) {
+  accountState = sanitizeAccountState(nextState);
+  persistAccountState();
+
+  if (
+    accountState &&
+    accountState.kycSessionId &&
+    (!sessionId || sessionId !== accountState.kycSessionId)
+  ) {
+    sessionId = accountState.kycSessionId;
+    sessionStorage.setItem("kycSessionId", sessionId);
+  }
+}
+
+function clearAccountSessionState() {
+  persistAuthToken("");
+  accountState = null;
+  sessionId = null;
+  sessionStorage.removeItem(ACCOUNT_STORAGE_KEY);
+  sessionStorage.removeItem("kycSessionId");
 }
 
 function persistAccountState() {
@@ -659,6 +709,70 @@ function setInlineFeedback(message, tone) {
   accountFormMessage.textContent = message || "";
 }
 
+function setLoginFeedback(message, tone) {
+  if (!loginFormMessage) return;
+
+  loginFormMessage.className = "inline-feedback";
+  if (tone) loginFormMessage.classList.add("is-" + tone);
+  loginFormMessage.textContent = message || "";
+}
+
+function syncAccountAuthControls() {
+  const authenticated = Boolean(authSessionToken && accountState);
+
+  if (accountSessionActions) {
+    accountSessionActions.hidden = !authenticated;
+  }
+
+  if (loginForm) {
+    Array.from(loginForm.elements || []).forEach(function(field) {
+      field.disabled = authenticated;
+    });
+  }
+
+  if (accountForm) {
+    Array.from(accountForm.elements || []).forEach(function(field) {
+      if (field === createAccountBtn) return;
+      field.disabled = authenticated;
+    });
+  }
+
+  if (createAccountBtn) {
+    createAccountBtn.textContent = authenticated
+      ? "Continuer vers la vérification"
+      : "Créer mon espace Bay4Bank";
+  }
+
+  if (authenticated) {
+    setLoginFeedback("Session active. Vous pouvez reprendre votre dossier.", "success");
+  } else if (loginFormMessage && !loginFormMessage.textContent) {
+    setLoginFeedback("", "");
+  }
+}
+
+async function hydrateAuthenticatedAccount() {
+  authSessionToken = readAuthToken();
+  if (!authSessionToken) return;
+
+  try {
+    const response = await fetch("/api/auth/session", {
+      headers: {
+        Authorization: "Bearer " + authSessionToken,
+      },
+    });
+
+    if (!response.ok) {
+      clearAccountSessionState();
+      return;
+    }
+
+    const payload = await response.json();
+    applyAccountState(payload.account);
+  } catch (error) {
+    console.error("Account hydration error:", error);
+  }
+}
+
 function setPageStatus(label) {
   if (!pageStatus) return;
 
@@ -1045,11 +1159,8 @@ function prefillAccountForm() {
   if (!accountState || !accountForm) return;
 
   const map = {
-    accountFirstName: accountState.firstName,
-    accountLastName: accountState.lastName,
     accountEmail: accountState.contactEmail,
     accountPhone: accountState.phone,
-    accountCountry: accountState.country,
   };
 
   Object.keys(map).forEach(function(key) {
@@ -1070,6 +1181,11 @@ function prefillProfileFromAccount() {
       accountState.country && !looksLikeEmail(accountState.country)
         ? accountState.country
         : "",
+    dob: accountState.dob,
+    street: accountState.street,
+    city: accountState.city,
+    state: accountState.state,
+    postal: accountState.postal,
   };
 
   Object.keys(map).forEach(function(key) {
@@ -1087,6 +1203,7 @@ function renderAccountState() {
       accountPill.textContent = "À créer";
     }
 
+    setCrmStatus("En attente", "neutral");
     accountStatus.innerHTML =
       '<div class="placeholder-title">Aucun compte Bay4Bank actif</div>' +
       "<p>Commencez par créer votre espace client pour débloquer la page de vérification et le journal d'ouverture.</p>";
@@ -1099,7 +1216,7 @@ function renderAccountState() {
 
     if (fileInput) fileInput.disabled = true;
     if (submitBtn) submitBtn.disabled = true;
-    if (createAccountBtn) createAccountBtn.textContent = "Créer mon espace Bay4Bank";
+    syncAccountAuthControls();
     return;
   }
 
@@ -1108,6 +1225,8 @@ function renderAccountState() {
       ? "Agent humain saisi"
       : accountState.kycStatus === "approved"
       ? "Compte actif"
+      : accountState.kycStatus === "rejected"
+        ? "Dossier refusé"
       : accountState.kycStatus === "pending_review"
         ? "Revue en cours"
         : "Compte créé";
@@ -1116,6 +1235,8 @@ function renderAccountState() {
       ? "alert"
       : accountState.kycStatus === "approved"
       ? "success"
+      : accountState.kycStatus === "rejected"
+        ? "alert"
       : accountState.kycStatus === "pending_review"
         ? "pending"
         : "neutral";
@@ -1124,6 +1245,8 @@ function renderAccountState() {
     accountPill.className = "status-badge " + statusTone;
     accountPill.textContent = statusText;
   }
+
+  setCrmStatus(statusText, statusTone);
 
   const rows = [];
   const fullName = [accountState.firstName, accountState.lastName].filter(Boolean).join(" ");
@@ -1135,8 +1258,20 @@ function renderAccountState() {
   if (accountState.phone) {
     rows.push({ label: "Téléphone", value: accountState.phone });
   }
+  if (accountState.submittedAt) {
+    rows.push({
+      label: "Dossier transmis",
+      value: new Intl.DateTimeFormat("fr-FR", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(accountState.submittedAt)),
+    });
+  }
   if (accountState.humanReviewRequired) {
     rows.push({ label: "Revue", value: "Agent humain assigné" });
+  }
+  if (accountState.kycStatus === "rejected") {
+    rows.push({ label: "Décision", value: "Refusé après revue humaine" });
   }
   if (accountState.country && !looksLikeEmail(accountState.country)) {
     rows.push({ label: "Pays de résidence", value: accountState.country });
@@ -1165,6 +1300,11 @@ function renderAccountState() {
       kycGate.textContent =
         accountState.humanReviewReason ||
         "Une anomalie a été détectée. Le dossier a été remonté à un agent humain pour revue.";
+    } else if (accountState.kycStatus === "rejected") {
+      kycGate.className = "gate-banner";
+      kycGate.textContent =
+        accountState.humanReviewReason ||
+        "Le dossier a été refusé après revue. Merci de reprendre les documents ou de contacter Bay4Bank.";
     } else {
       kycGate.className = "gate-banner is-ready";
       kycGate.textContent =
@@ -1174,7 +1314,7 @@ function renderAccountState() {
 
   if (fileInput) fileInput.disabled = false;
   if (submitBtn) submitBtn.disabled = false;
-  if (createAccountBtn) createAccountBtn.textContent = "Mettre à jour mon espace";
+  syncAccountAuthControls();
 }
 
 function updateFileChips(fileName) {
@@ -1334,6 +1474,11 @@ function showValidationBanner(errors, warnings) {
 
 async function initSession() {
   if (sessionId) return;
+  if (accountState && accountState.kycSessionId) {
+    sessionId = accountState.kycSessionId;
+    sessionStorage.setItem("kycSessionId", sessionId);
+    return;
+  }
 
   try {
     const response = await fetch("/api/kyc/session", { method: "POST" });
@@ -1816,51 +1961,195 @@ function createAccountPreview(formData) {
   };
 }
 
+function applyAuthenticatedPayload(payload) {
+  if (!payload || !payload.account) return;
+
+  persistAuthToken(payload.sessionToken || authSessionToken);
+  applyAccountState(payload.account);
+  updateAccountCtas();
+  prefillAccountForm();
+  prefillProfileFromAccount();
+  renderAccountState();
+  syncJourneyStage();
+}
+
 function initAccountPage() {
-  if (!accountForm) return;
+  if (accountForm) {
+    accountForm.addEventListener("submit", async function(event) {
+      event.preventDefault();
+      await initSession();
 
-  accountForm.addEventListener("submit", async function(event) {
-    event.preventDefault();
-    await initSession();
+      if (authSessionToken && accountState) {
+        setInlineFeedback(
+          "Session déjà active. Redirection vers votre dossier Bay4Bank…",
+          "success",
+        );
+        window.setTimeout(function() {
+          window.location.href = "kyc.html";
+        }, 400);
+        return;
+      }
 
-    const formData = {
-      accountEmail: getFormFieldValue(accountForm, "accountEmail"),
-      accountPhone: getFormFieldValue(accountForm, "accountPhone"),
-      accountPassword: getFormFieldValue(accountForm, "accountPassword"),
-    };
+      const formData = {
+        accountEmail: getFormFieldValue(accountForm, "accountEmail"),
+        accountPhone: getFormFieldValue(accountForm, "accountPhone"),
+        accountPassword: getFormFieldValue(accountForm, "accountPassword"),
+      };
 
-    const missing = [];
-    if (!formData.accountEmail) missing.push("adresse e-mail");
-    if (!formData.accountPhone) missing.push("numéro de téléphone");
-    if (!formData.accountPassword || formData.accountPassword.length < 8) {
-      missing.push("mot de passe (8 caractères minimum)");
-    }
+      const missing = [];
+      if (!formData.accountEmail) missing.push("adresse e-mail");
+      if (!formData.accountPhone) missing.push("numéro de téléphone");
+      if (!formData.accountPassword || formData.accountPassword.length < 8) {
+        missing.push("mot de passe (8 caractères minimum)");
+      }
 
-    if (missing.length) {
-      setInlineFeedback("Merci de compléter : " + missing.join(", ") + ".", "error");
-      return;
-    }
+      if (missing.length) {
+        setInlineFeedback("Merci de compléter : " + missing.join(", ") + ".", "error");
+        return;
+      }
 
-    if (!looksLikePhone(formData.accountPhone)) {
-      setInlineFeedback("Merci de saisir un numéro de téléphone valide.", "error");
-      return;
-    }
+      if (!looksLikePhone(formData.accountPhone)) {
+        setInlineFeedback("Merci de saisir un numéro de téléphone valide.", "error");
+        return;
+      }
 
-    journeyFinished = false;
-    accountState = createAccountPreview(formData);
-    persistAccountState();
-    updateAccountCtas();
-    prefillAccountForm();
-    renderAccountState();
-    setInlineFeedback(
-      "Compte créé. Redirection vers la page de vérification Bay4Bank…",
-      "success",
-    );
+      try {
+        createAccountBtn.disabled = true;
+        setInlineFeedback("Création du compte Bay4Bank en cours…", "warning");
+        setLoginFeedback("", "");
 
-    window.setTimeout(function() {
-      window.location.href = "kyc.html";
-    }, 500);
-  });
+        const response = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.accountEmail,
+            phone: formData.accountPhone,
+            password: formData.accountPassword,
+            sessionId: sessionId,
+          }),
+        });
+
+        const payload = await response.json().catch(function() {
+          return {};
+        });
+
+        if (!response.ok) {
+          setInlineFeedback(
+            payload.error || "Impossible de créer le compte pour le moment.",
+            "error",
+          );
+          return;
+        }
+
+        journeyFinished = false;
+        applyAuthenticatedPayload(payload);
+        setInlineFeedback(
+          "Compte créé. Redirection vers la page de vérification Bay4Bank…",
+          "success",
+        );
+
+        window.setTimeout(function() {
+          window.location.href = "kyc.html";
+        }, 500);
+      } catch (error) {
+        console.error("Account registration error:", error);
+        setInlineFeedback(
+          "La création du compte a échoué à cause d'une erreur réseau.",
+          "error",
+        );
+      } finally {
+        createAccountBtn.disabled = false;
+      }
+    });
+  }
+
+  if (loginForm) {
+    loginForm.addEventListener("submit", async function(event) {
+      event.preventDefault();
+
+      const email = getFormFieldValue(loginForm, "loginEmail");
+      const password = getFormFieldValue(loginForm, "loginPassword");
+
+      if (!email || !password) {
+        setLoginFeedback("Merci de renseigner votre adresse e-mail et votre mot de passe.", "error");
+        return;
+      }
+
+      try {
+        if (loginBtn) loginBtn.disabled = true;
+        setLoginFeedback("Connexion à votre espace Bay4Bank…", "warning");
+        setInlineFeedback("", "");
+
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+          }),
+        });
+
+        const payload = await response.json().catch(function() {
+          return {};
+        });
+
+        if (!response.ok) {
+          setLoginFeedback(
+            payload.error || "Connexion impossible pour le moment.",
+            "error",
+          );
+          return;
+        }
+
+        journeyFinished = Boolean(payload.account && payload.account.kycStatus);
+        applyAuthenticatedPayload(payload);
+        setLoginFeedback("Connexion réussie. Redirection vers votre dossier…", "success");
+
+        window.setTimeout(function() {
+          window.location.href = "kyc.html";
+        }, 450);
+      } catch (error) {
+        console.error("Account login error:", error);
+        setLoginFeedback("La connexion a échoué à cause d'une erreur réseau.", "error");
+      } finally {
+        if (loginBtn) loginBtn.disabled = false;
+      }
+    });
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async function() {
+      try {
+        logoutBtn.disabled = true;
+
+        if (authSessionToken) {
+          await fetch("/api/auth/logout", {
+            method: "POST",
+            headers: {
+              Authorization: "Bearer " + authSessionToken,
+            },
+          });
+        }
+      } catch (error) {
+        console.error("Account logout error:", error);
+      } finally {
+        clearAccountSessionState();
+        if (accountForm) accountForm.reset();
+        if (loginForm) loginForm.reset();
+        setInlineFeedback("Session fermée. Vous pouvez créer ou reconnecter un compte.", "warning");
+        setLoginFeedback("", "");
+        updateAccountCtas();
+        renderAccountState();
+        prefillProfileFromAccount();
+        syncJourneyStage();
+        logoutBtn.disabled = false;
+      }
+    });
+  }
 }
 
 function openUploadPicker(intent) {
@@ -2175,6 +2464,7 @@ function initSubmitFlow() {
           identityExtraction: identityExtraction,
           addressExtraction: addressExtraction,
           accountData: accountState,
+          authToken: authSessionToken || "",
           documentFiles: {
             identity: documentNames.identity,
             address: documentNames.address,
@@ -2203,11 +2493,26 @@ function initSubmitFlow() {
       journeyFinished = true;
       const humanReview = submission.humanReview || { required: false };
 
-      accountState = Object.assign({}, accountState, {
+      applyAccountState(Object.assign({}, accountState, {
         firstName: profileData.firstName || accountState.firstName,
         lastName: profileData.lastName || accountState.lastName,
+        contactEmail: profileData.email || accountState.contactEmail,
         phone: profileData.phone || accountState.phone,
         country: profileData.country || accountState.country,
+        dob: profileData.dob || accountState.dob,
+        street: profileData.street || accountState.street,
+        city: profileData.city || accountState.city,
+        state: profileData.state || accountState.state,
+        postal: profileData.postal || accountState.postal,
+        documentNumber:
+          (identityExtraction && identityExtraction.documentNumber) ||
+          accountState.documentNumber,
+        documentExpiry:
+          (identityExtraction && identityExtraction.dateOfExpiry) ||
+          accountState.documentExpiry,
+        nationality:
+          (identityExtraction && identityExtraction.nationality) ||
+          accountState.nationality,
         kycStatus: submission.status,
         humanReviewRequired: Boolean(humanReview.required),
         humanReviewReason: humanReview.message || "",
@@ -2219,8 +2524,11 @@ function initSubmitFlow() {
         customerId:
           (submission.accountTimeline && submission.accountTimeline.customerId) ||
           accountState.customerId,
-      });
-      persistAccountState();
+        owner:
+          (submission.accountTimeline && submission.accountTimeline.owner) ||
+          accountState.owner,
+        kycSessionId: sessionId,
+      }));
       persistAdminHumanReviewCase(submission, profileData);
       updateAccountCtas();
       renderAccountState();
@@ -2430,8 +2738,9 @@ function initChat() {
 
 (async function init() {
   updateBranding();
-  updateAccountCtas();
   initHeader();
+  await hydrateAuthenticatedAccount();
+  updateAccountCtas();
   if (accountState) persistAccountState();
   prefillAccountForm();
   prefillProfileFromAccount();
@@ -2448,8 +2757,16 @@ function initChat() {
 
   if (accountState && accountState.kycStatus) {
     setCrmStatus(
-      accountState.kycStatus === "approved" ? "Compte actif" : "Revue en cours",
-      accountState.kycStatus === "approved" ? "success" : "pending",
+      accountState.kycStatus === "approved"
+        ? "Compte actif"
+        : accountState.kycStatus === "rejected"
+          ? "Dossier refusé"
+          : "Revue en cours",
+      accountState.kycStatus === "approved"
+        ? "success"
+        : accountState.kycStatus === "rejected"
+          ? "alert"
+          : "pending",
     );
   } else {
     setCrmStatus("En attente", "neutral");
