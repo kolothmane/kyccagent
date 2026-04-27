@@ -12,6 +12,14 @@
     {
       "source": "/admin/",
       "destination": "/admin.html"
+    },
+    {
+      "source": "/admin/passcodes",
+      "destination": "/admin-passcodes.html"
+    },
+    {
+      "source": "/admin/passcodes/",
+      "destination": "/admin-passcodes.html"
     }
   ]
 }

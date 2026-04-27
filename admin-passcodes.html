@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <base href="/" />
+  <title>Bay4Bank | Gestion des accès</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200,0,0&family=Outfit:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="baybank-ui.css?v=20260427-2" />
+</head>
+<body data-page="admin-passcodes">
+  <header class="site-header" id="siteHeader">
+    <div class="container">
+      <div class="header-row">
+        <a href="index.html" class="brand" aria-label="Accueil Bay4Bank">
+          <img src="assets/bay4bank-header-logo.svg" alt="Logo Bay4Bank" class="brand-logo" />
+          <span class="brand-copy">
+            <strong data-brand>Bay4Bank</strong>
+            <span data-service>Banque digitale nouvelle génération</span>
+          </span>
+        </a>
+
+        <button id="navToggle" class="nav-toggle" type="button" aria-label="Ouvrir le menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <div id="navbarCollapse" class="navbar-wrap">
+          <nav class="site-nav" aria-label="Navigation principale">
+            <a href="index.html">Accueil</a>
+            <a href="services.html">Services</a>
+            <a href="/admin">Console agent</a>
+            <a href="/admin/passcodes" class="is-active">Accès clients</a>
+          </nav>
+
+          <div class="header-actions">
+            <a href="/admin" class="ghost-link" data-icon="support_agent">Retour console</a>
+            <button id="passcodesRefresh" type="button" class="button button-secondary" data-icon="refresh">
+              Actualiser
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="inner-page">
+    <section class="page-hero page-hero-compact">
+      <div class="container page-hero-grid">
+        <div class="page-hero-copy">
+          <span class="eyebrow" data-icon="admin_panel_settings">Administration Bay4Bank</span>
+          <h1>Gérer les comptes clients existants.</h1>
+          <p>
+            Retrouvez les espaces client créés, vérifiez leur statut KYC et réinitialisez un mot de
+            passe lorsqu'un client doit récupérer son accès.
+          </p>
+        </div>
+
+        <div class="page-hero-card">
+          <span class="mini-label" data-icon="lock_reset">Accès</span>
+          <strong>Réinitialisation encadrée.</strong>
+          <p>
+            Le nouveau mot de passe remplace l'ancien accès du compte sélectionné. Le client pourra
+            ensuite se reconnecter depuis la page d'ouverture.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section passcodes-shell">
+      <div class="container passcodes-stats">
+        <article class="metric-card">
+          <strong id="passcodesTotalCount">0</strong>
+          <span>Comptes clients</span>
+        </article>
+        <article class="metric-card">
+          <strong id="passcodesApprovedCount">0</strong>
+          <span>Comptes actifs</span>
+        </article>
+        <article class="metric-card">
+          <strong id="passcodesReviewCount">0</strong>
+          <span>Dossiers en revue</span>
+        </article>
+      </div>
+
+      <div class="container passcodes-grid">
+        <aside class="panel passcodes-list-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="section-kicker" data-icon="group">Comptes</span>
+              <h2>Clients enregistrés</h2>
+            </div>
+            <span id="passcodesListCount" class="status-badge neutral">0 compte</span>
+          </div>
+
+          <label class="form-field passcodes-search">
+            <span>Rechercher</span>
+            <input id="passcodesSearch" type="search" placeholder="E-mail, nom, téléphone ou compte" autocomplete="off" />
+          </label>
+
+          <div id="passcodesListEmpty" class="crm-empty">
+            Aucun compte client n'est disponible pour le moment.
+          </div>
+          <div id="passcodesAccountList" class="passcodes-account-list"></div>
+        </aside>
+
+        <section class="panel passcodes-detail-panel">
+          <div id="passcodesDetailEmpty" class="crm-empty">
+            Sélectionnez un compte pour afficher le profil et modifier son mot de passe.
+          </div>
+
+          <div id="passcodesDetail" hidden>
+            <div class="panel-heading">
+              <div>
+                <span class="section-kicker" data-icon="manage_accounts">Compte sélectionné</span>
+                <h2 id="passcodesClientName">—</h2>
+              </div>
+              <span id="passcodesStatus" class="status-badge neutral">—</span>
+            </div>
+
+            <div id="passcodesProfileGrid" class="admin-data-grid passcodes-profile-grid"></div>
+
+            <form id="passcodeResetForm" class="passcode-reset-form">
+              <div class="panel-heading compact-heading">
+                <div>
+                  <span class="section-kicker" data-icon="password">Mot de passe</span>
+                  <h3>Réinitialiser l'accès client</h3>
+                </div>
+              </div>
+
+              <div class="form-grid two-columns">
+                <label class="form-field">
+                  <span>Nouveau mot de passe</span>
+                  <input id="passcodePassword" type="password" autocomplete="new-password" />
+                </label>
+                <label class="form-field">
+                  <span>Confirmer</span>
+                  <input id="passcodePasswordConfirm" type="password" autocomplete="new-password" />
+                </label>
+              </div>
+
+              <div id="passcodeFeedback" class="inline-feedback" aria-live="polite"></div>
+
+              <button id="passcodeResetBtn" type="submit" class="button button-primary" data-icon="lock_reset">
+                Mettre à jour le mot de passe
+              </button>
+            </form>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="brand footer-brand-link">
+          <img src="assets/bay4bank-footer-logo.svg" alt="Logo Bay4Bank" class="footer-logo-mark" />
+        </a>
+        <p>Administration des accès clients Bay4Bank.</p>
+      </div>
+
+      <div class="footer-column">
+        <h3>Agent</h3>
+        <a href="/admin">Console</a>
+        <a href="/admin/passcodes">Accès clients</a>
+        <a href="kyc.html">Parcours KYC</a>
+      </div>
+
+      <div class="footer-column">
+        <h3>Produit</h3>
+        <a href="services.html">Services</a>
+        <a href="index.html">Présentation</a>
+        <a href="client.html">Espace client</a>
+      </div>
+
+      <div class="footer-column">
+        <h3>Bay4Bank</h3>
+        <a href="index.html">Accueil</a>
+        <a href="open-account.html">Ouvrir un compte</a>
+        <a href="/admin">Console agent</a>
+      </div>
+    </div>
+
+    <div class="container footer-meta">
+      <span>© 2026 Bay4Bank. Tous droits réservés.</span>
+      <span>Gestion des accès et comptes clients.</span>
+    </div>
+  </footer>
+
+  <script src="lib/branding.js?v=20260424-3"></script>
+  <script src="admin-passcodes.js?v=20260427-1"></script>
+</body>
+</html>

@@ -1991,6 +1991,104 @@ img {
   min-height: 0;
 }
 
+.passcodes-shell {
+  padding-top: 10px;
+}
+
+.passcodes-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.passcodes-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.15fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.passcodes-list-panel,
+.passcodes-detail-panel {
+  min-width: 0;
+}
+
+.passcodes-search {
+  margin-bottom: 18px;
+}
+
+.passcodes-account-list {
+  display: grid;
+  gap: 12px;
+}
+
+.passcodes-account-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 14px;
+  align-items: center;
+  padding: 16px;
+  border: 2px solid var(--playful-foreground);
+  border-radius: 18px;
+  background: #ffffff;
+  color: var(--playful-foreground);
+  box-shadow: 3px 3px 0 0 rgba(30, 41, 59, 0.12);
+  text-align: left;
+  cursor: pointer;
+}
+
+.passcodes-account-row:hover,
+.passcodes-account-row.is-selected {
+  background: rgba(23, 137, 255, 0.08);
+  box-shadow: var(--playful-shadow-active);
+}
+
+.passcodes-account-row span,
+.passcodes-account-row strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.passcodes-account-row span {
+  font-size: 1.02rem;
+  font-weight: 800;
+}
+
+.passcodes-account-row strong {
+  color: var(--playful-muted-foreground);
+  font-size: 0.92rem;
+}
+
+.passcodes-account-row .status-badge {
+  grid-row: span 2;
+  font-style: normal;
+}
+
+.passcodes-profile-grid {
+  margin-bottom: 26px;
+}
+
+.passcode-reset-form {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  border: 2px solid var(--playful-foreground);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--playful-shadow-hard);
+}
+
+.compact-heading {
+  margin-bottom: 0;
+}
+
+.compact-heading h3 {
+  margin: 10px 0 0;
+  font-size: 1.28rem;
+}
+
 /* Playful geometric system integration for the site chrome and content.
    Chat styles remain unchanged below on purpose. */
 body {
@@ -3570,6 +3668,7 @@ body[data-page="account"] .site-nav a[href="open-account.html"] {
   .form-grid-layout,
   .kyc-grid,
   .admin-grid,
+  .passcodes-grid,
   .footer-grid {
     grid-template-columns: 1fr;
   }
@@ -3590,6 +3689,7 @@ body[data-page="account"] .site-nav a[href="open-account.html"] {
 
   .hero-metrics,
   .admin-stats,
+  .passcodes-stats,
   .feature-grid,
   .upload-grid,
   .document-summary,
@@ -3666,6 +3766,7 @@ body[data-page="account"] .site-nav a[href="open-account.html"] {
 
   .hero-metrics,
   .admin-stats,
+  .passcodes-stats,
   .feature-grid,
   .two-columns,
   .three-columns,
@@ -3675,6 +3776,15 @@ body[data-page="account"] .site-nav a[href="open-account.html"] {
   .admin-doc-grid,
   .admin-data-grid {
     grid-template-columns: 1fr;
+  }
+
+  .passcodes-account-row {
+    grid-template-columns: 1fr;
+  }
+
+  .passcodes-account-row .status-badge {
+    grid-row: auto;
+    justify-self: start;
   }
 
   .logo-strip-inner {
