@@ -153,6 +153,12 @@ const clientDashboard = document.getElementById("clientDashboard");
 const clientIban = document.getElementById("clientIban");
 const clientCardHolder = document.getElementById("clientCardHolder");
 const clientProfileGrid = document.getElementById("clientProfileGrid");
+const clientAvailableBalance = document.getElementById("clientAvailableBalance");
+const clientMonthlyLimit = document.getElementById("clientMonthlyLimit");
+const clientCardLast4 = document.getElementById("clientCardLast4");
+const clientOnlinePayments = document.getElementById("clientOnlinePayments");
+const clientRecentCardPayment = document.getElementById("clientRecentCardPayment");
+const clientRecentIncomingTransfer = document.getElementById("clientRecentIncomingTransfer");
 
 const uploadIdentityBtn = document.getElementById("uploadIdentityBtn");
 const uploadAddressBtn = document.getElementById("uploadAddressBtn");
@@ -1368,6 +1374,44 @@ function formatClientDate(value) {
   }
 }
 
+function centsValue(value, fallback) {
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) return fallback;
+  return Math.round(number);
+}
+
+function getClientFinancials(account) {
+  const financials = (account && account.financials) || {};
+
+  return {
+    availableBalanceCents: centsValue(financials.availableBalanceCents, 42075),
+    monthlyLimitCents: Math.max(0, centsValue(financials.monthlyLimitCents, 150000)),
+    recentCardPaymentCents: Math.max(0, centsValue(financials.recentCardPaymentCents, 1290)),
+    recentIncomingTransferCents: Math.max(
+      0,
+      centsValue(financials.recentIncomingTransferCents, 25000),
+    ),
+    cardLast4: String(financials.cardLast4 || "4821").replace(/\D/g, "").slice(-4) || "4821",
+    onlinePaymentsEnabled:
+      typeof financials.onlinePaymentsEnabled === "boolean"
+        ? financials.onlinePaymentsEnabled
+        : true,
+  };
+}
+
+function formatClientMoney(cents, options) {
+  const sign = options && options.sign ? options.sign : "";
+  const value = centsValue(cents, 0) / 100;
+  const displayValue = sign ? Math.abs(value) : value;
+  const formatted = new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+  }).format(displayValue);
+
+  return sign + formatted;
+}
+
 function buildClientIban(account) {
   const source = String((account && account.accountId) || "bay4bank")
     .replace(/\D/g, "")
@@ -1487,6 +1531,7 @@ function renderClientSpace() {
     [accountState.firstName, accountState.lastName].filter(Boolean).join(" ").trim() ||
     "Client Bay4Bank";
   const cityCountry = [accountState.city, accountState.country].filter(Boolean).join(", ");
+  const financials = getClientFinancials(accountState);
 
   clientLockedState.hidden = true;
   clientDashboard.hidden = false;
@@ -1520,6 +1565,35 @@ function renderClientSpace() {
 
   if (clientCardHolder) {
     clientCardHolder.textContent = fullName.toUpperCase();
+  }
+
+  if (clientAvailableBalance) {
+    clientAvailableBalance.textContent = formatClientMoney(financials.availableBalanceCents);
+  }
+
+  if (clientMonthlyLimit) {
+    clientMonthlyLimit.textContent = formatClientMoney(financials.monthlyLimitCents);
+  }
+
+  if (clientCardLast4) {
+    clientCardLast4.textContent = "•••• " + financials.cardLast4;
+  }
+
+  if (clientOnlinePayments) {
+    clientOnlinePayments.textContent = financials.onlinePaymentsEnabled ? "Activé" : "Désactivé";
+  }
+
+  if (clientRecentCardPayment) {
+    clientRecentCardPayment.textContent = formatClientMoney(financials.recentCardPaymentCents, {
+      sign: "-",
+    });
+  }
+
+  if (clientRecentIncomingTransfer) {
+    clientRecentIncomingTransfer.textContent = formatClientMoney(
+      financials.recentIncomingTransferCents,
+      { sign: "+" },
+    );
   }
 
   renderClientInfoGrid(clientProfileGrid, [

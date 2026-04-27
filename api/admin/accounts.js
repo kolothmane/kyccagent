@@ -3,6 +3,7 @@
 const {
   listAccounts,
   resetAccountPassword,
+  updateAccount,
 } = require("../../lib/account-store");
 
 module.exports = async (req, res) => {
@@ -16,17 +17,20 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === "POST") {
-      const { accountId, email, action, password } = req.body || {};
+      const { accountId, email, action, password, financials } = req.body || {};
 
-      if (action !== "reset_password") {
-        return res.status(400).json({ error: "action must be 'reset_password'" });
+      if (!["reset_password", "update_financials"].includes(action)) {
+        return res.status(400).json({ error: "action must be 'reset_password' or 'update_financials'" });
       }
 
       if (!accountId && !email) {
         return res.status(400).json({ error: "accountId or email is required" });
       }
 
-      const account = await resetAccountPassword({ accountId, email }, password);
+      const account =
+        action === "reset_password"
+          ? await resetAccountPassword({ accountId, email }, password)
+          : await updateAccount({ accountId, email }, { financials });
 
       if (!account) {
         return res.status(404).json({ error: "Compte introuvable" });

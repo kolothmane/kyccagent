@@ -10,7 +10,7 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200,0,0&family=Outfit:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="baybank-ui.css?v=20260427-1" />
+  <link rel="stylesheet" href="baybank-ui.css?v=20260427-3" />
 </head>
 <body data-page="client">
   <header class="site-header" id="siteHeader">
@@ -79,7 +79,7 @@
             </div>
             <div class="client-balance">
               <span>Solde disponible</span>
-              <strong>8 420,75 €</strong>
+              <strong id="clientAvailableBalance">420,75 €</strong>
             </div>
             <div class="client-account-meta">
               <span>IBAN</span>
@@ -95,17 +95,17 @@
             <span class="section-kicker" data-icon="credit_card">Carte Bay4Bank</span>
             <div class="payment-card-visual">
               <span>Bay4Bank Global</span>
-              <strong>•••• 4821</strong>
+              <strong id="clientCardLast4">•••• 4821</strong>
               <small id="clientCardHolder">Titulaire</small>
             </div>
             <div class="client-data-list">
               <div>
                 <span>Plafond mensuel</span>
-                <strong>5 000 €</strong>
+                <strong id="clientMonthlyLimit">1 500 €</strong>
               </div>
               <div>
                 <span>Paiement en ligne</span>
-                <strong>Activé</strong>
+                <strong id="clientOnlinePayments">Activé</strong>
               </div>
             </div>
           </section>
@@ -122,7 +122,7 @@
                   <strong>Carte Bay4Bank</strong>
                   <span>Paiement carte autorisé</span>
                 </div>
-                <b>-42,90 €</b>
+                <b id="clientRecentCardPayment">-12,90 €</b>
               </article>
               <article>
                 <span class="transaction-icon" data-icon="savings"></span>
@@ -130,7 +130,7 @@
                   <strong>Virement entrant</strong>
                   <span>Compte activé et prêt à recevoir des fonds</span>
                 </div>
-                <b>+1 250,00 €</b>
+                <b id="clientRecentIncomingTransfer">+250,00 €</b>
               </article>
               <article>
                 <span class="transaction-icon" data-icon="verified"></span>
@@ -190,6 +190,6 @@
   </footer>
 
   <script src="lib/branding.js?v=20260424-3"></script>
-  <script src="app.js?v=20260427-1"></script>
+  <script src="app.js?v=20260427-3"></script>
 </body>
 </html>
