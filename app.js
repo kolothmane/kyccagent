@@ -144,6 +144,15 @@ const loginFormMessage = document.getElementById("loginFormMessage");
 const logoutBtn = document.getElementById("logoutBtn");
 const accountSessionActions = document.getElementById("accountSessionActions");
 const accountStatus = document.getElementById("accountStatus");
+const clientStatusBadge = document.getElementById("clientStatusBadge");
+const clientGreeting = document.getElementById("clientGreeting");
+const clientIntro = document.getElementById("clientIntro");
+const clientIdentitySummary = document.getElementById("clientIdentitySummary");
+const clientLockedState = document.getElementById("clientLockedState");
+const clientDashboard = document.getElementById("clientDashboard");
+const clientIban = document.getElementById("clientIban");
+const clientCardHolder = document.getElementById("clientCardHolder");
+const clientProfileGrid = document.getElementById("clientProfileGrid");
 
 const uploadIdentityBtn = document.getElementById("uploadIdentityBtn");
 const uploadAddressBtn = document.getElementById("uploadAddressBtn");
@@ -527,6 +536,20 @@ function pickOwner(country) {
   return managers[index];
 }
 
+function isAccountApproved(account) {
+  return Boolean(account && account.kycStatus === "approved");
+}
+
+function getAccountDestination(account) {
+  if (!account) return "open-account.html";
+  return isAccountApproved(account) ? "client.html" : "kyc.html";
+}
+
+function getAccountDestinationLabel(account) {
+  if (!account) return "Ouvrir un compte";
+  return isAccountApproved(account) ? "Accéder à mon espace" : "Continuer mon dossier";
+}
+
 function splitAddressChunks(address) {
   return String(address || "")
     .split(/\n|,/)
@@ -659,8 +682,20 @@ function updateAccountCtas() {
       node.dataset.defaultLabel = node.textContent.trim() || "Ouvrir un compte";
     }
 
-    node.setAttribute("href", accountState ? "kyc.html" : "open-account.html");
-    node.textContent = accountState ? "Continuer mon dossier" : node.dataset.defaultLabel;
+    node.setAttribute("href", getAccountDestination(accountState));
+    node.textContent = accountState
+      ? getAccountDestinationLabel(accountState)
+      : node.dataset.defaultLabel;
+  });
+
+  document.querySelectorAll("[data-client-destination]").forEach(function(node) {
+    const approved = isAccountApproved(accountState);
+    const label = approved
+      ? node.dataset.approvedLabel || "Mon espace"
+      : node.dataset.pendingLabel || "Mon dossier";
+
+    node.setAttribute("href", approved ? "client.html" : "kyc.html");
+    node.textContent = label;
   });
 }
 
@@ -724,6 +759,10 @@ function syncAccountAuthControls() {
     accountSessionActions.hidden = !authenticated;
   }
 
+  if (logoutBtn) {
+    logoutBtn.hidden = !authenticated;
+  }
+
   if (loginForm) {
     Array.from(loginForm.elements || []).forEach(function(field) {
       field.disabled = authenticated;
@@ -739,7 +778,7 @@ function syncAccountAuthControls() {
 
   if (createAccountBtn) {
     createAccountBtn.textContent = authenticated
-      ? "Continuer vers la vérification"
+      ? getAccountDestinationLabel(accountState)
       : "Créer mon espace Bay4Bank";
   }
 
@@ -1315,6 +1354,182 @@ function renderAccountState() {
   if (fileInput) fileInput.disabled = false;
   if (submitBtn) submitBtn.disabled = false;
   syncAccountAuthControls();
+}
+
+function formatClientDate(value) {
+  if (!value) return "—";
+
+  try {
+    return new Intl.DateTimeFormat("fr-FR", {
+      dateStyle: "medium",
+    }).format(new Date(value));
+  } catch (error) {
+    return value;
+  }
+}
+
+function buildClientIban(account) {
+  const source = String((account && account.accountId) || "bay4bank")
+    .replace(/\D/g, "")
+    .padEnd(18, "4")
+    .slice(0, 18);
+
+  return [
+    "FR76",
+    "3000",
+    "4000",
+    source.slice(0, 4),
+    source.slice(4, 8),
+    source.slice(8, 12),
+    source.slice(12, 16),
+    source.slice(16, 18),
+  ].join(" ");
+}
+
+function renderClientInfoGrid(target, rows) {
+  if (!target) return;
+
+  target.innerHTML = rows
+    .map(function(row) {
+      return (
+        "<div>" +
+        "<span>" +
+        escapeHtml(row.label) +
+        "</span><strong>" +
+        escapeHtml(row.value || "—") +
+        "</strong></div>"
+      );
+    })
+    .join("");
+}
+
+function renderClientLockedState(kind) {
+  if (!clientLockedState || !clientDashboard) return;
+
+  clientDashboard.hidden = true;
+  clientLockedState.hidden = false;
+
+  const needsLogin = kind === "login" || !authSessionToken || !accountState;
+  const isRejected = accountState && accountState.kycStatus === "rejected";
+  const isPending = accountState && accountState.kycStatus === "pending_review";
+  const title = needsLogin
+    ? "Connectez-vous à votre compte Bay4Bank"
+    : isRejected
+      ? "Votre demande nécessite une reprise"
+      : isPending || accountState.humanReviewRequired
+        ? "Votre dossier est encore en revue"
+        : "Votre espace client n'est pas encore activé";
+  const detail = needsLogin
+    ? "L'espace client bancaire s'ouvre après connexion et validation du dossier."
+    : isRejected
+      ? accountState.humanReviewReason ||
+        "Le dossier a été refusé après revue humaine. Vous pouvez revenir au dossier pour reprendre les informations."
+      : "Dès que la validation est terminée, vous accédez automatiquement à votre compte courant, vos cartes et vos opérations.";
+  const actionHref = needsLogin ? "open-account.html" : "kyc.html";
+  const actionLabel = needsLogin ? "Se connecter" : "Voir mon dossier";
+
+  clientLockedState.innerHTML =
+    '<div class="client-locked-card">' +
+    '<span class="section-kicker" data-icon="' +
+    escapeHtml(kind || "lock") +
+    '">' +
+    escapeHtml(needsLogin ? "Accès sécurisé" : "Dossier client") +
+    "</span>" +
+    "<h2>" +
+    escapeHtml(title) +
+    "</h2>" +
+    "<p>" +
+    escapeHtml(detail) +
+    "</p>" +
+    '<a href="' +
+    escapeHtml(actionHref) +
+    '" class="button button-primary" data-icon="' +
+    escapeHtml(needsLogin ? "login" : "description") +
+    '">' +
+    escapeHtml(actionLabel) +
+    "</a>" +
+    "</div>";
+
+  if (clientStatusBadge) {
+    clientStatusBadge.className = "status-badge " + (isRejected ? "alert" : "pending");
+    clientStatusBadge.textContent = needsLogin ? "Connexion requise" : "Validation en cours";
+  }
+
+  if (clientGreeting) {
+    clientGreeting.textContent = title;
+  }
+
+  if (clientIntro) {
+    clientIntro.textContent = detail;
+  }
+
+  if (clientIdentitySummary) {
+    clientIdentitySummary.innerHTML =
+      "<p>Les informations du compte apparaîtront ici dès l'activation.</p>";
+  }
+}
+
+function renderClientSpace() {
+  if (currentPage !== "client") return;
+  if (!clientDashboard || !clientLockedState) return;
+
+  if (!authSessionToken || !accountState) {
+    renderClientLockedState("login");
+    return;
+  }
+
+  if (!isAccountApproved(accountState)) {
+    renderClientLockedState(accountState.kycStatus === "rejected" ? "block" : "pending_actions");
+    return;
+  }
+
+  const fullName =
+    [accountState.firstName, accountState.lastName].filter(Boolean).join(" ").trim() ||
+    "Client Bay4Bank";
+  const cityCountry = [accountState.city, accountState.country].filter(Boolean).join(", ");
+
+  clientLockedState.hidden = true;
+  clientDashboard.hidden = false;
+
+  if (clientStatusBadge) {
+    clientStatusBadge.className = "status-badge success";
+    clientStatusBadge.textContent = "Compte actif";
+  }
+
+  if (clientGreeting) {
+    clientGreeting.textContent = "Bonjour " + fullName;
+  }
+
+  if (clientIntro) {
+    clientIntro.textContent =
+      "Votre compte Bay4Bank est actif. Vous pouvez suivre vos opérations, gérer votre carte et consulter vos informations client.";
+  }
+
+  if (clientIdentitySummary) {
+    renderClientInfoGrid(clientIdentitySummary, [
+      { label: "Titulaire", value: fullName },
+      { label: "Compte", value: accountState.accountId },
+      { label: "Client depuis", value: formatClientDate(accountState.decisionAt || accountState.submittedAt || accountState.createdAt) },
+      { label: "Conseiller", value: accountState.owner },
+    ]);
+  }
+
+  if (clientIban) {
+    clientIban.textContent = buildClientIban(accountState);
+  }
+
+  if (clientCardHolder) {
+    clientCardHolder.textContent = fullName.toUpperCase();
+  }
+
+  renderClientInfoGrid(clientProfileGrid, [
+    { label: "Adresse e-mail", value: accountState.contactEmail },
+    { label: "Téléphone", value: accountState.phone },
+    { label: "Résidence", value: cityCountry || accountState.country },
+    { label: "Adresse", value: accountState.street },
+    { label: "Code postal", value: accountState.postal },
+    { label: "Nationalité", value: accountState.nationality },
+  ]);
 }
 
 function updateFileChips(fileName) {
@@ -1970,6 +2185,8 @@ function applyAuthenticatedPayload(payload) {
   prefillAccountForm();
   prefillProfileFromAccount();
   renderAccountState();
+  renderClientSpace();
+  syncAccountAuthControls();
   syncJourneyStage();
 }
 
@@ -1981,11 +2198,11 @@ function initAccountPage() {
 
       if (authSessionToken && accountState) {
         setInlineFeedback(
-          "Session déjà active. Redirection vers votre dossier Bay4Bank…",
+          "Session déjà active. Redirection vers votre espace Bay4Bank…",
           "success",
         );
         window.setTimeout(function() {
-          window.location.href = "kyc.html";
+          window.location.href = getAccountDestination(accountState);
         }, 400);
         return;
       }
@@ -2107,10 +2324,10 @@ function initAccountPage() {
 
         journeyFinished = Boolean(payload.account && payload.account.kycStatus);
         applyAuthenticatedPayload(payload);
-        setLoginFeedback("Connexion réussie. Redirection vers votre dossier…", "success");
+        setLoginFeedback("Connexion réussie. Redirection vers votre espace…", "success");
 
         window.setTimeout(function() {
-          window.location.href = "kyc.html";
+          window.location.href = getAccountDestination(payload.account);
         }, 450);
       } catch (error) {
         console.error("Account login error:", error);
@@ -2144,6 +2361,8 @@ function initAccountPage() {
         setLoginFeedback("", "");
         updateAccountCtas();
         renderAccountState();
+        renderClientSpace();
+        syncAccountAuthControls();
         prefillProfileFromAccount();
         syncJourneyStage();
         logoutBtn.disabled = false;
@@ -2532,6 +2751,7 @@ function initSubmitFlow() {
       persistAdminHumanReviewCase(submission, profileData);
       updateAccountCtas();
       renderAccountState();
+      renderClientSpace();
       syncJourneyStage();
 
       const timeline = submission.accountTimeline || null;
@@ -2542,9 +2762,12 @@ function initSubmitFlow() {
           "success",
         );
         say(
-          "Le dossier est validé. Votre compte Bay4Bank est activé et le profil client a bien été enregistré.",
+          "Le dossier est validé. Votre compte Bay4Bank est activé. Je vous redirige vers votre espace client.",
           "agent",
         );
+        window.setTimeout(function() {
+          window.location.href = "client.html";
+        }, 1600);
       } else if (humanReview.required) {
         setResultMessage(
           humanReview.message ||
@@ -2745,6 +2968,8 @@ function initChat() {
   prefillAccountForm();
   prefillProfileFromAccount();
   renderAccountState();
+  renderClientSpace();
+  syncAccountAuthControls();
   renderDocumentState();
   updateChecklist();
   syncJourneyStage();

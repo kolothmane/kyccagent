@@ -1153,6 +1153,235 @@ img {
   border: 1px solid rgba(16, 38, 77, 0.06);
 }
 
+.client-page {
+  padding-top: 128px;
+}
+
+.client-hero,
+.client-workspace {
+  padding: 18px 0;
+}
+
+.client-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.client-welcome,
+.client-identity-panel,
+.client-locked-card,
+.client-account-card,
+.client-card {
+  border: 2px solid var(--playful-foreground);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--playful-shadow-hard);
+}
+
+.client-welcome,
+.client-identity-panel {
+  border-radius: 28px;
+  padding: 30px;
+}
+
+.client-welcome {
+  display: grid;
+  align-content: center;
+  gap: 18px;
+}
+
+.client-welcome h1 {
+  margin: 0;
+  font-size: clamp(2.2rem, 3.4vw, 4rem);
+  line-height: 1;
+}
+
+.client-welcome p,
+.client-locked-card p {
+  max-width: 720px;
+  margin: 0;
+  color: var(--playful-muted-foreground);
+  font-size: 1.04rem;
+  line-height: 1.7;
+}
+
+.client-identity-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.client-identity-summary,
+.client-profile-grid,
+.client-data-list {
+  display: grid;
+  gap: 12px;
+}
+
+.client-identity-summary > div,
+.client-profile-grid > div,
+.client-data-list > div,
+.client-account-meta {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid rgba(16, 38, 77, 0.12);
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.client-identity-summary span,
+.client-profile-grid span,
+.client-data-list span,
+.client-account-meta span,
+.client-balance span {
+  color: var(--playful-muted-foreground);
+  font-weight: 700;
+}
+
+.client-identity-summary strong,
+.client-profile-grid strong,
+.client-data-list strong,
+.client-account-meta strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.client-dashboard {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.95fr) minmax(0, 1.05fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.client-dashboard[hidden],
+.client-locked-state[hidden] {
+  display: none;
+}
+
+.client-account-card,
+.client-card,
+.client-locked-card {
+  border-radius: 24px;
+  padding: 28px;
+}
+
+.client-account-card {
+  display: grid;
+  gap: 24px;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(250, 229, 77, 0.35), transparent 18%),
+    linear-gradient(145deg, #ffffff, #eef7ff);
+}
+
+.client-card {
+  display: grid;
+  gap: 20px;
+}
+
+.client-card-compact {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(104, 213, 139, 0.22), transparent 28%),
+    #ffffff;
+}
+
+.client-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.client-balance {
+  display: grid;
+  gap: 6px;
+}
+
+.client-balance strong {
+  font-size: clamp(2.5rem, 4vw, 4.4rem);
+  line-height: 1;
+}
+
+.client-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.payment-card-visual {
+  display: grid;
+  align-content: space-between;
+  min-height: 180px;
+  padding: 24px;
+  border-radius: 20px;
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.28), transparent 20%),
+    linear-gradient(135deg, #03194c, #0d66e5 70%, #52d273);
+  border: 2px solid var(--playful-foreground);
+  box-shadow: 6px 6px 0 rgba(30, 41, 59, 0.16);
+}
+
+.payment-card-visual span,
+.payment-card-visual small {
+  font-weight: 800;
+}
+
+.payment-card-visual strong {
+  font-size: 1.8rem;
+  letter-spacing: 0.08em;
+}
+
+.client-transactions {
+  display: grid;
+  gap: 12px;
+}
+
+.client-transactions article {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid rgba(16, 38, 77, 0.12);
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.client-transactions article div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.client-transactions article span:not(.transaction-icon) {
+  color: var(--playful-muted-foreground);
+}
+
+.transaction-icon {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: rgba(23, 137, 255, 0.12);
+}
+
+.transaction-icon::before {
+  content: attr(data-icon);
+  font-family: "Material Symbols Outlined";
+  font-size: 22px;
+  color: var(--brand-blue);
+}
+
+.client-locked-card {
+  display: grid;
+  gap: 18px;
+  max-width: 760px;
+}
+
 .check-title {
   font-family: "Manrope", sans-serif;
   font-weight: 800;
@@ -3251,6 +3480,13 @@ body[data-page="account"] .site-nav a[href="open-account.html"] {
   }
 }
 
+@media (max-width: 1180px) {
+  .client-hero-grid,
+  .client-dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 1560px) {
   .brand-copy span {
     display: none;
@@ -4106,6 +4342,31 @@ body[data-page="account"] .site-nav a[href="open-account.html"] {
   .header-actions .button {
     justify-content: center;
     text-align: center;
+  }
+
+  .client-page {
+    padding-top: 120px;
+  }
+
+  .client-welcome,
+  .client-identity-panel,
+  .client-account-card,
+  .client-card,
+  .client-locked-card {
+    padding: 22px;
+    border-radius: 22px;
+  }
+
+  .client-action-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .client-transactions article {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .client-transactions article b {
+    grid-column: 2;
   }
 }
 
