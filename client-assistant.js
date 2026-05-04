@@ -2,6 +2,8 @@
 
 const CLIENT_ASSISTANT_AUTH_KEY = "baybankAuthToken";
 const CLIENT_ASSISTANT_TIMEOUT_MS = 14000;
+const CLIENT_ASSISTANT_RECORDING_MAX_MS = 9000;
+const CLIENT_ASSISTANT_MIN_AUDIO_BYTES = 700;
 
 const assistantLauncher = document.getElementById("clientAssistantLauncher");
 const assistantHeaderCta = document.getElementById("clientAssistantHeaderCta");
@@ -24,10 +26,15 @@ let clientAssistantAccount = null;
 let clientAssistantHistory = [];
 let clientAssistantOpen = false;
 let clientAssistantBusy = false;
+let clientAssistantVoiceBusy = false;
 let clientAssistantWelcomed = false;
-let clientAssistantRecognition = null;
 let clientAssistantListening = false;
 let clientAssistantAbortController = null;
+let clientAssistantMediaRecorder = null;
+let clientAssistantMediaStream = null;
+let clientAssistantAudioChunks = [];
+let clientAssistantRecordingTimer = null;
+let clientAssistantDiscardRecording = false;
 
 function clientAssistantToken() {
   return String(localStorage.getItem(CLIENT_ASSISTANT_AUTH_KEY) || "").trim();
@@ -43,6 +50,14 @@ function clientAssistantEscape(value) {
       "'": "&#39;",
     }[match];
   });
+}
+
+function clientAssistantLogoMark(className) {
+  return (
+    '<span class="' +
+    className +
+    '" aria-hidden="true"><img src="assets/bay4bank-header-logo.svg" alt="" /></span>'
+  );
 }
 
 function clientAssistantName(account) {
@@ -76,8 +91,10 @@ function syncClientAssistantShell() {
   if (assistantLauncher) assistantLauncher.hidden = clientAssistantOpen;
   if (assistantHeaderCta) assistantHeaderCta.hidden = false;
 
+  const busy = clientAssistantBusy || clientAssistantVoiceBusy;
+
   if (assistantStatus) {
-    assistantStatus.textContent = clientAssistantBusy
+    assistantStatus.textContent = busy
       ? "En traitement"
       : clientAssistantListening
         ? "Écoute active"
@@ -85,13 +102,13 @@ function syncClientAssistantShell() {
   }
 
   if (assistantShell) {
-    assistantShell.classList.toggle("is-thinking", clientAssistantBusy);
+    assistantShell.classList.toggle("is-thinking", busy);
     assistantShell.classList.toggle("is-listening", clientAssistantListening);
   }
 
   if (assistantSend) {
     assistantSend.disabled =
-      clientAssistantBusy || !assistantInput || !assistantInput.value.trim();
+      busy || !assistantInput || !assistantInput.value.trim();
   }
 
   if (assistantMic) {
@@ -116,7 +133,7 @@ function appendClientAssistantMessage(role, content, meta) {
 
   if (role === "assistant") {
     row.innerHTML =
-      '<span class="client-assistant-avatar" aria-hidden="true">S</span>' +
+      clientAssistantLogoMark("client-assistant-avatar") +
       '<div class="client-assistant-bubble">' +
       "<p>" +
       clientAssistantEscape(content) +
@@ -144,7 +161,7 @@ function appendClientAssistantThinking() {
   row.className = "client-assistant-message assistant is-loading";
   row.dataset.clientAssistantThinking = "true";
   row.innerHTML =
-    '<span class="client-assistant-avatar" aria-hidden="true">S</span>' +
+    clientAssistantLogoMark("client-assistant-avatar") +
     '<div class="client-assistant-bubble">' +
     '<span class="client-assistant-dots" aria-label="Sophie prépare une réponse">' +
     "<i></i><i></i><i></i>" +
@@ -241,7 +258,7 @@ function openClientAssistant() {
 
 function closeClientAssistant() {
   clientAssistantOpen = false;
-  stopClientAssistantListening();
+  stopClientAssistantListening(true);
   syncClientAssistantShell();
 }
 
@@ -249,9 +266,10 @@ function interruptClientAssistant() {
   if (clientAssistantAbortController) {
     clientAssistantAbortController.abort();
   }
-  stopClientAssistantListening();
+  stopClientAssistantListening(true);
   removeClientAssistantThinking();
   clientAssistantBusy = false;
+  clientAssistantVoiceBusy = false;
   syncClientAssistantShell();
 }
 
@@ -317,79 +335,199 @@ async function sendClientAssistantMessage(message) {
   }
 }
 
-function setupClientAssistantSpeechRecognition() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) return null;
+function getClientAssistantAudioMimeType() {
+  if (typeof MediaRecorder === "undefined") return "";
 
-  const recognition = new SpeechRecognition();
-  recognition.continuous = false;
-  recognition.interimResults = false;
+  const candidates = [
+    "audio/webm;codecs=opus",
+    "audio/webm",
+    "audio/mp4",
+    "audio/ogg;codecs=opus",
+  ];
 
-  recognition.onresult = function(event) {
-    const transcript =
-      event.results &&
-      event.results[0] &&
-      event.results[0][0] &&
-      event.results[0][0].transcript;
-
-    if (transcript) {
-      if (assistantInput) assistantInput.value = transcript;
-      sendClientAssistantMessage(transcript);
-    }
-  };
-
-  recognition.onend = function() {
-    clientAssistantListening = false;
-    syncClientAssistantShell();
-  };
-
-  recognition.onerror = function() {
-    clientAssistantListening = false;
-    syncClientAssistantShell();
-    appendClientAssistantMessage(
-      "assistant",
-      "L'écoute vocale n'est pas disponible pour le moment. Vous pouvez écrire votre demande.",
-    );
-  };
-
-  return recognition;
+  return (
+    candidates.find(function(mimeType) {
+      return MediaRecorder.isTypeSupported(mimeType);
+    }) || ""
+  );
 }
 
-function startClientAssistantListening() {
-  if (clientAssistantListening) {
-    stopClientAssistantListening();
-    return;
+function blobToBase64(blob) {
+  return new Promise(function(resolve, reject) {
+    const reader = new FileReader();
+    reader.onloadend = function() {
+      const result = String(reader.result || "");
+      resolve(result.split(",")[1] || "");
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+function cleanupClientAssistantMedia() {
+  if (clientAssistantRecordingTimer) {
+    window.clearTimeout(clientAssistantRecordingTimer);
+    clientAssistantRecordingTimer = null;
   }
 
-  if (!clientAssistantRecognition) {
-    clientAssistantRecognition = setupClientAssistantSpeechRecognition();
+  if (clientAssistantMediaStream) {
+    clientAssistantMediaStream.getTracks().forEach(function(track) {
+      track.stop();
+    });
   }
 
-  if (!clientAssistantRecognition) {
+  clientAssistantMediaStream = null;
+  clientAssistantMediaRecorder = null;
+}
+
+async function transcribeClientAssistantRecording(blob) {
+  if (!blob || blob.size < CLIENT_ASSISTANT_MIN_AUDIO_BYTES) {
     appendClientAssistantMessage(
       "assistant",
-      "Le mode vocal n'est pas disponible sur ce navigateur. Vous pouvez écrire votre demande.",
+      "Je n'ai pas capté assez d'audio. Cliquez sur le micro, parlez clairement, puis cliquez à nouveau pour envoyer.",
     );
     return;
   }
 
-  const language = assistantLanguage ? assistantLanguage.value : "fr";
-  clientAssistantRecognition.lang =
-    language === "en" ? "en-US" : language === "es" ? "es-ES" : language === "ar" ? "ar" : "fr-FR";
-
-  clientAssistantListening = true;
+  clientAssistantVoiceBusy = true;
   syncClientAssistantShell();
-  clientAssistantRecognition.start();
-}
-
-function stopClientAssistantListening() {
-  if (!clientAssistantListening) return;
-  clientAssistantListening = false;
+  appendClientAssistantThinking();
 
   try {
-    if (clientAssistantRecognition) clientAssistantRecognition.stop();
+    const audio = await blobToBase64(blob);
+    const response = await fetch("/api/client-voice", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + clientAssistantToken(),
+      },
+      body: JSON.stringify({
+        audio,
+        mimeType: blob.type || "audio/webm",
+        language: assistantLanguage ? assistantLanguage.value : "fr",
+      }),
+    });
+
+    const payload = await response.json().catch(function() {
+      return {};
+    });
+
+    const transcript = String(payload.text || "").trim();
+    removeClientAssistantThinking();
+    clientAssistantVoiceBusy = false;
+    syncClientAssistantShell();
+
+    if (!response.ok || !transcript) {
+      appendClientAssistantMessage(
+        "assistant",
+        payload.error ||
+          "Je n'ai pas réussi à transcrire l'audio. Vous pouvez réessayer ou écrire votre demande.",
+      );
+      return;
+    }
+
+    if (assistantInput) assistantInput.value = transcript;
+    await sendClientAssistantMessage(transcript);
   } catch (error) {
-    // The browser can throw if recognition is already stopped.
+    console.error("Client voice transcription error:", error);
+    removeClientAssistantThinking();
+    appendClientAssistantMessage(
+      "assistant",
+      "La transcription OpenAI est indisponible pour le moment. Vous pouvez écrire votre demande.",
+    );
+  } finally {
+    clientAssistantVoiceBusy = false;
+    syncClientAssistantShell();
+  }
+}
+
+async function startClientAssistantListening() {
+  if (clientAssistantListening) {
+    stopClientAssistantListening(false);
+    return;
+  }
+
+  if (
+    !navigator.mediaDevices ||
+    !navigator.mediaDevices.getUserMedia ||
+    typeof MediaRecorder === "undefined"
+  ) {
+    appendClientAssistantMessage(
+      "assistant",
+      "Le micro du navigateur n'est pas disponible. Vous pouvez écrire votre demande.",
+    );
+    return;
+  }
+
+  try {
+    openClientAssistant();
+    clientAssistantAudioChunks = [];
+    clientAssistantDiscardRecording = false;
+    clientAssistantMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    const mimeType = getClientAssistantAudioMimeType();
+    clientAssistantMediaRecorder = new MediaRecorder(
+      clientAssistantMediaStream,
+      mimeType ? { mimeType } : undefined,
+    );
+
+    clientAssistantMediaRecorder.addEventListener("dataavailable", function(event) {
+      if (event.data && event.data.size > 0) {
+        clientAssistantAudioChunks.push(event.data);
+      }
+    });
+
+    clientAssistantMediaRecorder.addEventListener("stop", function() {
+      const blob = new Blob(clientAssistantAudioChunks, {
+        type:
+          (clientAssistantMediaRecorder && clientAssistantMediaRecorder.mimeType) ||
+          mimeType ||
+          "audio/webm",
+      });
+      const shouldDiscard = clientAssistantDiscardRecording;
+      clientAssistantAudioChunks = [];
+      cleanupClientAssistantMedia();
+      if (!shouldDiscard) transcribeClientAssistantRecording(blob);
+    });
+
+    clientAssistantMediaRecorder.start();
+    clientAssistantListening = true;
+    syncClientAssistantShell();
+
+    clientAssistantRecordingTimer = window.setTimeout(function() {
+      stopClientAssistantListening(false);
+    }, CLIENT_ASSISTANT_RECORDING_MAX_MS);
+  } catch (error) {
+    console.error("Client microphone error:", error);
+    cleanupClientAssistantMedia();
+    clientAssistantListening = false;
+    syncClientAssistantShell();
+    appendClientAssistantMessage(
+      "assistant",
+      "Autorisez l'accès au micro pour utiliser la voix, ou écrivez votre demande.",
+    );
+  }
+}
+
+function stopClientAssistantListening(discardRecording) {
+  if (!clientAssistantListening && !clientAssistantMediaRecorder) return;
+
+  clientAssistantDiscardRecording = Boolean(discardRecording);
+  clientAssistantListening = false;
+
+  if (clientAssistantRecordingTimer) {
+    window.clearTimeout(clientAssistantRecordingTimer);
+    clientAssistantRecordingTimer = null;
+  }
+
+  if (
+    clientAssistantMediaRecorder &&
+    clientAssistantMediaRecorder.state &&
+    clientAssistantMediaRecorder.state !== "inactive"
+  ) {
+    clientAssistantMediaRecorder.stop();
+  } else {
+    cleanupClientAssistantMedia();
   }
 
   syncClientAssistantShell();
@@ -438,7 +576,15 @@ function initClientAssistant() {
   if (assistantHeaderCta) assistantHeaderCta.addEventListener("click", openClientAssistant);
   if (assistantClose) assistantClose.addEventListener("click", closeClientAssistant);
   if (assistantMinimize) assistantMinimize.addEventListener("click", closeClientAssistant);
-  if (assistantInterrupt) assistantInterrupt.addEventListener("click", interruptClientAssistant);
+  if (assistantInterrupt) {
+    assistantInterrupt.addEventListener("click", function() {
+      if (clientAssistantBusy || clientAssistantVoiceBusy) {
+        interruptClientAssistant();
+        return;
+      }
+      startClientAssistantListening();
+    });
+  }
   if (assistantMic) assistantMic.addEventListener("click", startClientAssistantListening);
   if (assistantMute) assistantMute.addEventListener("click", interruptClientAssistant);
 
