@@ -395,13 +395,14 @@ async function transcribeClientAssistantRecording(blob) {
 
   try {
     const audio = await blobToBase64(blob);
-    const response = await fetch("/api/client-voice", {
+    const response = await fetch("/api/client-chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + clientAssistantToken(),
       },
       body: JSON.stringify({
+        action: "transcribe_voice",
         audio,
         mimeType: blob.type || "audio/webm",
         language: assistantLanguage ? assistantLanguage.value : "fr",
