@@ -10,7 +10,7 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200,0,0&family=Outfit:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="baybank-ui.css?v=20260427-3" />
+  <link rel="stylesheet" href="baybank-ui.css?v=20260504-1" />
 </head>
 <body data-page="client">
   <header class="site-header" id="siteHeader">
@@ -39,6 +39,9 @@
           </nav>
 
           <div class="header-actions">
+            <button id="clientAssistantHeaderCta" type="button" class="client-assistant-nav-button" hidden>
+              Parler à Sophie
+            </button>
             <a href="kyc.html" class="ghost-link" data-icon="description">Voir le dossier KYC</a>
             <button id="logoutBtn" type="button" class="button button-secondary" data-icon="logout">
               Se déconnecter
@@ -152,6 +155,99 @@
     </section>
   </main>
 
+  <button id="clientAssistantLauncher" type="button" class="client-assistant-launcher" hidden>
+    <span class="client-assistant-launcher-mark">S</span>
+    <span>
+      <strong>Sophie</strong>
+      <small>Assistant client</small>
+    </span>
+  </button>
+
+  <section
+    id="clientAssistantShell"
+    class="client-assistant-shell"
+    aria-label="Assistant client Bay4Bank"
+    hidden
+  >
+    <div class="client-assistant-card">
+      <header class="client-assistant-topbar">
+        <div class="client-assistant-window-dots" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="client-assistant-window-line" aria-hidden="true"></div>
+      </header>
+
+      <div class="client-assistant-bankbar">
+        <div class="client-assistant-brand">
+          <span class="client-assistant-brand-mark">B4</span>
+          <span>
+            <strong id="clientAssistantTitle">Sophie</strong>
+            <small>Assistant bancaire</small>
+          </span>
+        </div>
+
+        <div class="client-assistant-actions">
+          <select id="clientAssistantLanguage" aria-label="Langue de l'assistant">
+            <option value="fr">FR</option>
+            <option value="en">EN</option>
+            <option value="ar">AR</option>
+            <option value="es">ES</option>
+          </select>
+          <button id="clientAssistantMinimize" type="button" aria-label="Réduire l'assistant">−</button>
+          <button id="clientAssistantClose" type="button" aria-label="Fermer l'assistant">×</button>
+        </div>
+      </div>
+
+      <div class="client-assistant-stage">
+        <div class="client-assistant-orb-wrap">
+          <div class="client-assistant-orb" aria-hidden="true"></div>
+          <button id="clientAssistantInterrupt" type="button" class="client-assistant-interrupt">
+            Parler pour interrompre
+          </button>
+        </div>
+
+        <div class="client-assistant-presence">
+          <span class="online-dot" aria-hidden="true"></span>
+          <span id="clientAssistantStatus">En ligne</span>
+        </div>
+
+        <div id="clientAssistantMessages" class="client-assistant-messages" aria-live="polite"></div>
+
+        <div class="client-assistant-prompts">
+          <button type="button" data-client-assistant-prompt="Quel est mon solde disponible ?">
+            Solde
+          </button>
+          <button type="button" data-client-assistant-prompt="J'ai une question sur ma carte.">
+            Carte
+          </button>
+          <button type="button" data-client-assistant-prompt="Je veux préparer un virement.">
+            Virement
+          </button>
+        </div>
+      </div>
+
+      <form class="client-assistant-composer">
+        <input
+          id="clientAssistantInput"
+          type="text"
+          placeholder="Envoyer un message"
+          autocomplete="off"
+        />
+        <button id="clientAssistantMic" type="button" aria-label="Activer l'écoute vocale">
+          <span class="symbol-icon">mic</span>
+        </button>
+        <button id="clientAssistantMute" type="button" aria-label="Interrompre Sophie">
+          <span class="symbol-icon">voice_over_off</span>
+        </button>
+        <button id="clientAssistantSend" type="submit" aria-label="Envoyer" disabled>
+          <span class="symbol-icon">send</span>
+        </button>
+      </form>
+    </div>
+  </section>
+
   <footer class="site-footer">
     <div class="container footer-grid">
       <div class="footer-brand">
@@ -190,6 +286,7 @@
   </footer>
 
   <script src="lib/branding.js?v=20260424-3"></script>
-  <script src="app.js?v=20260427-3"></script>
+  <script src="app.js?v=20260504-1"></script>
+  <script src="client-assistant.js?v=20260504-1"></script>
 </body>
 </html>
