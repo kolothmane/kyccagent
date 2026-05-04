@@ -6,6 +6,7 @@ const { getAccountBySessionToken } = require("../lib/account-store");
 
 const MODEL = "gpt-5.4";
 const TRANSCRIPTION_MODEL = "gpt-4o-mini-transcribe";
+const TRANSCRIPTION_FALLBACK_MODEL = "whisper-1";
 const MAX_HISTORY = 16;
 const MAX_AUDIO_BYTES = 7 * 1024 * 1024;
 const PRODUCT_NAME = "Bay4Bank";
@@ -80,6 +81,40 @@ function extensionForMimeType(mimeType) {
   if (mimeType === "audio/ogg") return "ogg";
   if (mimeType === "audio/wav") return "wav";
   return "webm";
+}
+
+async function transcribeAudioBuffer(buffer, mimeType, language) {
+  const client = getClient();
+  const extension = extensionForMimeType(mimeType);
+  const attempts = [TRANSCRIPTION_MODEL, TRANSCRIPTION_FALLBACK_MODEL];
+  let lastError = null;
+
+  for (const model of attempts) {
+    try {
+      const file = await toFile(buffer, "bay4bank-voice." + extension, { type: mimeType });
+      const transcription = await client.audio.transcriptions.create({
+        file,
+        model,
+        language,
+        prompt:
+          "The speaker is a Bay4Bank banking client talking to Sophie, a virtual banking assistant. Transcribe the request clearly.",
+      });
+      const text = cleanText(transcription && transcription.text);
+
+      if (text) {
+        return { text, model };
+      }
+    } catch (error) {
+      lastError = error;
+      console.error("[client-chat] transcription attempt failed:", model, error.message);
+    }
+  }
+
+  if (lastError) {
+    throw lastError;
+  }
+
+  return { text: "", model: "" };
 }
 
 function getFullName(account) {
@@ -280,21 +315,18 @@ module.exports = async (req, res) => {
       }
 
       const safeMimeType = sanitizeMimeType(mimeType);
-      const file = await toFile(
-        buffer,
-        "bay4bank-voice." + extensionForMimeType(safeMimeType),
-        { type: safeMimeType },
-      );
+      const transcription = await transcribeAudioBuffer(buffer, safeMimeType, selectedLanguage);
 
-      const client = getClient();
-      const transcription = await client.audio.transcriptions.create({
-        file,
-        model: TRANSCRIPTION_MODEL,
-        language: selectedLanguage,
-      });
+      if (!transcription.text) {
+        return res.status(422).json({
+          error:
+            "Je n'ai pas entendu de voix claire. Cliquez sur le micro, parlez deux à trois secondes, puis cliquez à nouveau pour envoyer.",
+        });
+      }
 
       return res.status(200).json({
-        text: cleanText(transcription && transcription.text),
+        text: transcription.text,
+        model: transcription.model,
       });
     }
 

@@ -2,7 +2,7 @@
 
 const CLIENT_ASSISTANT_AUTH_KEY = "baybankAuthToken";
 const CLIENT_ASSISTANT_TIMEOUT_MS = 14000;
-const CLIENT_ASSISTANT_RECORDING_MAX_MS = 9000;
+const CLIENT_ASSISTANT_RECORDING_MAX_MS = 12000;
 const CLIENT_ASSISTANT_MIN_AUDIO_BYTES = 700;
 
 const assistantLauncher = document.getElementById("clientAssistantLauncher");
@@ -35,6 +35,7 @@ let clientAssistantMediaStream = null;
 let clientAssistantAudioChunks = [];
 let clientAssistantRecordingTimer = null;
 let clientAssistantDiscardRecording = false;
+let clientAssistantHasVoiceHint = false;
 
 function clientAssistantToken() {
   return String(localStorage.getItem(CLIENT_ASSISTANT_AUTH_KEY) || "").trim();
@@ -65,6 +66,14 @@ function clientAssistantName(account) {
     .filter(Boolean)
     .join(" ")
     .trim();
+}
+
+function clientAssistantGreeting(account) {
+  const name = clientAssistantName(account);
+  if (name) {
+    return "Bonjour " + name + ", en quoi puis-je vous aider aujourd'hui ?";
+  }
+  return "Bonjour, en quoi puis-je vous aider aujourd'hui ?";
 }
 
 function setClientAssistantVisibility(visible) {
@@ -240,7 +249,8 @@ function welcomeClientAssistant() {
 
   appendClientAssistantMessage(
     "assistant",
-    "Bonjour, je suis Sophie. Je peux vous aider avec vos demandes bancaires simples, vos cartes, vos virements et l'orientation vers un conseiller.",
+    clientAssistantGreeting(clientAssistantAccount) +
+      " Je peux vous aider avec vos demandes bancaires simples, vos cartes, vos virements et l'orientation vers un conseiller.",
   );
 }
 
@@ -422,7 +432,7 @@ async function transcribeClientAssistantRecording(blob) {
       appendClientAssistantMessage(
         "assistant",
         payload.error ||
-          "Je n'ai pas réussi à transcrire l'audio. Vous pouvez réessayer ou écrire votre demande.",
+          "Je n'ai pas entendu de voix claire. Cliquez sur le micro, parlez deux à trois secondes, puis cliquez à nouveau pour envoyer.",
       );
       return;
     }
@@ -464,7 +474,13 @@ async function startClientAssistantListening() {
     openClientAssistant();
     clientAssistantAudioChunks = [];
     clientAssistantDiscardRecording = false;
-    clientAssistantMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    clientAssistantMediaStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+      },
+    });
 
     const mimeType = getClientAssistantAudioMimeType();
     clientAssistantMediaRecorder = new MediaRecorder(
@@ -491,9 +507,17 @@ async function startClientAssistantListening() {
       if (!shouldDiscard) transcribeClientAssistantRecording(blob);
     });
 
-    clientAssistantMediaRecorder.start();
+    clientAssistantMediaRecorder.start(250);
     clientAssistantListening = true;
     syncClientAssistantShell();
+
+    if (!clientAssistantHasVoiceHint) {
+      clientAssistantHasVoiceHint = true;
+      appendClientAssistantMessage(
+        "assistant",
+        "Je vous écoute. Parlez maintenant, puis cliquez à nouveau sur le micro pour envoyer.",
+      );
+    }
 
     clientAssistantRecordingTimer = window.setTimeout(function() {
       stopClientAssistantListening(false);
@@ -526,6 +550,13 @@ function stopClientAssistantListening(discardRecording) {
     clientAssistantMediaRecorder.state &&
     clientAssistantMediaRecorder.state !== "inactive"
   ) {
+    if (clientAssistantMediaRecorder.requestData) {
+      try {
+        clientAssistantMediaRecorder.requestData();
+      } catch (error) {
+        console.warn("Client microphone flush skipped:", error);
+      }
+    }
     clientAssistantMediaRecorder.stop();
   } else {
     cleanupClientAssistantMedia();
