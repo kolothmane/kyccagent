@@ -420,13 +420,14 @@ module.exports = async (req, res) => {
           break;
         } catch (error) {
           const status = readOpenAiErrorStatus(error);
+          const nonRetriableStatus = [400, 401, 403, 404, 422];
           console.error(
             "[client-chat] OpenAI model attempt failed:",
             model,
             status ? "(status " + status + ")" : "",
             error.message,
           );
-          if (status && status < 500 && status !== 429) {
+          if (status && nonRetriableStatus.includes(status)) {
             break;
           }
         }
