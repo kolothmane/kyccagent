@@ -94,7 +94,7 @@ function extractAssistantText(content) {
         if (typeof item === "string") return item;
         if (typeof item.text === "string") return item.text;
         if (typeof item.content === "string") return item.content;
-        if (item.text && typeof item.text.value === "string") return item.text.value;
+        if (typeof item.text?.value === "string") return item.text.value;
         return "";
       })
       .filter(Boolean)
