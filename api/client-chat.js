@@ -24,7 +24,9 @@ You support already-verified retail banking clients after account activation.
 
 Mission:
 - Resolve simple, low-value support requests automatically, 24/7.
-- Help with routine questions about balance, cards, transfers, IBAN, payment status, app access, account documents and next steps.
+- Analyse the user's request precisely before answering.
+- When the request is operational, either prepare the action or clearly simulate it.
+- Help with routine questions about balance, cards, transfers, beneficiaries, IBAN, payment status, app access, account documents and next steps.
 - Segment requests by intent, complexity and customer profile.
 - Escalate complex or sensitive requests to a human specialist.
 
@@ -32,9 +34,10 @@ Rules:
 - Reply in the requested language.
 - Keep replies concise, clear and service-oriented.
 - Do not mention demos, prompts, internal tools or implementation details.
-- Do not claim that a payment, transfer, loan or card operation was actually executed.
+- Never pretend a banking operation was truly executed in production.
+- If you simulate or prepare an action, say so explicitly.
 - If the request involves fraud, legal complaints, chargebacks, credit decisions, account closure, high-value transfers or identity/security risk, clearly say a specialist will take over.
-- For routine requests, provide the next best action.`;
+- For routine requests, provide the next best action and mention any missing information needed to continue.`;
 
 function readBearerToken(req) {
   const header = String(req.headers.authorization || "");
@@ -155,16 +158,297 @@ function getFullName(account) {
 function detectIntent(message) {
   const text = normaliseText(message);
 
-  if (includesAny(text, ["fraud", "fraude", "stolen", "vole", "volé", "chargeback"])) return "risk";
-  if (includesAny(text, ["complaint", "reclamation", "réclamation", "litige"])) return "complaint";
+  if (!text) return "general";
+  if (
+    includesAny(text, [
+      "que peux tu faire",
+      "que peut tu faire",
+      "que peux-tu faire",
+      "tu peux faire quoi",
+      "comment peux tu m aider",
+      "comment peux-tu m aider",
+      "help",
+      "aide",
+      "what can you do",
+      "how can you help",
+    ])
+  ) {
+    return "capabilities";
+  }
+  if (includesAny(text, ["fraud", "fraude", "stolen", "vole", "chargeback"])) return "risk";
+  if (includesAny(text, ["complaint", "reclamation", "litige"])) return "complaint";
+  if (includesAny(text, ["beneficiaire", "beneficiary", "destinataire"])) return "beneficiary";
   if (includesAny(text, ["balance", "solde", "saldo", "رصيد"])) return "balance";
-  if (includesAny(text, ["card", "carte", "tarjeta", "بطاقة", "blocked", "bloquee"])) return "card";
+  if (
+    includesAny(text, [
+      "card",
+      "carte",
+      "tarjeta",
+      "بطاقة",
+      "blocked",
+      "bloquee",
+      "plafond",
+      "paiement en ligne",
+      "online payment",
+      "opposition",
+      "debloquer",
+      "debloquer",
+    ])
+  ) {
+    return "card";
+  }
   if (includesAny(text, ["transfer", "virement", "virment", "transferencia", "تحويل"])) return "transfer";
   if (includesAny(text, ["iban", "rib", "account number", "numero de compte"])) return "iban";
-  if (includesAny(text, ["loan", "credit", "pret", "prêt", "credito", "قرض"])) return "loan";
-  if (includesAny(text, ["saving", "epargne", "épargne", "ahorro"])) return "savings";
+  if (includesAny(text, ["document", "releve", "statement", "attestation", "justificatif"])) return "document";
+  if (includesAny(text, ["conseiller", "advisor", "adviser", "specialiste", "support humain"])) return "advisor";
+  if (includesAny(text, ["loan", "credit", "pret", "credito", "قرض"])) return "loan";
+  if (includesAny(text, ["saving", "epargne", "ahorro"])) return "savings";
   if (includesAny(text, ["password", "mot de passe", "connexion", "login", "access"])) return "access";
   return "general";
+}
+
+function getLastUserMessage(history) {
+  if (!Array.isArray(history)) return "";
+
+  for (let index = history.length - 1; index >= 0; index -= 1) {
+    const entry = history[index];
+    if (entry && entry.role === "user" && typeof entry.content === "string") {
+      return entry.content;
+    }
+  }
+
+  return "";
+}
+
+function resolveIntent(message, history) {
+  const currentIntent = detectIntent(message);
+  if (currentIntent !== "general") return currentIntent;
+
+  const previousUserMessage = getLastUserMessage(history);
+  const previousIntent = detectIntent(previousUserMessage);
+  const hasStructuredInput = Boolean(extractIban(message) || extractAmount(message));
+
+  if (hasStructuredInput && ["beneficiary", "transfer", "card", "document"].includes(previousIntent)) {
+    return previousIntent;
+  }
+
+  return currentIntent;
+}
+
+function extractIban(value) {
+  const compact = String(value || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const match = compact.match(/[A-Z]{2}\d{2}[A-Z0-9]{11,30}/);
+  return match ? match[0] : "";
+}
+
+function formatIban(value) {
+  const compact = extractIban(value);
+  if (!compact) return "";
+  return compact.replace(/(.{4})(?=.)/g, "$1 ").trim();
+}
+
+function extractAmount(value) {
+  const text = cleanText(value);
+  const directMatch = text.match(/(\d+(?:[.,]\d{1,2})?)\s*(€|eur|euros?)/i);
+  const contextualMatch = text.match(/(?:de|pour|montant|amount|transfer of)\s+(\d+(?:[.,]\d{1,2})?)/i);
+  const match = directMatch || contextualMatch;
+
+  if (!match) return null;
+
+  const amount = Number(String(match[1] || "").replace(",", "."));
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+  return amount;
+}
+
+function formatAmount(amount, language) {
+  const locale = language === "en" ? "en-US" : language === "es" ? "es-ES" : "fr-FR";
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 2,
+  }).format(Number(amount || 0));
+}
+
+function sanitiseBeneficiaryName(value) {
+  return cleanText(value)
+    .replace(/^(ajouter|rajouter|create|add|simuler|prepare|préparer|beneficiaire|bénéficiaire|beneficiary|pour|to|au nom de|nom)\s+/i, "")
+    .replace(/\b(?:iban|rib|virement|transfer|montant|amount|eur|euros?|€)\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+function isLikelyBeneficiaryName(value) {
+  const text = normaliseText(value);
+  return Boolean(text) && !includesAny(text, [
+    "je veux",
+    "virement",
+    "transfer",
+    "montant",
+    "solde",
+    "carte",
+    "ajouter",
+    "rajouter",
+    "prepare",
+    "simule",
+  ]);
+}
+
+function extractBeneficiaryName(value) {
+  const raw = cleanText(value);
+  const withoutIban = raw
+    .replace(formatIban(raw), " ")
+    .replace(extractIban(raw), " ")
+    .replace(/(\d+(?:[.,]\d{1,2})?)\s*(€|eur|euros?)/gi, " ");
+  const transferMatch = withoutIban.match(
+    /(?:vers|to|au nom de|beneficiaire|bénéficiaire|beneficiary|destinataire|a|à)\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ' -]{2,60})$/i,
+  );
+
+  if (transferMatch && transferMatch[1]) {
+    const candidate = sanitiseBeneficiaryName(transferMatch[1]);
+    if (isLikelyBeneficiaryName(candidate)) return candidate;
+  }
+
+  const namedMatch = withoutIban.match(
+    /(?:beneficiaire|bénéficiaire|beneficiary|pour|to|au nom de|nom)\s*:?\s*([A-Za-zÀ-ÿ' -]{3,60})/i,
+  );
+
+  if (namedMatch && namedMatch[1]) {
+    const candidate = sanitiseBeneficiaryName(namedMatch[1]);
+    if (isLikelyBeneficiaryName(candidate)) return candidate;
+  }
+
+  const leadingMatch = withoutIban.match(/([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ' -]{2,60})/);
+  if (!leadingMatch) return "";
+
+  const candidate = sanitiseBeneficiaryName(leadingMatch[1]);
+  return /[A-Za-zÀ-ÿ]{2,}/.test(candidate) && isLikelyBeneficiaryName(candidate) ? candidate : "";
+}
+
+function buildCapabilityReply(name, language) {
+  if (language === "en") {
+    return `Hello ${name}, I can analyse your request and either prepare or simulate common actions: show balance, share IBAN details, prepare a transfer, simulate adding a beneficiary, explain card settings, toggle online payments, locate account documents and route you to an advisor when needed.`;
+  }
+  if (language === "es") {
+    return `Hola ${name}, puedo analizar tu solicitud y preparar o simular acciones habituales: mostrar saldo, compartir el IBAN, preparar una transferencia, simular el alta de un beneficiario, explicar opciones de la tarjeta, activar o desactivar pagos en línea, encontrar documentos y derivarte a un asesor si hace falta.`;
+  }
+  if (language === "ar") {
+    return `مرحبا ${name}، أستطيع تحليل طلبك وتجهيز أو محاكاة الإجراءات المعتادة: عرض الرصيد، مشاركة IBAN، تجهيز تحويل، محاكاة إضافة مستفيد، شرح إعدادات البطاقة، تفعيل أو إيقاف الدفع عبر الإنترنت، العثور على مستندات الحساب وتحويلك إلى مستشار عند الحاجة.`;
+  }
+  return `Bonjour ${name}, je peux analyser votre demande et préparer ou simuler des actions courantes : afficher votre solde, partager l'IBAN, préparer un virement, simuler l'ajout d'un bénéficiaire, expliquer les réglages carte, activer ou désactiver le paiement en ligne, retrouver des documents de compte et vous orienter vers un conseiller si nécessaire.`;
+}
+
+function buildDocumentReply(message, language) {
+  const text = normaliseText(message);
+
+  if (includesAny(text, ["rib", "iban"])) {
+    if (language === "en") return "I can help you retrieve your IBAN/RIB from the current account card in this client area.";
+    if (language === "es") return "Puedo ayudarte a recuperar tu IBAN/RIB desde la tarjeta de cuenta corriente de este espacio cliente.";
+    if (language === "ar") return "أستطيع مساعدتك في العثور على IBAN أو RIB من بطاقة الحساب الجاري في مساحة العميل.";
+    return "Je peux vous aider à retrouver votre IBAN ou votre RIB depuis la carte de compte courant dans cet espace client.";
+  }
+
+  if (includesAny(text, ["releve", "statement"])) {
+    if (language === "en") return "For an account statement, tell me the period you need and I will guide you to the right document.";
+    if (language === "es") return "Para un extracto, indícame el período que necesitas y te guiaré al documento adecuado.";
+    if (language === "ar") return "بالنسبة لكشف الحساب، أخبرني بالفترة المطلوبة وسأوجهك إلى المستند المناسب.";
+    return "Pour un relevé, indiquez-moi la période souhaitée et je vous guiderai vers le bon document.";
+  }
+
+  if (language === "en") return "I can help you find an IBAN/RIB, statement or account certificate. Tell me which document you need.";
+  if (language === "es") return "Puedo ayudarte a encontrar un IBAN/RIB, extracto o attestation de compte. Dime qué documento necesitas.";
+  if (language === "ar") return "أستطيع مساعدتك في العثور على IBAN أو RIB أو كشف حساب أو شهادة حساب. أخبرني بالمستند المطلوب.";
+  return "Je peux vous aider à retrouver un RIB, un relevé ou une attestation de compte. Dites-moi simplement lequel il vous faut.";
+}
+
+function buildBeneficiaryReply(message, language) {
+  const beneficiaryName = extractBeneficiaryName(message);
+  const iban = formatIban(message);
+
+  if (beneficiaryName && iban) {
+    if (language === "en") {
+      return `Done. I am simulating the addition of beneficiary ${beneficiaryName} with IBAN ${iban}. The beneficiary is now prepared for a future transfer in your Bay4Bank space.`;
+    }
+    if (language === "es") {
+      return `Perfecto. Estoy simulando el alta del beneficiario ${beneficiaryName} con el IBAN ${iban}. El beneficiario queda preparado para una próxima transferencia en tu espacio Bay4Bank.`;
+    }
+    if (language === "ar") {
+      return `تم. أقوم بمحاكاة إضافة المستفيد ${beneficiaryName} مع رقم IBAN ${iban}. المستفيد أصبح جاهزا لتحويل لاحق داخل مساحة Bay4Bank الخاصة بك.`;
+    }
+    return `C'est noté. Je simule l'ajout du bénéficiaire ${beneficiaryName} avec l'IBAN ${iban}. Le bénéficiaire est maintenant prêt pour un prochain virement dans votre espace Bay4Bank.`;
+  }
+
+  if (language === "en") {
+    return "I can prepare a beneficiary addition. Send me at least the full name and IBAN, and I will simulate the registration for your next transfer.";
+  }
+  if (language === "es") {
+    return "Puedo preparar el alta de un beneficiario. Envíame al menos el nombre completo y el IBAN y simularé el registro para tu próxima transferencia.";
+  }
+  if (language === "ar") {
+    return "أستطيع تجهيز إضافة مستفيد. أرسل لي على الأقل الاسم الكامل ورقم IBAN وسأحاكي التسجيل من أجل التحويل القادم.";
+  }
+  return "Je peux préparer l'ajout d'un bénéficiaire. Envoyez-moi au minimum son nom complet et son IBAN, et je simulerai l'enregistrement pour votre prochain virement.";
+}
+
+function buildTransferReply(message, language) {
+  const amount = extractAmount(message);
+  const beneficiaryName = extractBeneficiaryName(message);
+
+  if (amount && beneficiaryName) {
+    const amountLabel = formatAmount(amount, language);
+    if (language === "en") {
+      return `I am preparing a transfer of ${amountLabel} to ${beneficiaryName}. Simulation ready: the transfer remains pending final confirmation.`;
+    }
+    if (language === "es") {
+      return `Estoy preparando una transferencia de ${amountLabel} para ${beneficiaryName}. Simulación lista: la operación queda pendiente de confirmación final.`;
+    }
+    if (language === "ar") {
+      return `أجهز تحويلا بقيمة ${amountLabel} إلى ${beneficiaryName}. المحاكاة جاهزة والعملية ما زالت بانتظار التأكيد النهائي.`;
+    }
+    return `Je prépare un virement de ${amountLabel} vers ${beneficiaryName}. Simulation prête : l'opération reste en attente de votre confirmation finale.`;
+  }
+
+  if (language === "en") return "I can prepare a transfer simulation. Tell me the beneficiary and the amount to simulate, and I will summarise the operation before confirmation.";
+  if (language === "es") return "Puedo preparar una simulación de transferencia. Indícame el beneficiario y el importe, y te resumiré la operación antes de confirmar.";
+  if (language === "ar") return "أستطيع تجهيز محاكاة تحويل. أخبرني باسم المستفيد والمبلغ وسألخص لك العملية قبل التأكيد.";
+  return "Je peux préparer une simulation de virement. Indiquez-moi le bénéficiaire et le montant à simuler, et je vous résumerai l'opération avant confirmation.";
+}
+
+function buildCardReply(message, language, cardLast4, monthlyLimit) {
+  const text = normaliseText(message);
+
+  if (includesAny(text, ["opposition", "bloquer", "block", "freeze"])) {
+    if (language === "en") return `I am simulating a temporary block on your card ending in ${cardLast4}. A specialist can take over if this is linked to fraud.`;
+    if (language === "es") return `Estoy simulando un bloqueo temporal de tu tarjeta terminada en ${cardLast4}. Un asesor puede intervenir si está relacionado con fraude.`;
+    if (language === "ar") return `أقوم بمحاكاة إيقاف مؤقت لبطاقتك المنتهية بـ ${cardLast4}. يمكن لمستشار المتابعة إذا كان الأمر مرتبطا باحتيال.`;
+    return `Je simule une mise en opposition temporaire de votre carte terminée par ${cardLast4}. Un conseiller peut prendre le relais si cela concerne une fraude.`;
+  }
+
+  if (includesAny(text, ["debloquer", "debloquer", "reactiver", "réactiver", "unblock"])) {
+    if (language === "en") return `I am simulating the reactivation of your card ending in ${cardLast4}. Check your payments again in a few moments.`;
+    if (language === "es") return `Estoy simulando la reactivación de tu tarjeta terminada en ${cardLast4}. Vuelve a comprobar tus pagos en unos instantes.`;
+    if (language === "ar") return `أقوم بمحاكاة إعادة تفعيل بطاقتك المنتهية بـ ${cardLast4}. أعد التحقق من المدفوعات بعد لحظات.`;
+    return `Je simule la réactivation de votre carte terminée par ${cardLast4}. Vous pouvez revérifier vos paiements d'ici quelques instants.`;
+  }
+
+  if (includesAny(text, ["paiement en ligne", "online payment", "desactiver", "désactiver", "activer", "enable", "disable"])) {
+    const enable = includesAny(text, ["activer", "enable", "reactiver", "réactiver"]);
+    if (language === "en") return enable ? `I am simulating online payments being enabled for your card ending in ${cardLast4}.` : `I am simulating online payments being disabled for your card ending in ${cardLast4}.`;
+    if (language === "es") return enable ? `Estoy simulando la activación de los pagos en línea para tu tarjeta terminada en ${cardLast4}.` : `Estoy simulando la desactivación de los pagos en línea para tu tarjeta terminada en ${cardLast4}.`;
+    if (language === "ar") return enable ? `أقوم بمحاكاة تفعيل الدفع عبر الإنترنت لبطاقتك المنتهية بـ ${cardLast4}.` : `أقوم بمحاكاة إيقاف الدفع عبر الإنترنت لبطاقتك المنتهية بـ ${cardLast4}.`;
+    return enable ? `Je simule l'activation du paiement en ligne pour votre carte terminée par ${cardLast4}.` : `Je simule la désactivation du paiement en ligne pour votre carte terminée par ${cardLast4}.`;
+  }
+
+  if (includesAny(text, ["plafond", "limit"])) {
+    if (language === "en") return `Your current monthly card limit is ${monthlyLimit}. I can also simulate a temporary block or an online payment change.`;
+    if (language === "es") return `Tu límite mensual actuel de tarjeta es ${monthlyLimit}. También puedo simular un bloqueo temporal o un cambio en pagos en línea.`;
+    if (language === "ar") return `الحد الشهري الحالي لبطاقتك هو ${monthlyLimit}. كما أستطيع محاكاة إيقاف مؤقت أو تغيير الدفع عبر الإنترنت.`;
+    return `Votre plafond mensuel actuel sur la carte est de ${monthlyLimit}. Je peux aussi simuler un blocage temporaire ou un changement sur le paiement en ligne.`;
+  }
+
+  if (language === "en") return `Your Bay4Bank card ending in ${cardLast4} is available in your client area. I can explain limits, online payments and card actions.`;
+  if (language === "es") return `Tu tarjeta Bay4Bank terminada en ${cardLast4} está disponible en tu espacio cliente. Puedo explicar límites, pagos en línea y acciones sobre la tarjeta.`;
+  if (language === "ar") return `بطاقة Bay4Bank المنتهية بـ ${cardLast4} ظاهرة في مساحة العميل. أستطيع شرح الحدود والإعدادات وإجراءات البطاقة.`;
+  return `Votre carte Bay4Bank terminée par ${cardLast4} est visible dans votre espace client. Je peux expliquer les plafonds, le paiement en ligne et les actions carte.`;
 }
 
 function isComplexRequest(intent, message) {
@@ -177,17 +461,14 @@ function isComplexRequest(intent, message) {
       "close account",
       "fermer mon compte",
       "cloturer",
-      "clôturer",
       "lawsuit",
       "legal",
       "juridique",
       "mortgage",
       "pret immobilier",
-      "prêt immobilier",
       "chargeback",
       "unauthorized",
       "non autorise",
-      "non autorisé",
       "10000",
       "10 000",
       "50000",
@@ -196,13 +477,14 @@ function isComplexRequest(intent, message) {
   );
 }
 
-function buildFallbackReply(message, account, language) {
-  const intent = detectIntent(message);
+function buildFallbackReply(message, history, account, language) {
+  const intent = resolveIntent(message, history);
   const complex = isComplexRequest(intent, message);
   const name = getFullName(account) || "client";
   const financials = (account && account.financials) || {};
   const balance = formatMoney(financials.availableBalanceCents || 42075, language);
   const cardLast4 = cleanText(financials.cardLast4) || "4821";
+  const monthlyLimit = formatMoney(financials.monthlyLimitCents || 150000, language);
 
   if (complex) {
     if (language === "en") {
@@ -210,6 +492,7 @@ function buildFallbackReply(message, account, language) {
         intent,
         complexity: "complex",
         escalate: true,
+        useModel: false,
         reply:
           "This request needs a specialist review. I have prepared the context so a Bay4Bank advisor can take over with priority.",
       };
@@ -219,6 +502,7 @@ function buildFallbackReply(message, account, language) {
         intent,
         complexity: "complex",
         escalate: true,
+        useModel: false,
         reply:
           "Esta solicitud requiere revisión especializada. He preparado el contexto para que un asesor Bay4Bank la atienda con prioridad.",
       };
@@ -228,6 +512,7 @@ function buildFallbackReply(message, account, language) {
         intent,
         complexity: "complex",
         escalate: true,
+        useModel: false,
         reply:
           "هذا الطلب يحتاج إلى مراجعة من مختص. جهزت السياق ليتمكن مستشار Bay4Bank من المتابعة بأولوية.",
       };
@@ -236,6 +521,7 @@ function buildFallbackReply(message, account, language) {
       intent,
       complexity: "complex",
       escalate: true,
+      useModel: false,
       reply:
         "Cette demande nécessite une revue spécialisée. Je prépare le contexte pour qu'un conseiller Bay4Bank prenne le relais en priorité.",
     };
@@ -243,73 +529,109 @@ function buildFallbackReply(message, account, language) {
 
   if (language === "en") {
     const replies = {
+      capabilities: buildCapabilityReply(name, language),
+      beneficiary: buildBeneficiaryReply(message, language),
       balance: `Your available balance is ${balance}. You can also review recent operations from this client area.`,
-      card: `Your Bay4Bank card ending in ${cardLast4} is visible in your client area. I can help with limits, online payments or card guidance.`,
-      transfer:
-        "For a transfer, check the beneficiary, amount and execution date before confirming. For large or unusual transfers, I will route you to an advisor.",
+      card: buildCardReply(message, language, cardLast4, monthlyLimit),
+      transfer: buildTransferReply(message, language),
       iban: "Your IBAN is displayed in the current account card of this client area.",
+      document: buildDocumentReply(message, language),
+      advisor: "I can route you to a Bay4Bank advisor and send the context of your request.",
       access:
         "For access issues, you can reset credentials through Bay4Bank support. If you suspect account takeover, I will escalate immediately.",
       loan:
         "For loan questions, I can explain the usual documents and next steps. A credit decision is handled by a specialist.",
       savings:
         "For savings, I can explain available options and help you prepare a request for an advisor.",
-      general: `Hello ${name}, I can help with routine banking questions, cards, transfers, account documents and support routing.`,
+      general: buildCapabilityReply(name, language),
     };
-    return { intent, complexity: "simple", escalate: false, reply: replies[intent] || replies.general };
+    return {
+      intent,
+      complexity: "simple",
+      escalate: false,
+      useModel: intent === "general",
+      reply: replies[intent] || replies.general,
+    };
   }
 
   if (language === "es") {
     const replies = {
+      capabilities: buildCapabilityReply(name, language),
+      beneficiary: buildBeneficiaryReply(message, language),
       balance: `Tu saldo disponible es ${balance}. También puedes revisar las operaciones recientes desde este espacio cliente.`,
-      card: `Tu tarjeta Bay4Bank terminada en ${cardLast4} está visible en tu espacio cliente. Puedo ayudarte con límites o pagos en línea.`,
-      transfer:
-        "Para una transferencia, revisa beneficiario, importe y fecha antes de confirmar. Si es una operación sensible, la pasaré a un asesor.",
+      card: buildCardReply(message, language, cardLast4, monthlyLimit),
+      transfer: buildTransferReply(message, language),
       iban: "Tu IBAN aparece en la tarjeta de cuenta corriente de este espacio cliente.",
+      document: buildDocumentReply(message, language),
+      advisor: "Puedo derivarte a un asesor Bay4Bank y enviar el contexto de tu solicitud.",
       access:
         "Para problemas de acceso, puedes restablecer tus credenciales con soporte Bay4Bank. Si hay riesgo de fraude, escalo el caso.",
       loan:
         "Para préstamos, puedo explicar documentos y próximos pasos. La decisión de crédito la gestiona un especialista.",
       savings:
         "Para ahorro, puedo explicar las opciones y preparar una solicitud para un asesor.",
-      general: `Hola ${name}, puedo ayudarte con consultas bancarias simples, tarjetas, transferencias, documentos y orientación.`,
+      general: buildCapabilityReply(name, language),
     };
-    return { intent, complexity: "simple", escalate: false, reply: replies[intent] || replies.general };
+    return {
+      intent,
+      complexity: "simple",
+      escalate: false,
+      useModel: intent === "general",
+      reply: replies[intent] || replies.general,
+    };
   }
 
   if (language === "ar") {
     const replies = {
+      capabilities: buildCapabilityReply(name, language),
+      beneficiary: buildBeneficiaryReply(message, language),
       balance: `رصيدك المتاح هو ${balance}. يمكنك أيضا مراجعة آخر العمليات من مساحة العميل.`,
-      card: `بطاقتك Bay4Bank المنتهية بـ ${cardLast4} ظاهرة في مساحة العميل. أستطيع مساعدتك في الحدود أو الدفع عبر الإنترنت.`,
-      transfer:
-        "للتحويل، تحقق من المستفيد والمبلغ وتاريخ التنفيذ قبل التأكيد. للعمليات الحساسة سأحولك إلى مستشار.",
+      card: buildCardReply(message, language, cardLast4, monthlyLimit),
+      transfer: buildTransferReply(message, language),
       iban: "رقم IBAN ظاهر في بطاقة الحساب الجاري داخل مساحة العميل.",
+      document: buildDocumentReply(message, language),
+      advisor: "أستطيع تحويلك إلى مستشار Bay4Bank مع إرسال سياق الطلب.",
       access:
         "لمشاكل الدخول، يمكن إعادة ضبط بيانات الوصول عبر دعم Bay4Bank. إذا كان هناك خطر أمني سأصعد الطلب.",
       loan:
         "بالنسبة للقروض، أستطيع شرح الوثائق والخطوات التالية. قرار الائتمان يتولاه مختص.",
       savings: "بالنسبة للادخار، أستطيع شرح الخيارات وتحضير طلب لمستشار.",
-      general: `مرحبا ${name}، أستطيع مساعدتك في الأسئلة البنكية البسيطة والبطاقات والتحويلات والوثائق.`,
+      general: buildCapabilityReply(name, language),
     };
-    return { intent, complexity: "simple", escalate: false, reply: replies[intent] || replies.general };
+    return {
+      intent,
+      complexity: "simple",
+      escalate: false,
+      useModel: intent === "general",
+      reply: replies[intent] || replies.general,
+    };
   }
 
   const replies = {
+    capabilities: buildCapabilityReply(name, language),
+    beneficiary: buildBeneficiaryReply(message, language),
     balance: `Votre solde disponible est de ${balance}. Vous pouvez aussi consulter vos dernières opérations depuis cet espace client.`,
-    card: `Votre carte Bay4Bank terminée par ${cardLast4} est visible dans votre espace client. Je peux vous aider sur les plafonds, le paiement en ligne ou les démarches carte.`,
-    transfer:
-      "Pour un virement, vérifiez le bénéficiaire, le montant et la date d'exécution avant confirmation. Pour une opération sensible, je vous oriente vers un conseiller.",
+    card: buildCardReply(message, language, cardLast4, monthlyLimit),
+    transfer: buildTransferReply(message, language),
     iban: "Votre IBAN est affiché dans la carte de compte courant de cet espace client.",
+    document: buildDocumentReply(message, language),
+    advisor: "Je peux vous orienter vers un conseiller Bay4Bank en transmettant le contexte de votre demande.",
     access:
       "Pour un problème d'accès, vous pouvez réinitialiser vos identifiants avec le support Bay4Bank. En cas de risque sécurité, je fais remonter le dossier.",
     loan:
       "Pour un crédit, je peux expliquer les pièces et les prochaines étapes. La décision de financement est traitée par un spécialiste.",
     savings:
       "Pour l'épargne, je peux présenter les options et préparer une demande à transmettre à un conseiller.",
-    general: `Bonjour ${name}, je peux vous aider sur les demandes bancaires simples, les cartes, virements, documents de compte et l'orientation support.`,
+    general: buildCapabilityReply(name, language),
   };
 
-  return { intent, complexity: "simple", escalate: false, reply: replies[intent] || replies.general };
+  return {
+    intent,
+    complexity: "simple",
+    escalate: false,
+    useModel: intent === "general",
+    reply: replies[intent] || replies.general,
+  };
 }
 
 module.exports = async (req, res) => {
@@ -362,7 +684,6 @@ module.exports = async (req, res) => {
 
     if (!text) return res.status(400).json({ error: "message is required" });
 
-    const fallback = buildFallbackReply(text, account, selectedLanguage);
     const safeHistory = Array.isArray(history) ? history.slice(-MAX_HISTORY) : [];
     const cleanHistory = safeHistory
       .filter(
@@ -372,6 +693,7 @@ module.exports = async (req, res) => {
           typeof entry.content === "string",
       )
       .map((entry) => ({ role: entry.role, content: entry.content }));
+    const fallback = buildFallbackReply(text, cleanHistory, account, selectedLanguage);
 
     const profileLines = [
       `Client name: ${getFullName(account) || "not provided"}`,
@@ -397,6 +719,15 @@ module.exports = async (req, res) => {
       ...cleanHistory,
       { role: "user", content: text },
     ];
+
+    if (fallback.useModel === false) {
+      return res.status(200).json({
+        reply: fallback.reply,
+        intent: fallback.intent,
+        complexity: fallback.complexity,
+        escalate: fallback.escalate,
+      });
+    }
 
     try {
       const client = getClient();

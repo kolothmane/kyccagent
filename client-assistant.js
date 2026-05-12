@@ -196,9 +196,22 @@ function clientAssistantFallback(message) {
   const text = String(message || "").toLowerCase();
   const financials = (clientAssistantAccount && clientAssistantAccount.financials) || {};
   const balance = Number(financials.availableBalanceCents || 42075) / 100;
+  const monthlyLimit = Number(financials.monthlyLimitCents || 150000) / 100;
+  const cardLast4 = String(financials.cardLast4 || "4821").replace(/\D/g, "").slice(-4) || "4821";
   const balanceLabel = Number.isFinite(balance)
     ? new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(balance)
     : "visible dans votre espace client";
+  const monthlyLimitLabel = Number.isFinite(monthlyLimit)
+    ? new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(monthlyLimit)
+    : "visible dans votre espace client";
+
+  if (/que peux[- ]?tu faire|tu peux faire quoi|aide|help/.test(text)) {
+    return {
+      reply:
+        "Je peux analyser votre demande et préparer ou simuler des actions courantes : afficher le solde, donner l'IBAN, préparer un virement, simuler l'ajout d'un bénéficiaire, expliquer la carte, gérer le paiement en ligne et vous orienter vers un conseiller si nécessaire.",
+      escalate: false,
+    };
+  }
 
   if (/fraude|fraud|vol|vole|stolen|litige|reclamation|réclamation/.test(text)) {
     return {
@@ -215,10 +228,42 @@ function clientAssistantFallback(message) {
     };
   }
 
-  if (/carte|card|tarjeta/.test(text)) {
+  if (/beneficiaire|bénéficiaire|beneficiary/.test(text)) {
     return {
       reply:
-        "Je peux vous aider avec votre carte Bay4Bank, les plafonds, le paiement en ligne ou l'orientation vers un conseiller si la demande est sensible.",
+        "Je peux préparer l'ajout d'un bénéficiaire. Envoyez-moi son nom complet et son IBAN, et je simulerai l'enregistrement pour votre prochain virement.",
+      escalate: false,
+    };
+  }
+
+  if (/carte|card|tarjeta/.test(text)) {
+    if (/opposition|bloquer|block/.test(text)) {
+      return {
+        reply:
+          "Je simule une mise en opposition temporaire de votre carte Bay4Bank terminée par " +
+          cardLast4 +
+          ".",
+        escalate: false,
+      };
+    }
+    if (/paiement en ligne|activer|désactiver|desactiver/.test(text)) {
+      return {
+        reply:
+          "Je peux simuler un changement de paiement en ligne sur votre carte terminée par " +
+          cardLast4 +
+          ".",
+        escalate: false,
+      };
+    }
+    if (/plafond/.test(text)) {
+      return {
+        reply: "Votre plafond mensuel carte actuel est de " + monthlyLimitLabel + ".",
+        escalate: false,
+      };
+    }
+    return {
+      reply:
+        "Je peux vous aider avec votre carte Bay4Bank, les plafonds, le paiement en ligne, une opposition temporaire ou l'orientation vers un conseiller si la demande est sensible.",
       escalate: false,
     };
   }
@@ -226,14 +271,14 @@ function clientAssistantFallback(message) {
   if (/virement|transfer|transferencia|iban|rib/.test(text)) {
     return {
       reply:
-        "Pour les virements et l'IBAN, vérifiez les informations dans la carte de compte courant. Pour une opération inhabituelle, je peux vous orienter vers un conseiller.",
+        "Je peux préparer une simulation de virement. Donnez-moi le bénéficiaire et le montant, ou consultez l'IBAN depuis la carte de compte courant.",
       escalate: false,
     };
   }
 
   return {
     reply:
-      "Je peux vous aider sur les demandes simples : solde, carte, virement, IBAN, accès au compte et orientation vers un conseiller si nécessaire.",
+      "Je peux analyser votre demande et vous aider sur le solde, la carte, les virements, l'IBAN, les bénéficiaires, les documents de compte et l'orientation vers un conseiller si nécessaire.",
     escalate: false,
   };
 }
@@ -250,7 +295,7 @@ function welcomeClientAssistant() {
   appendClientAssistantMessage(
     "assistant",
     clientAssistantGreeting(clientAssistantAccount) +
-      " Je peux vous aider avec vos demandes bancaires simples, vos cartes, vos virements et l'orientation vers un conseiller.",
+      " Je peux analyser votre demande, préparer ou simuler un virement, un bénéficiaire, des actions carte et vous orienter vers un conseiller si nécessaire.",
   );
 }
 
