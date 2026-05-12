@@ -4,7 +4,7 @@ const { toFile } = require("openai");
 const { getClient } = require("../lib/openai-client");
 const { getAccountBySessionToken } = require("../lib/account-store");
 
-const MODEL = "gpt-5.4";
+const MODELS = ["gpt-5.4", "gpt-4.1-mini", "gpt-4o-mini"];
 const TRANSCRIPTION_MODEL = "gpt-4o-mini-transcribe";
 const TRANSCRIPTION_FALLBACK_MODEL = "whisper-1";
 const MAX_HISTORY = 16;
@@ -81,6 +81,25 @@ function extensionForMimeType(mimeType) {
   if (mimeType === "audio/ogg") return "ogg";
   if (mimeType === "audio/wav") return "wav";
   return "webm";
+}
+
+function extractAssistantText(content) {
+  if (typeof content === "string") return cleanText(content);
+  if (!Array.isArray(content)) return "";
+
+  return cleanText(
+    content
+      .map((item) => {
+        if (!item) return "";
+        if (typeof item === "string") return item;
+        if (typeof item.text === "string") return item.text;
+        if (typeof item.content === "string") return item.content;
+        if (item.text && typeof item.text.value === "string") return item.text.value;
+        return "";
+      })
+      .filter(Boolean)
+      .join(" "),
+  );
 }
 
 async function transcribeAudioBuffer(buffer, mimeType, language) {
@@ -372,17 +391,27 @@ module.exports = async (req, res) => {
 
     try {
       const client = getClient();
-      const response = await client.chat.completions.create({
-        model: MODEL,
-        max_tokens: 360,
-        temperature: 0.35,
-        messages,
-      });
+      let reply = "";
 
-      const reply =
-        response.choices[0] && response.choices[0].message
-          ? cleanText(response.choices[0].message.content)
-          : "";
+      for (const model of MODELS) {
+        try {
+          const response = await client.chat.completions.create({
+            model,
+            max_tokens: 360,
+            temperature: 0.35,
+            messages,
+          });
+
+          reply =
+            response.choices[0] && response.choices[0].message
+              ? extractAssistantText(response.choices[0].message.content)
+              : "";
+
+          if (reply) break;
+        } catch (error) {
+          console.error("[client-chat] OpenAI model attempt failed:", model, error.message);
+        }
+      }
 
       return res.status(200).json({
         reply: reply || fallback.reply,

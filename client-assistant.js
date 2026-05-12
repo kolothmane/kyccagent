@@ -1,7 +1,7 @@
 "use strict";
 
 const CLIENT_ASSISTANT_AUTH_KEY = "baybankAuthToken";
-const CLIENT_ASSISTANT_TIMEOUT_MS = 14000;
+const CLIENT_ASSISTANT_TIMEOUT_MS = 28000;
 const CLIENT_ASSISTANT_RECORDING_MAX_MS = 12000;
 const CLIENT_ASSISTANT_MIN_AUDIO_BYTES = 700;
 
@@ -285,7 +285,7 @@ function interruptClientAssistant() {
 
 async function sendClientAssistantMessage(message) {
   const text = String(message || "").trim();
-  if (!text || clientAssistantBusy) return;
+  if (!text || clientAssistantBusy || clientAssistantVoiceBusy) return;
 
   openClientAssistant();
   appendClientAssistantMessage("user", text);
