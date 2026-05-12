@@ -4,7 +4,7 @@ const { toFile } = require("openai");
 const { getClient } = require("../lib/openai-client");
 const { getAccountBySessionToken } = require("../lib/account-store");
 
-const MODEL = "gpt-5.4";
+const MODELS = ["gpt-5.4", "gpt-4.1-mini", "gpt-4o-mini"];
 const TRANSCRIPTION_MODEL = "gpt-4o-mini-transcribe";
 const TRANSCRIPTION_FALLBACK_MODEL = "whisper-1";
 const MAX_HISTORY = 16;
@@ -81,6 +81,34 @@ function extensionForMimeType(mimeType) {
   if (mimeType === "audio/ogg") return "ogg";
   if (mimeType === "audio/wav") return "wav";
   return "webm";
+}
+
+function extractAssistantText(content) {
+  if (typeof content === "string") return cleanText(content);
+  if (!Array.isArray(content)) return "";
+
+  return cleanText(
+    content
+      .map((item) => {
+        if (!item) return "";
+        if (typeof item === "string") return item;
+        if (typeof item.text === "string") return item.text;
+        if (typeof item.content === "string") return item.content;
+        if (typeof item.text?.value === "string") return item.text.value;
+        return "";
+      })
+      .filter(Boolean)
+      .join(" "),
+  );
+}
+
+function readOpenAiErrorStatus(error) {
+  return Number(
+    (error && error.status) ||
+      (error && error.response && error.response.status) ||
+      (error && error.cause && error.cause.status) ||
+      0,
+  );
 }
 
 async function transcribeAudioBuffer(buffer, mimeType, language) {
@@ -372,17 +400,42 @@ module.exports = async (req, res) => {
 
     try {
       const client = getClient();
-      const response = await client.chat.completions.create({
-        model: MODEL,
-        max_tokens: 360,
-        temperature: 0.35,
-        messages,
-      });
+      let reply = "";
+      let requestSucceeded = false;
 
-      const reply =
-        response.choices[0] && response.choices[0].message
-          ? cleanText(response.choices[0].message.content)
-          : "";
+      for (const model of MODELS) {
+        try {
+          const response = await client.chat.completions.create({
+            model,
+            max_tokens: 360,
+            temperature: 0.35,
+            messages,
+          });
+
+          reply =
+            response.choices[0] && response.choices[0].message
+              ? extractAssistantText(response.choices[0].message.content)
+              : "";
+          requestSucceeded = true;
+          break;
+        } catch (error) {
+          const status = readOpenAiErrorStatus(error);
+          const nonRetriableStatuses = [400, 401, 403, 404, 422];
+          console.error(
+            "[client-chat] OpenAI model attempt failed:",
+            model,
+            status ? "(status " + status + ")" : "",
+            error.message,
+          );
+          if (status && nonRetriableStatuses.includes(status)) {
+            break;
+          }
+        }
+      }
+
+      if (!requestSucceeded) {
+        throw new Error("All model attempts failed");
+      }
 
       return res.status(200).json({
         reply: reply || fallback.reply,
