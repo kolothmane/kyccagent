@@ -102,6 +102,15 @@ function extractAssistantText(content) {
   );
 }
 
+function readOpenAiErrorStatus(error) {
+  return Number(
+    (error && error.status) ||
+      (error && error.response && error.response.status) ||
+      (error && error.cause && error.cause.status) ||
+      0,
+  );
+}
+
 async function transcribeAudioBuffer(buffer, mimeType, language) {
   const client = getClient();
   const extension = extensionForMimeType(mimeType);
@@ -392,6 +401,7 @@ module.exports = async (req, res) => {
     try {
       const client = getClient();
       let reply = "";
+      let requestSucceeded = false;
 
       for (const model of MODELS) {
         try {
@@ -406,11 +416,24 @@ module.exports = async (req, res) => {
             response.choices[0] && response.choices[0].message
               ? extractAssistantText(response.choices[0].message.content)
               : "";
-
-          if (reply) break;
+          requestSucceeded = true;
+          break;
         } catch (error) {
-          console.error("[client-chat] OpenAI model attempt failed:", model, error.message);
+          const status = readOpenAiErrorStatus(error);
+          console.error(
+            "[client-chat] OpenAI model attempt failed:",
+            model,
+            status ? "(status " + status + ")" : "",
+            error.message,
+          );
+          if (status && status < 500 && status !== 429) {
+            break;
+          }
         }
+      }
+
+      if (!requestSucceeded) {
+        throw new Error("All model attempts failed");
       }
 
       return res.status(200).json({
